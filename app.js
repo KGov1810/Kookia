@@ -67,6 +67,14 @@ function thumb(product) {
     : html`<span class="thumb">${S.category(product.category).emoji}${count}</span>`;
 }
 
+/** Catégories regroupées par rayon (une ancienne catégorie reste affichée si le produit l'a encore). */
+function categoryOptions(current) {
+  const legacy = S.CATEGORY_IDS.includes(current) ? '' : html`<option value="${current}" selected>${S.category(current).emoji} ${S.category(current).label}</option>`;
+  return html`${legacy}${S.CATEGORY_GROUPS.map((group) => html`<optgroup label="${group}">${S.CATEGORIES
+    .filter((c) => c.group === group)
+    .map((c) => html`<option value="${c.id}" ${c.id === current ? raw('selected') : ''}>${c.emoji} ${c.label}</option>`)}</optgroup>`)}`;
+}
+
 /** Le compteur façon magnet de frigo : jours ou mois restants, ou ancienneté pour les produits secs. */
 function dayCounter(product) {
   const c = S.stockCounter(product, state.settings.alertDays);
@@ -338,7 +346,7 @@ function openProduceSheet() {
         entries.forEach(({ item, count }) => store.saveProduct({
           id: crypto.randomUUID(),
           name: item.name,
-          category: 'fruits_legumes',
+          category: item.type ?? S.guessCategory(item.name) ?? 'legumes',
           quantity: '',
           count,
           location: item.place,
@@ -408,13 +416,13 @@ function openEditor({ product = null, draft = null, mode = 'manual', filePromise
     location: ui.location || 'frigo', dateKind: '', frozenAt: '',
     ...(draft ?? {}), ...(product ?? {})
   };
-  const view = { dateTouched: !isNew, locationTouched: !isNew || Boolean(draft?.location), busy: '', info: '', error: '', sameProductId: null };
+  const view = { dateTouched: !isNew, locationTouched: !isNew || Boolean(draft?.location), categoryTouched: !isNew || Boolean(draft?.category), busy: '', info: '', error: '', sameProductId: null };
   if (isNew && !draft?.location && p.name) {
     // Fruit ou légume reconnu (ex. rangé depuis la liste de courses) : son lieu habituel, date estimée.
     const produce = S.produceFor(p.name);
     if (produce) {
       p.location = produce.place;
-      p.category = 'fruits_legumes';
+      p.category = produce.type;
       p.dateKind = 'estimee';
     }
   }
@@ -430,7 +438,7 @@ function openEditor({ product = null, draft = null, mode = 'manual', filePromise
       p.expiry = S.freezerLimit(p.category, p.frozenAt);
     }
     if (kind === 'aucune') p.expiry = '';
-    if ((kind === 'dlc' || kind === 'ddm') && !S.hasDate(p.expiry) && isNew && kind === 'dlc') p.expiry = S.isoInDays(7);
+    if (kind === 'dlc' && isNew && !view.dateTouched) p.expiry = S.isoInDays(7); // date par défaut, annoncée comme telle
   }
 
   function setLocation(location) {
@@ -440,6 +448,43 @@ function openEditor({ product = null, draft = null, mode = 'manual', filePromise
       view.dateTouched = false;
       setKind(kinds[0]);
     }
+  }
+
+  /**
+   * Après la saisie du nom : catégorie proposée (« Lentilles » → Légumineuses), lieu habituel
+   * et date estimée. Seules les parties concernées sont redessinées, pour ne pas perdre
+   * le toucher en cours (bouton « Ajouter », par exemple).
+   */
+  function suggestFromName() {
+    let changed = false;
+    if (isNew && !view.categoryTouched) {
+      const guess = S.guessCategory(p.name);
+      if (guess && guess !== p.category) {
+        p.category = guess;
+        changed = true;
+        const select = sheet.panel.querySelector('[name="category"]');
+        if (select) select.value = guess;
+        const thumbEl = sheet.panel.querySelector('.name-row .thumb');
+        if (thumbEl && !p.image && !p.imageUrl) thumbEl.outerHTML = fmt(thumb(p));
+        const place = view.locationTouched ? null : S.defaultLocationFor(guess, p.name);
+        if (place && place !== p.location) {
+          setLocation(place);
+          sheet.panel.querySelectorAll('[data-action="set-loc"]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.value === p.location)));
+        }
+        // Un fruit ou un légume n'a pas de date imprimée : date estimée ; l'inverse pour les autres produits.
+        const produce = guess === 'fruits' || guess === 'legumes';
+        const kinds = S.KINDS_BY_LOCATION[p.location] ?? [];
+        if (!view.dateTouched && produce && S.dateKindOf(p) === 'dlc' && kinds.includes('estimee')) setKind('estimee');
+        else if (!view.dateTouched && !produce && S.dateKindOf(p) === 'estimee' && kinds.includes('dlc')) setKind('dlc');
+      }
+    }
+    if (S.dateKindOf(p) === 'estimee' && !view.dateTouched) {
+      p.expiry = S.isoInDays(S.estimateFreshDays(p.name, p.location));
+      changed = true;
+    }
+    if (S.dateKindOf(p) === 'congele') p.expiry = S.freezerLimit(p.category, p.frozenAt);
+    const section = sheet.panel.querySelector('#date-section');
+    if (changed && section) section.outerHTML = fmt(dateSection());
   }
 
   /** Mise à jour du statut sans tout redessiner (le sélecteur de date d'iOS resterait sinon bloqué). */
@@ -530,17 +575,12 @@ function openEditor({ product = null, draft = null, mode = 'manual', filePromise
         p.name = t.value;
         const button = sheet.panel.querySelector('[data-action="save"]');
         if (button) button.disabled = !p.name.trim();
-        if (event.type === 'change' && S.dateKindOf(p) === 'estimee' && !view.dateTouched) {
-          // Durée estimée selon le fruit ou le légume tapé (sans tout redessiner).
-          p.expiry = S.isoInDays(S.estimateFreshDays(p.name, p.location));
-          const input = sheet.panel.querySelector('[name="expiry"]');
-          if (input) input.value = p.expiry;
-          refreshStatus();
-        }
+        if (event.type === 'change') suggestFromName();
       } else if (t.name === 'quantity') {
         p.quantity = t.value;
       } else if (t.name === 'category' && event.type === 'change') {
         p.category = t.value;
+        view.categoryTouched = true;
         if (S.dateKindOf(p) === 'congele') p.expiry = S.freezerLimit(p.category, p.frozenAt);
         sheet.update();
       } else if (t.name === 'expiry' && event.type === 'change') {
@@ -574,7 +614,7 @@ function openEditor({ product = null, draft = null, mode = 'manual', filePromise
         <div class="quick">${quick.map(([days, label]) => html`<button data-action="quick" data-days="${days}">${label}</button>`)}</div>`;
     }
     return html`
-      <section class="group">
+      <section class="group" id="date-section">
         <h2>Date</h2>
         ${kinds.length > 1 ? html`<div class="segmented" role="group" aria-label="Type de date">
           ${kinds.map((k) => html`<button data-action="set-kind" data-value="${k}" aria-pressed="${String(kind === k)}">${S.DATE_KINDS[k].label}</button>`)}
@@ -606,7 +646,7 @@ function openEditor({ product = null, draft = null, mode = 'manual', filePromise
         <section class="group">
           <div class="name-row">${thumb(p)}<input name="name" value="${p.name}" placeholder="Nom (ex. Yaourt nature)" autocomplete="off" enterkeyhint="done" aria-label="Nom du produit"></div>
           <label class="field"><span>Catégorie</span>
-            <select name="category">${S.CATEGORIES.map((c) => html`<option value="${c.id}" ${c.id === p.category ? raw('selected') : ''}>${c.emoji} ${c.label}</option>`)}</select>
+            <select name="category">${categoryOptions(p.category)}</select>
           </label>
           <div class="field"><span>Nombre</span>
             <div class="stepper">
@@ -695,6 +735,7 @@ function openEditor({ product = null, draft = null, mode = 'manual', filePromise
       }
       p.name = info.name;
       p.category = info.category;
+      view.categoryTouched = true; // catégorie d'Open Food Facts : ne pas la remplacer
       if (!p.quantity && info.quantity) {
         const split = S.splitCount(info.quantity);
         p.quantity = split.quantity;
@@ -702,7 +743,7 @@ function openEditor({ product = null, draft = null, mode = 'manual', filePromise
       }
       if (!p.image && info.imageUrl) p.imageUrl = info.imageUrl;
       if (!view.locationTouched) {
-        const place = { surgele: 'congelateur', epicerie: 'placard', boisson: 'placard' }[info.category];
+        const place = S.defaultLocationFor(info.category, info.name);
         if (place) setLocation(place);
       }
       if (S.dateKindOf(p) === 'congele') p.expiry = S.freezerLimit(p.category, p.frozenAt);
@@ -734,9 +775,9 @@ function openEditor({ product = null, draft = null, mode = 'manual', filePromise
         }
         if (result.name) p.name = result.name;
         p.category = result.category;
+        view.categoryTouched = true; // catégorie reconnue par Claude
         if (!view.locationTouched) {
-          const place = { surgele: 'congelateur', epicerie: 'placard', boisson: 'placard' }[result.category]
-            ?? (S.produceFor(result.name) ? S.produceFor(result.name).place : null);
+          const place = S.defaultLocationFor(result.category, result.name);
           if (place) setLocation(place);
         }
         if (!p.quantity && result.quantity) {

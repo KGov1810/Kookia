@@ -5,21 +5,55 @@
 // Catégories
 // ---------------------------------------------------------------------------
 
+export const CATEGORY_GROUPS = ['Frais', 'Épicerie', 'Boissons et surgelés', 'Autre'];
+
 export const CATEGORIES = [
-  { id: 'fruits_legumes', label: 'Fruits et légumes', emoji: '🥕' },
-  { id: 'viande', label: 'Viande et charcuterie', emoji: '🥩' },
-  { id: 'poisson', label: 'Poisson et fruits de mer', emoji: '🐟' },
-  { id: 'laitier', label: 'Produits laitiers et œufs', emoji: '🧀' },
-  { id: 'traiteur', label: 'Traiteur et plats préparés', emoji: '🍱' },
-  { id: 'epicerie', label: 'Épicerie', emoji: '🥫' },
-  { id: 'surgele', label: 'Surgelés', emoji: '🧊' },
-  { id: 'boulangerie', label: 'Boulangerie', emoji: '🥖' },
-  { id: 'boisson', label: 'Boissons', emoji: '🧃' },
-  { id: 'autre', label: 'Autre', emoji: '🛒' }
+  { id: 'fruits', label: 'Fruits', emoji: '🍎', group: 'Frais' },
+  { id: 'legumes', label: 'Légumes', emoji: '🥕', group: 'Frais' },
+  { id: 'viande', label: 'Viande', emoji: '🥩', group: 'Frais' },
+  { id: 'volaille', label: 'Volaille', emoji: '🍗', group: 'Frais' },
+  { id: 'charcuterie', label: 'Charcuterie', emoji: '🥓', group: 'Frais' },
+  { id: 'poisson', label: 'Poisson et fruits de mer', emoji: '🐟', group: 'Frais' },
+  { id: 'oeufs', label: 'Œufs', emoji: '🥚', group: 'Frais' },
+  { id: 'laitier', label: 'Produits laitiers', emoji: '🥛', group: 'Frais' },
+  { id: 'fromage', label: 'Fromages', emoji: '🧀', group: 'Frais' },
+  { id: 'traiteur', label: 'Traiteur et plats préparés', emoji: '🍱', group: 'Frais' },
+  { id: 'boulangerie', label: 'Pain et viennoiseries', emoji: '🥖', group: 'Frais' },
+  { id: 'feculents', label: 'Pâtes, riz et céréales', emoji: '🍝', group: 'Épicerie' },
+  { id: 'legumineuses', label: 'Légumineuses', emoji: '🫘', group: 'Épicerie' },
+  { id: 'conserves', label: 'Conserves', emoji: '🥫', group: 'Épicerie' },
+  { id: 'condiments', label: 'Sauces, condiments et épices', emoji: '🧂', group: 'Épicerie' },
+  { id: 'patisserie', label: 'Farine, sucre et pâtisserie', emoji: '🧁', group: 'Épicerie' },
+  { id: 'sucre', label: 'Biscuits, chocolat et petit-déjeuner', emoji: '🍪', group: 'Épicerie' },
+  { id: 'snacks', label: 'Apéritif et snacks', emoji: '🥨', group: 'Épicerie' },
+  { id: 'fruits_secs', label: 'Fruits secs et graines', emoji: '🥜', group: 'Épicerie' },
+  { id: 'epicerie', label: 'Épicerie (autre)', emoji: '🫙', group: 'Épicerie' },
+  { id: 'boisson', label: 'Boissons', emoji: '🧃', group: 'Boissons et surgelés' },
+  { id: 'surgele', label: 'Surgelés et glaces', emoji: '🧊', group: 'Boissons et surgelés' },
+  { id: 'autre', label: 'Autre', emoji: '🛒', group: 'Autre' }
 ];
 
+/** Anciennes catégories, remplacées par des catégories plus précises (gardées pour l'affichage). */
+const LEGACY_CATEGORIES = [{ id: 'fruits_legumes', label: 'Fruits et légumes', emoji: '🥗', group: 'Frais' }];
+
+export const CATEGORY_IDS = CATEGORIES.map((c) => c.id);
+
 export function category(id) {
-  return CATEGORIES.find((c) => c.id === id) ?? CATEGORIES[CATEGORIES.length - 1];
+  return CATEGORIES.find((c) => c.id === id) ?? LEGACY_CATEGORIES.find((c) => c.id === id)
+    ?? CATEGORIES[CATEGORIES.length - 1];
+}
+
+/** Grandes familles, pour comparer une ancienne catégorie à une nouvelle (recettes). */
+const FAMILY = {
+  fruits: 'vegetal', legumes: 'vegetal', fruits_legumes: 'vegetal',
+  viande: 'viande', volaille: 'viande', charcuterie: 'viande',
+  laitier: 'laitier', fromage: 'laitier', oeufs: 'laitier',
+  feculents: 'epicerie', legumineuses: 'epicerie', conserves: 'epicerie', condiments: 'epicerie',
+  patisserie: 'epicerie', sucre: 'epicerie', snacks: 'epicerie', fruits_secs: 'epicerie', epicerie: 'epicerie'
+};
+
+export function categoryFamily(id) {
+  return FAMILY[id] ?? id;
 }
 
 // ---------------------------------------------------------------------------
@@ -271,8 +305,9 @@ export function dateKindOf(product) {
 
 /** Durée conseillée au congélateur, en mois, selon la catégorie. */
 export const FREEZER_MONTHS = {
-  viande: 6, poisson: 4, traiteur: 3, fruits_legumes: 12, boulangerie: 3,
-  laitier: 4, surgele: 6, epicerie: 6, boisson: 6, autre: 6
+  viande: 6, volaille: 9, charcuterie: 2, poisson: 4, traiteur: 3, fruits: 10, legumes: 12, fruits_legumes: 12,
+  boulangerie: 3, laitier: 4, fromage: 4, oeufs: 6, feculents: 6, legumineuses: 6, conserves: 6, condiments: 6,
+  patisserie: 6, sucre: 6, snacks: 6, fruits_secs: 12, surgele: 6, epicerie: 6, boisson: 6, autre: 6
 };
 
 export function addMonths(date, months) {
@@ -286,6 +321,9 @@ export function freezerLimit(category, frozenAtISO) {
   const frozen = parseISODate(frozenAtISO) ?? startOfDay();
   return toISODate(addMonths(frozen, FREEZER_MONTHS[category] ?? 6));
 }
+
+const FRUIT_NAMES = new Set(['Bananes', 'Pommes', 'Poires', 'Oranges', 'Clémentines', 'Citrons', 'Kiwis', 'Avocats',
+  'Mangues', 'Ananas', 'Melon', 'Pastèque', 'Pêches', 'Fraises', 'Framboises', 'Myrtilles', 'Raisin', 'Cerises']);
 
 /** Fruits et légumes courants : où on les range et combien de jours ils se gardent environ. */
 export const PRODUCE = [
@@ -305,7 +343,7 @@ export const PRODUCE = [
   ['Piments', '🌶️', 'frigo', 10], ['Herbes fraîches', '🌿', 'frigo', 5], ['Fraises', '🍓', 'frigo', 3],
   ['Framboises', '🍓', 'frigo', 2], ['Myrtilles', '🫐', 'frigo', 7], ['Raisin', '🍇', 'frigo', 7],
   ['Cerises', '🍒', 'frigo', 5]
-].map(([name, emoji, place, days]) => ({ name, emoji, place, days }));
+].map(([name, emoji, place, days]) => ({ name, emoji, place, days, type: FRUIT_NAMES.has(name) ? 'fruits' : 'legumes' }));
 
 /** Fruit ou légume du catalogue correspondant à un nom (« tomates cerises » → Tomates). */
 export function produceFor(name) {
@@ -319,6 +357,75 @@ export function produceFor(name) {
     }
   }
   return best;
+}
+
+// Mots-clés (sans accents, au singulier) par catégorie. Ordre de test important :
+// d'abord le type de produit (« jus », « confiture », « sauce »…), puis l'aliment de base.
+const TYPE_KEYWORDS = [
+  ['boisson', ['jus', 'sirop', 'soda', 'eau', 'biere', 'vin', 'cafe', 'smoothie', 'tisane', 'infusion', 'cidre', 'limonade', 'cola', 'champagne', 'boisson']],
+  ['surgele', ['glace', 'sorbet', 'surgele', 'esquimau']],
+  ['sucre', ['confiture', 'compote', 'chocolat', 'biscuit', 'gateau', 'miel', 'cereale', 'pate-a-tartiner', 'nutella', 'bonbon', 'cookie', 'madeleine', 'muesli', 'granola']],
+  ['traiteur', ['pizza', 'quiche', 'lasagne', 'gratin', 'taboule', 'sandwich', 'sushi', 'nem', 'samoussa', 'soupe', 'veloute', 'feuilletee', 'brisee', 'sablee', 'hachis']],
+  ['condiments', ['sauce', 'huile', 'vinaigre', 'moutarde', 'ketchup', 'mayonnaise', 'pesto', 'bouillon', 'epice', 'harissa', 'cornichon', 'sel', 'poivre', 'curry', 'paprika', 'cumin', 'cannelle', 'soja', 'tabasco', 'capre']],
+  ['snacks', ['chip', 'cracker', 'bretzel', 'popcorn', 'cacahuete', 'olive', 'apericube']],
+  ['conserves', ['conserve', 'boite']],
+  ['patisserie', ['farine', 'sucre', 'levure', 'maizena', 'fecule', 'cacao', 'vanille', 'gelatine', 'amidon']],
+  ['boulangerie', ['pain', 'baguette', 'brioche', 'croissant', 'viennoiserie', 'biscotte', 'tortilla', 'wrap', 'bagel']]
+];
+const FOOD_KEYWORDS = [
+  ['volaille', ['poulet', 'dinde', 'canard', 'pintade', 'volaille', 'caille', 'chapon']],
+  ['charcuterie', ['jambon', 'saucisson', 'lardon', 'chorizo', 'bacon', 'rillette', 'salami', 'coppa', 'pancetta', 'mortadelle', 'saucisse', 'merguez', 'boudin', 'terrine', 'campagne', 'foie']],
+  ['poisson', ['poisson', 'saumon', 'thon', 'cabillaud', 'colin', 'sardine', 'maquereau', 'truite', 'crevette', 'moule', 'crabe', 'surimi', 'merlu', 'dorade', 'calamar', 'huitre']],
+  ['viande', ['boeuf', 'veau', 'porc', 'agneau', 'steak', 'bavette', 'entrecote', 'roti', 'escalope', 'viande', 'hache', 'cotelette']],
+  ['oeufs', ['oeuf']],
+  ['fromage', ['fromage', 'emmental', 'comte', 'camembert', 'brie', 'mozzarella', 'parmesan', 'chevre', 'roquefort', 'raclette', 'feta', 'gruyere', 'cheddar', 'ricotta', 'mascarpone', 'reblochon', 'gorgonzola', 'tomme', 'mimolette', 'burrata', 'halloumi']],
+  ['laitier', ['lait', 'yaourt', 'yogourt', 'creme', 'beurre', 'skyr', 'kefir', 'faisselle']]
+];
+const STARCH_KEYWORDS = [
+  ['feculents', ['pate', 'riz', 'semoule', 'quinoa', 'couscous', 'boulgour', 'nouille', 'spaghetti', 'tagliatelle', 'penne', 'macaroni', 'coquillette', 'farfalle', 'fusilli', 'polenta', 'vermicelle', 'gnocchi', 'flocon', 'avoine']],
+  ['legumineuses', ['lentille', 'chiche', 'flageolet', 'feve', 'haricot']]
+];
+const NUT_KEYWORDS = ['noix', 'amande', 'noisette', 'pistache', 'cajou', 'datte', 'pruneau', 'graine', 'sesame', 'tournesol', 'chia'];
+
+function keywordMatch(tokens, table) {
+  for (const [id, words] of table) {
+    if (words.some((w) => tokens.includes(w))) return id;
+  }
+  return null;
+}
+
+/** Catégorie proposée d'après le nom (« Lentilles » → légumineuses), ou null si rien de sûr. */
+export function guessCategory(name) {
+  const tokens = nameTokens(name);
+  if (!tokens.length) return null;
+  const dried = tokens.some((t) => ['sec', 'seche', 'deshydrate'].includes(t));
+  if (NUT_KEYWORDS.some((w) => tokens.includes(w)) || (dried && produceFor(name))) return 'fruits_secs';
+  return keywordMatch(tokens, TYPE_KEYWORDS)
+    ?? keywordMatch(tokens, FOOD_KEYWORDS)
+    ?? produceFor(name)?.type
+    ?? keywordMatch(tokens, STARCH_KEYWORDS);
+}
+
+/**
+ * Reclasse un produit enregistré avec une ancienne catégorie trop large
+ * (« Fruits et légumes », « Produits laitiers et œufs », « Viande et charcuterie », « Épicerie »).
+ */
+export function normalizeCategory(id, name) {
+  const guess = guessCategory(name);
+  const sameFamily = guess && categoryFamily(guess) === categoryFamily(id);
+  switch (id) {
+    case 'fruits_legumes': return sameFamily ? guess : 'legumes';
+    case 'laitier': case 'viande': case 'epicerie': return sameFamily ? guess : id;
+    default: return CATEGORY_IDS.includes(id) ? id : (guess ?? 'autre');
+  }
+}
+
+/** Lieu habituel selon la catégorie (null = garder le lieu choisi). */
+export function defaultLocationFor(categoryId, name = '') {
+  if (categoryId === 'surgele') return 'congelateur';
+  if (categoryFamily(categoryId) === 'epicerie' || categoryId === 'boisson') return 'placard';
+  if (categoryId === 'fruits' || categoryId === 'legumes') return produceFor(name)?.place ?? (categoryId === 'fruits' ? 'fruits' : 'frigo');
+  return null;
 }
 
 /** Durée de conservation estimée (jours) d'un produit frais sans date imprimée. */
@@ -608,22 +715,39 @@ export async function thumbnail(blob) {
 // Open Food Facts (base collaborative, licence ODbL)
 // ---------------------------------------------------------------------------
 
+// Étiquettes Open Food Facts (« en:dry-pastas ») → catégorie. On teste la fin de l'étiquette
+// (mot entier), de la plus précise à la plus générale.
 const OFF_RULES = [
-  ['surgele', ['frozen']],
-  ['boisson', ['beverages', 'drinks', 'waters', 'juices', 'sodas', 'wines', 'beers']],
-  ['laitier', ['dairies', 'cheeses', 'yogurts', 'milks', 'butters', 'creams', 'eggs']],
-  ['poisson', ['fishes', 'fish', 'seafood', 'smoked-salmons', 'crustaceans']],
-  ['viande', ['meats', 'poultry', 'hams', 'sausages', 'charcuteries', 'chickens', 'beef', 'pork']],
-  ['boulangerie', ['breads', 'viennoiseries', 'pastries', 'brioches']],
-  ['traiteur', ['meals', 'prepared', 'salads', 'pizzas', 'sandwiches', 'dips', 'quiches', 'fresh-pastas']],
-  ['fruits_legumes', ['fruits', 'vegetables', 'fresh-plant']]
+  ['boisson', /(^|-)(beverages|drinks|waters|juices|sodas|wines|beers|teas|coffees|syrups|ciders)$/],
+  ['fromage', /(^|-)cheeses$/],
+  ['oeufs', /(^|-)eggs$/],
+  ['laitier', /(^|-)(dairies|yogurts|milks|butters|creams|dairy-desserts|fermented-milk-products)$/],
+  ['volaille', /(^|-)(poultries|poultry|chickens|turkeys|ducks)$/],
+  ['charcuterie', /(^|-)(hams|sausages|charcuteries|bacons|salamis|prepared-meats|cured-meats|chorizos)$/],
+  ['viande', /(^|-)(meats|beef|pork|veal|lamb|steaks)$/],
+  ['poisson', /(^|-)(fishes|seafood|smoked-salmons|crustaceans|shellfish|tunas|salmons|sardines)$/],
+  ['boulangerie', /(^|-)(breads|viennoiseries|pastries|brioches|baguettes|crispbreads|rusks)$/],
+  ['traiteur', /(^|-)(meals|prepared-salads|pizzas|sandwiches|quiches|fresh-pastas|dips|soups)$/],
+  ['fruits_secs', /(^|-)(nuts|dried-fruits|seeds|almonds|walnuts|hazelnuts|pistachios|cashew-nuts)$/],
+  ['legumineuses', /(^|-)(legumes|pulses|lentils|chickpeas|dried-beans|kidney-beans|white-beans)$/],
+  ['feculents', /(^|-)(pastas|rices|semolinas|quinoa|cereal-grains|couscous|noodles|breakfast-oats|oat-flakes)$/],
+  ['condiments', /(^|-)(condiments|sauces|spices|oils|vinegars|salts|mustards|ketchups|mayonnaises|seasonings|broths)$/],
+  ['patisserie', /(^|-)(flours|sugars|yeasts|baking-aids|cooking-chocolates|cocoa-powders)$/],
+  ['sucre', /(^|-)(biscuits|cookies|chocolates|candies|confectioneries|jams|spreads|honeys|breakfast-cereals|cakes|desserts|compotes)$/],
+  ['snacks', /(^|-)(chips|crisps|salty-snacks|crackers|appetizers|popcorn|olives)$/],
+  ['conserves', /(^|-)(canned-foods|canned-vegetables|canned-meals)$/],
+  ['fruits', /(^|-)(fruits|apples|bananas|citrus|berries|pears|oranges)$/],
+  ['legumes', /(^|-)(vegetables|tomatoes|potatoes|carrots|leafy-vegetables|mushrooms)$/]
 ];
+const OFF_GENERIC = new Set(['plant-based-foods-and-beverages', 'plant-based-foods', 'foods', 'groceries']);
 
 export function categoryFromTags(tags = []) {
   if (!tags.length) return 'autre';
-  const joined = tags.join(' ').toLowerCase();
-  for (const [id, keywords] of OFF_RULES) {
-    if (keywords.some((k) => joined.includes(k))) return id;
+  const names = tags.map((t) => String(t).toLowerCase().replace(/^[a-z]{2}:/, '')).filter((t) => !OFF_GENERIC.has(t));
+  if (names.some((t) => t.includes('frozen') || t.endsWith('ice-creams'))) return 'surgele';
+  for (const name of [...names].reverse()) { // la plus précise en dernier chez Open Food Facts
+    const rule = OFF_RULES.find(([, pattern]) => pattern.test(name));
+    if (rule) return rule[0];
   }
   return 'epicerie';
 }
@@ -720,7 +844,7 @@ export function resolveIngredient(ingredient, products) {
   let bestScore = 0;
   for (const product of products) {
     if (ingredient.category && ingredient.category !== 'autre' && product.category !== 'autre'
-      && product.category !== ingredient.category) continue;
+      && categoryFamily(product.category) !== categoryFamily(ingredient.category)) continue;
     const score = Math.max(
       nameMatchScore(ingredient.name, product.name),
       ingredient.productName ? nameMatchScore(ingredient.productName, product.name) : 0
@@ -1095,7 +1219,7 @@ export async function generateRecipes({ key, model, priority, others, shopping, 
 
 /** Analyse la photo d'un produit : { isFood, name, category, quantity, expiry } */
 export async function analyzeProduct({ key, model, base64 }) {
-  const categoryIds = CATEGORIES.map((c) => c.id);
+  const categoryIds = CATEGORY_IDS;
   const input = await callTool({
     key, model,
     system: 'Tu identifies des produits alimentaires photographiés pour une application anti-gaspillage française. Sois précis et prudent.',
@@ -1137,7 +1261,7 @@ N'invente jamais de date : laisse une chaîne vide si elle n'est pas lisible.`
   return {
     isFood: input.est_alimentaire !== false,
     name: (input.nom ?? '').trim(),
-    category: categoryIds.includes(input.categorie) ? input.categorie : 'autre',
+    category: categoryIds.includes(input.categorie) ? input.categorie : normalizeCategory(input.categorie, input.nom),
     quantity: (input.quantite ?? '').trim(),
     expiry
   };
@@ -1149,7 +1273,7 @@ N'invente jamais de date : laisse une chaîne vide si elle n'est pas lisible.`
  * Les dates de péremption ne figurent pas sur un ticket : elles restent « à compléter ».
  */
 export async function analyzeReceipt({ key, model, images }) {
-  const categoryIds = CATEGORIES.map((c) => c.id);
+  const categoryIds = CATEGORY_IDS;
   const content = images.map((data) => ({ type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data } }));
   content.push({
     type: 'text',
@@ -1201,7 +1325,7 @@ Liste uniquement les produits alimentaires et les boissons achetés.
     .map((item) => ({
       name: item.nom.trim(),
       receiptText: (item.texte_ticket ?? '').trim(),
-      category: categoryIds.includes(item.categorie) ? item.categorie : 'autre',
+      category: categoryIds.includes(item.categorie) ? item.categorie : normalizeCategory(item.categorie, item.nom),
       count: Math.min(99, Math.max(1, Math.round(Number(item.nombre) || 1))),
       quantity: (item.contenance ?? '').trim(),
       location: LOCATIONS.some((l) => l.id === item.lieu) ? item.lieu : 'frigo'

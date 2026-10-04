@@ -12,8 +12,11 @@ import {
 import {
   statusOf, daysUntil, hasDate, resolveIngredient, matchesFilters, scaleIngredient, maxPurchases,
   sanitizeCount, splitItemName, toShoppingEntry, stockStatus, nameMatchScore,
-  dateKindOf, freezerLimit, estimateFreshDays, isoInDays, toISODate, locationOf
+  dateKindOf, freezerLimit, estimateFreshDays, isoInDays, toISODate, locationOf, normalizeCategory
 } from './services.js';
+
+/** Version des catégories : 2 = catégories détaillées (fruits, légumes, fromages…). */
+const CATEGORY_VERSION = 2;
 
 // ---------------------------------------------------------------------------
 // Réglages locaux
@@ -398,7 +401,8 @@ function toProduct(id, d) {
     id,
     name: d.name ?? '',
     expiry: d.expiry ?? '',
-    category: d.category ?? 'autre',
+    // Anciens produits : catégorie trop large reclassée d'après le nom (enregistrée à la prochaine modification).
+    category: (d.categoryVersion ?? 1) >= CATEGORY_VERSION ? (d.category ?? 'autre') : normalizeCategory(d.category ?? 'autre', d.name),
     quantity: d.quantity ?? '',
     count: Number(d.count) >= 1 ? Math.round(Number(d.count)) : 1, // nombre d'unités (anciens produits : 1)
     location: d.location || 'frigo',   // anciens produits : au frigo
@@ -460,6 +464,7 @@ export function saveProduct(product) {
     name: (product.name ?? '').trim(),
     expiry: product.expiry,
     category: product.category || 'autre',
+    categoryVersion: CATEGORY_VERSION,
     quantity: (product.quantity ?? '').trim(),
     count: Math.max(1, Math.round(Number(product.count) || 1)),
     location: product.location || 'frigo',
@@ -579,7 +584,7 @@ export function addReceiptProducts(items, shoppingIdsToRemove = []) {
   const today = toISODate(new Date());
   items.forEach((item, index) => {
     const location = locationOf(item.location).id;
-    const produce = item.category === 'fruits_legumes' || location === 'fruits';
+    const produce = ['fruits', 'legumes', 'fruits_legumes'].includes(item.category) || location === 'fruits';
     let dateKind = 'dlc';
     let expiry = ''; // frigo : date à compléter (elle est imprimée sur l'emballage)
     let frozenAt = '';
@@ -600,6 +605,7 @@ export function addReceiptProducts(items, shoppingIdsToRemove = []) {
       dateKind,
       frozenAt,
       category: item.category || 'autre',
+      categoryVersion: CATEGORY_VERSION,
       quantity: (item.quantity ?? '').trim(),
       count: Math.max(1, Math.round(Number(item.count) || 1)),
       barcode: '',
