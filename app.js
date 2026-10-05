@@ -142,7 +142,8 @@ const LOCATION_ICON = { frigo: () => I.fridge, congelateur: () => I.snow, placar
 const fridgeView = {
   render() {
     return html`
-      <header class="top"><div><h1>Stock</h1><p class="sync" id="sync-line"></p></div></header>
+      <header class="top"><div><h1>Stock</h1><p class="sync" id="sync-line"></p></div>
+        <button class="icon-btn" data-action="open-history" aria-label="Historique des changements">${I.history}</button></header>
       <div id="fridge-alert"></div>
       <div class="chips location-filter" id="location-filter" role="group" aria-label="Lieu de rangement"></div>
       <label class="search" id="search-box">${I.search}<input id="search" type="search" placeholder="Rechercher un produit" value="${ui.search}" autocomplete="off" enterkeyhint="search" aria-label="Rechercher un produit"></label>
@@ -555,7 +556,7 @@ function openEditor({ product = null, draft = null, mode = 'manual', filePromise
         sheet.update();
       },
       consume: () => {
-        const removed = store.removeProducts([p.id]);
+        const removed = store.removeProducts([p.id], { reason: 'tout consommé' });
         sheet.close();
         if (removed.length) toast(`${removed[0].name} : retiré du stock`, 'Annuler', () => store.restoreProducts(removed));
       },
@@ -564,7 +565,7 @@ function openEditor({ product = null, draft = null, mode = 'manual', filePromise
         if (!same) return;
         const count = (same.count ?? 1) + (p.count ?? 1);
         store.saveProduct({ ...same, count });
-        if (shoppingItemId) store.deleteShoppingItems([shoppingItemId]);
+        if (shoppingItemId) store.deleteShoppingItems([shoppingItemId], { reason: 'rangement' });
         toast(`${same.name} : ${count} en stock`);
         sheet.close();
       }
@@ -698,7 +699,7 @@ function openEditor({ product = null, draft = null, mode = 'manual', filePromise
       return;
     }
     store.saveProduct(p);
-    if (shoppingItemId) store.deleteShoppingItems([shoppingItemId]);
+    if (shoppingItemId) store.deleteShoppingItems([shoppingItemId], { reason: 'rangement' });
     toast(isNew ? `${p.name.trim()} : ajouté ${S.locationOf(p.location).at}` : 'Modifications enregistrées');
     sheet.close();
   }
@@ -1232,6 +1233,126 @@ function openReceipt(firstFilePromise) {
 }
 
 // ===========================================================================
+// Historique des changements
+// ===========================================================================
+
+const HISTORY_TEXT = {
+  'stock:ajout': 'a ajouté {n}',
+  'stock:modification': 'a modifié {n}',
+  'stock:consommation': 'a consommé {n}',
+  'stock:suppression': 'a retiré {n} du stock',
+  'stock:annulation': 'a annulé une action sur {n}',
+  'stock:ticket': 'a ajouté {n} depuis un ticket de caisse',
+  'courses:ajout': 'a ajouté {n} aux courses',
+  'courses:modification': 'a modifié {n} dans les courses',
+  'courses:suppression': 'a supprimé {n} des courses',
+  'courses:rangement': 'a acheté et rangé {n}',
+  'courses:panier': 'a vidé le panier ({n})',
+  'recettes:generation': 'a généré {n}',
+  'recettes:suppression': 'a supprimé la recette {n}',
+  'recettes:favori': 'a mis {n} en favori',
+  'recettes:favori-retire': 'a retiré {n} des favoris'
+};
+
+const HISTORY_ICON = {
+  ajout: () => I.plus, modification: () => I.pencil, consommation: () => I.check, suppression: () => I.trash,
+  annulation: () => I.refresh, rangement: () => I.jar, panier: () => I.cart, ticket: () => I.receipt,
+  generation: () => I.sparkle, favori: () => I.star, 'favori-retire': () => I.star
+};
+
+function historySentence(entry) {
+  const template = HISTORY_TEXT[`${entry.scope}:${entry.action}`] ?? 'a modifié {n}';
+  const [before, after] = template.split('{n}');
+  return html`<strong>${entry.by || "Quelqu'un"}</strong> ${before}<strong>${entry.name}</strong>${after}`;
+}
+
+function historyDay(ms) {
+  const day = S.startOfDay(new Date(ms));
+  const today = S.startOfDay();
+  const diff = Math.round((today - day) / 86_400_000);
+  if (diff === 0) return "Aujourd'hui";
+  if (diff === 1) return 'Hier';
+  const text = new Date(ms).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+function openHistory() {
+  const view = { entries: [], loaded: false, limit: 100, scope: '', person: '' };
+  let stop = () => {};
+  const subscribe = () => {
+    stop();
+    stop = store.listenHistory(view.limit, (entries) => {
+      view.entries = entries;
+      view.loaded = true;
+      if (sheet.isOpen) sheet.update();
+    });
+  };
+
+  const sheet = openSheet({
+    tall: true,
+    render,
+    actions: {
+      'history-scope': (el) => {
+        view.scope = el.dataset.value;
+        sheet.update();
+      },
+      'history-person': (el) => {
+        view.person = el.dataset.value;
+        sheet.update();
+      },
+      'history-more': () => {
+        view.limit += 100;
+        subscribe();
+      }
+    },
+    onClose: () => stop()
+  });
+
+  function render() {
+    const people = [...new Set(view.entries.map((e) => e.by || "Quelqu'un"))];
+    const shown = view.entries.filter((e) => (!view.scope || e.scope === view.scope)
+      && (!view.person || (e.by || "Quelqu'un") === view.person));
+    const groups = [];
+    for (const entry of shown) {
+      const label = historyDay(entry.clientAt);
+      if (groups.at(-1)?.label !== label) groups.push({ label, entries: [] });
+      groups.at(-1).entries.push(entry);
+    }
+    return html`
+      <header class="sheet-head"><span></span><h2>Historique</h2><button class="link strong" data-action="close">Fermer</button></header>
+      <div class="sheet-body">
+        <div class="segmented history-filter" role="group" aria-label="Type">
+          ${[['', 'Tout'], ['stock', 'Stock'], ['courses', 'Courses'], ['recettes', 'Recettes']].map(([value, label]) => html`<button data-action="history-scope" data-value="${value}" aria-pressed="${String(view.scope === value)}">${label}</button>`)}
+        </div>
+        ${people.length > 1 ? html`<div class="chips history-people" role="group" aria-label="Personne">
+          ${[['', 'Tout le monde'], ...people.map((p) => [p, p])].map(([value, label]) => html`<button class="chip filter-chip" data-action="history-person" data-value="${value}" aria-pressed="${String(view.person === value)}">${label}</button>`)}
+        </div>` : ''}
+        ${state.historyError ? html`<p class="note warn">${state.historyError}</p>` : ''}
+        ${!view.loaded ? html`<div class="boot small"><span class="spinner"></span></div>`
+          : !shown.length ? html`<p class="hint">${view.entries.length ? 'Aucune action pour ce filtre.' : 'Aucune action notée pour l\'instant. Les prochains ajouts, modifications, consommations et suppressions apparaîtront ici.'}</p>`
+          : groups.map((group) => html`
+            <h2 class="section">${group.label}</h2>
+            <div class="group history-list">
+              ${group.entries.map((entry) => html`
+                <div class="history-item ${entry.action}">
+                  <span class="history-icon" aria-hidden="true">${(HISTORY_ICON[entry.action] ?? HISTORY_ICON.modification)()}</span>
+                  <div class="history-text">
+                    <p>${historySentence(entry)}</p>
+                    ${(entry.details ?? []).filter(Boolean).map((d) => html`<small>${d}</small>`)}
+                  </div>
+                  <time>${new Date(entry.clientAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</time>
+                </div>`)}
+            </div>`)}
+        ${view.loaded && view.entries.length >= view.limit ? html`<button class="secondary" data-action="history-more">Afficher plus</button>` : ''}
+        <p class="hint">Les ${store.HISTORY_DAYS} derniers jours. Cocher ou décocher les courses n'est pas noté.</p>
+      </div>`;
+  }
+
+  subscribe();
+  return sheet;
+}
+
+// ===========================================================================
 // Écran Recettes
 // ===========================================================================
 
@@ -1543,7 +1664,7 @@ function openRecipe(id) {
         if (!used.length) return;
         const list = used.map((p) => ((p.count ?? 1) > 1 ? `${p.name} (1 sur ${p.count})` : p.name)).join(', ');
         if (!window.confirm(`Retirer une unité du stock : ${list} ?`)) return;
-        const { before } = store.consumeOne(used.map((p) => p.id));
+        const { before } = store.consumeOne(used.map((p) => p.id), { reason: `recette « ${recipe.title} »` });
         toast(`${S.plural(before.length, 'produit')} mis à jour dans le stock`, 'Annuler', () => store.restoreProducts(before));
       },
       share: () => {
@@ -1844,7 +1965,8 @@ const settingsView = {
         </div>
       </section>
 
-      <section class="group"><h2>Foyer partagé</h2><div id="household"></div></section>
+      <section class="group"><h2>Foyer partagé</h2><div id="household"></div>
+        <button class="row-button" data-action="open-history">${I.history}Historique des changements (${store.HISTORY_DAYS} jours)</button></section>
 
       <section class="group">
         <h2>Synchronisation</h2>
@@ -2166,6 +2288,7 @@ const ACTIONS = {
   },
   'pick-products': () => openProductPicker(),
   'pick-origin': () => openOriginPicker(),
+  'open-history': () => openHistory(),
   'set-difficulty': (el) => {
     ui.filters.difficulty = el.dataset.value;
     ui.recipeNote = null;

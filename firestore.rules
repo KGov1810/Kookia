@@ -7,10 +7,16 @@ service cloud.firestore {
       allow get, create: if request.auth != null;
       allow list, update, delete: if false;
 
-      // Frigo, liste de courses et recettes du foyer.
+      // Stock, liste de courses et recettes du foyer.
       match /{collection}/{docId} {
         allow read, write: if request.auth != null
           && collection in ['produits', 'courses', 'recettes']
+          && exists(/databases/$(database)/documents/foyers/$(code));
+      }
+
+      // Historique : lecture, ajout et nettoyage des entrées anciennes ; jamais de modification.
+      match /historique/{entryId} {
+        allow read, create, delete: if request.auth != null
           && exists(/databases/$(database)/documents/foyers/$(code));
       }
     }

@@ -692,3 +692,25 @@ h2.section.old { color: var(--apricot); }
   align-self: flex-start; min-height: 32px; border: 1px solid var(--line); border-radius: 10px;
   background: var(--bg); color: var(--herb); font-weight: 600; font-size: 14px; padding: 0 8px;
 }
+
+/* ---------- Historique ---------- */
+
+.history-filter { margin: 8px 0 10px; }
+.history-people { margin: 0 -16px 4px; padding: 0 16px 8px; }
+.history-list { margin-top: 0; }
+.history-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border-top: 1px solid var(--line); }
+.history-item:first-child { border-top: 0; }
+.history-icon {
+  width: 32px; height: 32px; flex: none; border-radius: 10px; display: grid; place-items: center;
+  background: var(--surface-2); color: var(--muted);
+}
+.history-icon svg { width: 18px; height: 18px; }
+.history-item.ajout .history-icon, .history-item.ticket .history-icon, .history-item.rangement .history-icon { background: var(--herb-soft); color: var(--herb-strong); }
+.history-item.consommation .history-icon { background: color-mix(in srgb, var(--herb) 14%, transparent); color: var(--herb); }
+.history-item.suppression .history-icon, .history-item.panier .history-icon { background: var(--tomato-soft); color: var(--tomato); }
+.history-item.favori .history-icon svg { fill: currentColor; color: var(--apricot); }
+.history-text { flex: 1; min-width: 0; }
+.history-text p { margin: 0 0 2px; font-size: 15px; line-height: 1.35; overflow-wrap: anywhere; }
+.history-text small { display: block; color: var(--muted); font-size: 13px; line-height: 1.35; overflow-wrap: anywhere; }
+.history-item time { flex: none; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; padding-top: 2px; }
+.boot.small { min-height: 80px; }

@@ -4,6 +4,7 @@ Le stock de nourriture de la maison, partagé à deux : **frigo, congélateur, p
 
 - **Tout le stock** : chaque produit a un lieu (Frigo, Congélateur, Placard, Fruits & légumes) et une date adaptée. Date limite (DLC) ou « de préférence » (DDM) imprimée, date estimée pour les fruits et légumes, durée conseillée pour ce qu'on congèle, et simple ancienneté (« au placard depuis 8 mois ») pour les produits secs sans date.
 - **Ajout de produits** : scan du code-barres (base Open Food Facts), photo analysée par Claude, **ticket de caisse** (toutes les courses d'un coup, chaque produit rangé à sa place), **grille de fruits et légumes** sans code-barres, lecture de la date sur l'emballage, ou saisie manuelle.
+- **Historique** : qui a ajouté, modifié, consommé ou supprimé quoi, et quand, sur 90 jours (stock, courses, recettes).
 - **Anti-oubli, anti-achat en double** : bouton *Congeler* pour sauver un produit qui va périmer, section « Oubliés depuis longtemps », et avertissement « déjà en stock » dans la liste de courses.
 - **Alertes** : les produits à consommer vite sont mis en avant à chaque ouverture, avec une pastille sur l'icône (voir les limites plus bas).
 - **Recettes** : l'app montre d'abord vos recettes déjà enregistrées réalisables avec le stock actuel (gratuit). Sinon, Claude en propose 5 nouvelles qui utilisent d'abord les produits qui vont périmer et ceux oubliés depuis longtemps, complétés par le reste du stock et la liste de courses. Filtres : nombre de personnes, végétarien ou vegan, **origine** (cuisines du monde, envie libre comme « nouilles » ou « couscous »), léger, difficulté, temps total, batch cooking. Calories estimées par portion, quantités recalculables selon le nombre de portions.
@@ -106,6 +107,7 @@ Le nombre de jours de prévenance (0 à 7, 2 par défaut) se règle dans **Régl
 - **Recettes** : choisissez **pour combien de personnes** (choix mémorisé), et si besoin **Végétarien**, **Vegan** ou **Léger** (500 kcal maximum par portion, seuil réglable dans Réglages → Recettes). **Origine** ouvre un sélecteur : cochez une ou plusieurs cuisines (italienne, japonaise, maghrébine…, ou *Tour du monde* pour varier), et/ou décrivez votre envie dans « Envie de… ». Avec une origine ou une envie, Claude peut prévoir jusqu'à 6 ingrédients à acheter par recette pour rester fidèle à l'originale (2 sinon). Les produits à consommer vite sont présélectionnés (*Choisir les produits* pour changer). La section **Déjà dans vos recettes** liste les recettes enregistrées réalisables avec le stock actuel (au plus deux ingrédients à se procurer), celles qui utilisent les produits à consommer vite en premier. Si aucune ne convient, **Proposer 5 nouvelles recettes**. Dans une recette : ajouter aux courses ce qui manque, favori (étoile), partager, **J'ai cuisiné cette recette** (retire une unité de chaque produit utilisé).
 - **Dans une recette**, les boutons **Portions** − et + recalculent les quantités (les temps de cuisson restent indicatifs) ; « ajouter aux courses » et « partager » suivent ce nombre. Les calories sont une **estimation** de Claude par portion.
 - Chaque ingrédient indique où il se trouve : *Au frigo*, *Au placard*, *Au congélateur*… (le produit d'origine), avec *(même code-barres)* pour un produit racheté ou *(produit similaire)* s'il est retrouvé par son nom (à vérifier), sinon *Sur la liste de courses* ou *À acheter*. Pour profiter du rapprochement par code-barres, ajoutez vos produits en les scannant.
+- **Historique** : bouton horloge en haut de l'écran Stock, ou Réglages → *Historique des changements*. Les actions sont groupées par jour, les plus récentes en premier, avec le prénom, l'heure et le détail des modifications (« Nombre : 2 → 3 », « Lieu : Frigo → Congélateur »). Filtres par type (Stock, Courses, Recettes) et par personne. Cocher ou décocher un article de courses n'est pas noté. Les entrées de plus de 90 jours sont supprimées automatiquement. C'est une consultation : on ne restaure rien depuis l'historique.
 - **Courses** : tapez l'article et, si besoin, le **nombre** à acheter dans « Qté » (chiffres uniquement). Pour préciser un poids, écrivez-le avec l'article : « Farine 1 kg ». Les ingrédients ajoutés depuis une recette suivent la même règle (« Pâtes (400 g) »). Touchez le rond pour cocher, touchez le nom pour modifier. Ajouter un article déjà présent avec un nouveau nombre met simplement sa quantité à jour. Si l'article est déjà en stock, l'app l'indique (« En stock : 1 au placard ») pour éviter d'acheter en double. Une fois acheté, l'icône bocal le range dans le stock : « Farine 1 kg », nombre 2, devient nombre 2 et poids « 1 kg ».
 
 ## Passer de « Frigo partagé » à Kookia
@@ -124,6 +126,8 @@ Le stock, les courses et les recettes, partagés dans Firebase, sont retrouvés 
 
 ## Mettre à jour l'app
 
+> **Version avec l'historique : mettez aussi à jour les règles Firebase.** Console Firebase → Firestore Database → onglet **Règles** → remplacez tout par le contenu du nouveau fichier `firestore.rules` → **Publier**. Sans cela, l'app continue de fonctionner normalement, mais l'écran Historique affiche « L'historique n'est pas encore autorisé » et rien n'est noté.
+
 1. Sur GitHub, ouvrez le dépôt `frigo` → **Add file → Upload files**.
 2. Glissez **tous les fichiers** de la nouvelle version (ils remplacent les anciens), puis **Commit changes**.
 3. Attendez une à deux minutes, puis sur chaque iPhone fermez complètement l'app (balayez-la vers le haut dans le sélecteur d'apps) et rouvrez-la. Si l'ancienne version s'affiche encore, recommencez une fois.
@@ -138,6 +142,7 @@ Aucune donnée n'est perdue : ni le frigo, ni les recettes, ni la clé Claude.
 - **Synchronisation après une pause** : quand l'app revient au premier plan, elle rétablit sa connexion (« Actualisation… » pendant une seconde). Si l'autre iPhone a fait une modification alors qu'il était hors ligne, elle n'arrive qu'une fois qu'il a retrouvé le réseau et été rouvert.
 - **Lecture de date sans Claude** : l'outil gratuit (téléchargé au premier usage, quelques Mo) est fiable sur les dates bien imprimées, beaucoup moins sur les dates embossées ou au jet d'encre. Avec une clé Claude, c'est Claude qui lit la date, bien plus fiable.
 - **Open Food Facts** : base collaborative, certains produits sont absents ou incomplets.
+- **Historique** : il est écrit par les iPhone eux-mêmes. Un iPhone pas encore mis à jour ne note rien, et le prénom affiché est celui saisi dans les Réglages (pas un compte vérifié). Les modifications faites directement dans la console Firebase n'y figurent pas.
 - **Dates estimées** : celles des fruits et légumes et des produits congelés sont des repères, pas des dates de péremption. L'app les marque d'un « ≈ » et ne les affiche jamais en « Périmés » : vérifiez l'aspect et l'odeur.
 - **Catégories proposées** : la proposition d'après le nom repose sur une liste de mots courants ; elle peut se tromper ou ne rien proposer pour un produit original. Les produits enregistrés avant l'arrivée des catégories détaillées ont été reclassés automatiquement d'après leur nom ; vérifiez-en quelques-uns.
 - **Produits secs** : la section « Oubliés depuis longtemps » se base sur la date d'ajout dans l'app, pas sur la date d'achat réelle des produits déjà présents avant.
@@ -156,6 +161,7 @@ Aucune donnée n'est perdue : ni le frigo, ni les recettes, ni la clé Claude.
 | « Authentication n'est pas activé » | Étape 1.4 : cliquez d'abord sur *Commencer*. |
 | « Base Firestore introuvable » | Étape 1.5. |
 | « Accès refusé par Firebase » | Règles non publiées : étape 1.6. |
+| « L'historique n'est pas encore autorisé » | Recollez le fichier `firestore.rules` dans Firebase → Firestore → Règles → **Publier**. |
 | « Aucun foyer ne correspond à ce code » | Renvoyez l'invitation depuis le premier iPhone (Réglages → Foyer partagé). |
 | Page GitHub « 404 » | Attendez deux minutes après l'étape 2.5 ; vérifiez que `index.html` est à la racine du dépôt, pas dans un sous-dossier. |
 | « Accès à la caméra refusé » | Réglages de l'iPhone → Safari → Caméra → Autoriser (ou Demander), puis « Réessayer ». |

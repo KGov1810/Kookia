@@ -7,12 +7,13 @@ import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/1
 import {
   initializeFirestore, persistentLocalCache, memoryLocalCache,
   collection, doc, setDoc, updateDoc, deleteDoc, getDoc, onSnapshot, writeBatch, serverTimestamp,
-  disableNetwork, enableNetwork
+  disableNetwork, enableNetwork, query, where, orderBy, limit, getDocs
 } from 'https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js';
 import {
   statusOf, daysUntil, hasDate, resolveIngredient, matchesFilters, scaleIngredient, maxPurchases,
   sanitizeCount, splitItemName, toShoppingEntry, stockStatus, nameMatchScore,
-  dateKindOf, freezerLimit, estimateFreshDays, isoInDays, toISODate, locationOf, normalizeCategory
+  dateKindOf, freezerLimit, estimateFreshDays, isoInDays, toISODate, locationOf, normalizeCategory,
+  category, DATE_KINDS, formatDate, quantityLabel, stockShort
 } from './services.js';
 
 /** Version des catégories : 2 = catégories détaillées (fruits, légumes, fromages…). */
@@ -73,6 +74,7 @@ export const state = {
   fromCache: true,
   pending: false,
   error: null,
+  historyError: null,   // historique refusé (règles Firestore pas encore mises à jour)
   lastSync: null
 };
 
@@ -273,6 +275,7 @@ export async function start() {
       emit('sync');
     }
   );
+  purgeHistory();
   unsubscribers = [
     listen('produits', 'products', toProduct),
     listen('courses', 'shopping', toShoppingItem),
@@ -458,8 +461,110 @@ function write(promise) {
   });
 }
 
-export function saveProduct(product) {
+// ---------------------------------------------------------------------------
+// Historique des changements (ajouts, modifications, consommations, suppressions)
+// ---------------------------------------------------------------------------
+
+export const HISTORY_DAYS = 90;
+const DAY_MS = 86_400_000;
+
+/**
+ * Note une action dans foyers/{code}/historique. Écriture séparée : si elle échoue
+ * (ex. règles Firestore pas encore mises à jour), la modification elle-même réussit.
+ */
+function logChange(entry) {
   if (!canWrite()) return;
+  const data = {
+    scope: entry.scope,
+    action: entry.action,
+    name: entry.name ?? '',
+    itemId: entry.itemId ?? '',
+    details: (entry.details ?? []).filter(Boolean).slice(0, 12),
+    by: state.settings.userName || '',
+    uid: auth?.currentUser?.uid ?? '',
+    clientAt: Date.now(),
+    at: serverTimestamp()
+  };
+  setDoc(ref('historique', crypto.randomUUID()), data).catch((error) => {
+    if (error?.code === 'permission-denied') {
+      state.historyError = "L'historique n'est pas encore autorisé : recollez les règles Firestore (fichier firestore.rules, README).";
+      emit('history');
+    }
+  });
+}
+
+// Champs suivis dans le détail d'une modification (ajouter un champ = ajouter une ligne).
+const TRACKED_FIELDS = [
+  ['name', 'Nom', (v) => v],
+  ['location', 'Lieu', (v) => locationOf(v).label],
+  ['category', 'Catégorie', (v) => category(v).label],
+  ['count', 'Nombre', (v) => String(v ?? 1)],
+  ['quantity', 'Poids', (v) => v || '—'],
+  ['dateKind', 'Type de date', (v) => DATE_KINDS[v]?.label ?? v],
+  ['expiry', 'Date', (v) => (v ? formatDate(v, { day: 'numeric', month: 'short', year: 'numeric' }) : 'à compléter')],
+  ['frozenAt', 'Congelé le', (v) => (v ? formatDate(v, { day: 'numeric', month: 'short' }) : '—')]
+];
+
+export function productDiff(before, after) {
+  const changes = [];
+  for (const [field, label, show] of TRACKED_FIELDS) {
+    const a = before[field] ?? '';
+    const b = after[field] ?? '';
+    if (String(a) !== String(b)) changes.push(`${label} : ${show(a)} → ${show(b)}`);
+  }
+  if ((before.image || before.imageUrl || '') !== (after.image || after.imageUrl || '')) changes.push('Photo modifiée');
+  return changes;
+}
+
+function productSummary(p) {
+  return [quantityLabel(p), locationOf(p.location).label, stockShort(p)].filter(Boolean).join(', ');
+}
+
+/** Écoute les dernières entrées (les plus récentes d'abord). Renvoie la fonction d'arrêt. */
+export function listenHistory(count, callback) {
+  if (!db || !state.settings.householdCode) return () => {};
+  const q = query(collection(db, 'foyers', state.settings.householdCode, 'historique'), orderBy('clientAt', 'desc'), limit(count));
+  return onSnapshot(q, (snapshot) => {
+    state.historyError = null;
+    callback(snapshot.docs.map((d) => ({ id: d.id, ...d.data() })));
+  }, (error) => {
+    state.historyError = error?.code === 'permission-denied'
+      ? "L'historique n'est pas encore autorisé : recollez les règles Firestore (fichier firestore.rules, README)."
+      : errorMessage(error);
+    callback([]);
+  });
+}
+
+/** Supprime les entrées de plus de 90 jours (au plus une fois par jour et par iPhone). */
+async function purgeHistory() {
+  if (!canWrite()) return;
+  const last = state.settings.historyPurgedAt ?? 0;
+  if (Date.now() - last < DAY_MS) return;
+  try {
+    const cutoff = Date.now() - HISTORY_DAYS * DAY_MS;
+    const old = await getDocs(query(collection(db, 'foyers', state.settings.householdCode, 'historique'), where('clientAt', '<', cutoff), limit(300)));
+    if (old.docs.length) {
+      const batch = writeBatch(db);
+      old.docs.forEach((d) => batch.delete(d.ref ?? ref('historique', d.id)));
+      await batch.commit();
+    }
+    updateSettings({ historyPurgedAt: Date.now() });
+  } catch {
+    // nouvel essai au prochain lancement
+  }
+}
+
+export function saveProduct(product, { log = true } = {}) {
+  if (!canWrite()) return;
+  const before = state.products.find((p) => p.id === product.id);
+  if (log) {
+    if (!before) {
+      logChange({ scope: 'stock', action: 'ajout', name: product.name.trim(), itemId: product.id, details: [productSummary(product)] });
+    } else {
+      const changes = productDiff(before, { ...product, name: product.name.trim(), count: Math.max(1, Math.round(Number(product.count) || 1)), dateKind: dateKindOf(product) });
+      if (changes.length) logChange({ scope: 'stock', action: 'modification', name: product.name.trim(), itemId: product.id, details: changes });
+    }
+  }
   write(setDoc(ref('produits', product.id), {
     name: (product.name ?? '').trim(),
     expiry: product.expiry,
@@ -479,10 +584,13 @@ export function saveProduct(product) {
 }
 
 /** Retire des produits (consommés ou jetés). Renvoie les produits retirés, pour « Annuler ». */
-export function removeProducts(ids) {
+export function removeProducts(ids, { log = true, reason = '' } = {}) {
   if (!canWrite()) return [];
   const removed = state.products.filter((p) => ids.includes(p.id));
   if (!removed.length) return [];
+  if (log) {
+    removed.forEach((p) => logChange({ scope: 'stock', action: 'suppression', name: p.name, itemId: p.id, details: [reason, quantityLabel(p)] }));
+  }
   rememberRecipeLinks(removed);
   const batch = writeBatch(db);
   removed.forEach((p) => batch.delete(ref('produits', p.id)));
@@ -490,8 +598,12 @@ export function removeProducts(ids) {
   return removed;
 }
 
+/** « Annuler » : remet les produits tels qu'ils étaient. */
 export function restoreProducts(products) {
-  products.forEach((p) => saveProduct(p));
+  products.forEach((p) => {
+    logChange({ scope: 'stock', action: 'annulation', name: p.name, itemId: p.id, details: [quantityLabel(p) ? `remis en stock : ${quantityLabel(p)}` : 'remis en stock'] });
+    saveProduct(p, { log: false });
+  });
 }
 
 /**
@@ -499,13 +611,17 @@ export function restoreProducts(products) {
  * et le produit n'est retiré du frigo qu'à la dernière unité.
  * Renvoie l'état d'avant (pour « Annuler ») et ce qui a été retiré ou diminué.
  */
-export function consumeOne(ids) {
+export function consumeOne(ids, { reason = '' } = {}) {
   if (!canWrite()) return { before: [], removed: [], decremented: [] };
   const before = state.products.filter((p) => ids.includes(p.id)).map((p) => ({ ...p }));
   const removed = before.filter((p) => (p.count ?? 1) <= 1);
   const decremented = before.filter((p) => (p.count ?? 1) > 1);
-  if (removed.length) removeProducts(removed.map((p) => p.id));
-  decremented.forEach((p) => saveProduct({ ...p, count: p.count - 1 }));
+  before.forEach((p) => logChange({
+    scope: 'stock', action: 'consommation', name: p.name, itemId: p.id,
+    details: [(p.count ?? 1) > 1 ? `il en reste ${p.count - 1}` : 'plus en stock', reason]
+  }));
+  if (removed.length) removeProducts(removed.map((p) => p.id), { log: false });
+  decremented.forEach((p) => saveProduct({ ...p, count: p.count - 1 }, { log: false }));
   return { before, removed, decremented };
 }
 
@@ -513,7 +629,7 @@ export function consumeOne(ids) {
  * Ajoute un article. Renvoie 'added', 'updated' (article déjà présent dont la
  * quantité a été remplacée, si updateQuantity) ou false (déjà présent).
  */
-export function addShoppingItem(name, quantity = '', { updateQuantity = false } = {}) {
+export function addShoppingItem(name, quantity = '', { updateQuantity = false, log = true } = {}) {
   const raw = String(quantity ?? '').trim();
   // La quantité enregistrée est toujours un nombre ; un poids (« 400 g ») rejoint le nom.
   const entry = /^\d*$/.test(raw)
@@ -527,12 +643,13 @@ export function addShoppingItem(name, quantity = '', { updateQuantity = false } 
     && splitItemName(i.name).base.localeCompare(base, 'fr', { sensitivity: 'base' }) === 0);
   if (existing) {
     if (updateQuantity && amount && amount !== existing.quantity) {
-      updateShoppingItem(existing.id, { quantity: amount });
+      updateShoppingItem(existing.id, { quantity: amount }, { log });
       return 'updated';
     }
     return false;
   }
   const id = crypto.randomUUID();
+  if (log) logChange({ scope: 'courses', action: 'ajout', name: trimmed, itemId: id, details: [amount ? `quantité : ${amount}` : ''] });
   write(setDoc(ref('courses', id), {
     name: trimmed, quantity: amount, checked: false, addedBy: state.settings.userName, createdAt: Date.now()
   }));
@@ -540,11 +657,18 @@ export function addShoppingItem(name, quantity = '', { updateQuantity = false } 
 }
 
 /** Modifie le nom et/ou la quantité d'un article. */
-export function updateShoppingItem(id, patch) {
+export function updateShoppingItem(id, patch, { log = true } = {}) {
   if (!canWrite()) return;
   const data = {};
   if (patch.name !== undefined && patch.name.trim()) data.name = patch.name.trim();
   if (patch.quantity !== undefined) data.quantity = sanitizeCount(patch.quantity);
+  const item = state.shopping.find((i) => i.id === id);
+  if (log && item) {
+    const changes = [];
+    if (data.name !== undefined && data.name !== item.name) changes.push(`Nom : ${item.name} → ${data.name}`);
+    if (data.quantity !== undefined && data.quantity !== (item.quantity ?? '')) changes.push(`Quantité : ${item.quantity || '—'} → ${data.quantity || '—'}`);
+    if (changes.length) logChange({ scope: 'courses', action: 'modification', name: data.name ?? item.name, itemId: id, details: changes });
+  }
   if (Object.keys(data).length) write(updateDoc(ref('courses', id), data));
 }
 
@@ -556,21 +680,31 @@ export function toggleShoppingItem(id) {
   write(updateDoc(ref('courses', id), { checked: !item.checked }));
 }
 
-export function deleteShoppingItems(ids) {
+/** reason 'rangement' : article acheté et rangé dans le stock. */
+export function deleteShoppingItems(ids, { log = true, reason = '' } = {}) {
   if (!canWrite() || !ids.length) return;
+  if (log) {
+    state.shopping.filter((i) => ids.includes(i.id)).forEach((i) => logChange({
+      scope: 'courses', action: reason === 'rangement' ? 'rangement' : 'suppression', name: i.name, itemId: i.id,
+      details: [i.quantity ? `quantité : ${i.quantity}` : '']
+    }));
+  }
   const batch = writeBatch(db);
   ids.forEach((id) => batch.delete(ref('courses', id)));
   write(batch.commit());
 }
 
 export function clearCheckedShopping() {
-  deleteShoppingItems(state.shopping.filter((i) => i.checked).map((i) => i.id));
+  const checked = state.shopping.filter((i) => i.checked);
+  if (!checked.length) return;
+  logChange({ scope: 'courses', action: 'panier', name: `${checked.length} article${checked.length > 1 ? 's' : ''}`, details: [checked.map((i) => i.name).join(', ')] });
+  deleteShoppingItems(checked.map((i) => i.id), { log: false });
 }
 
 /** Ajoute aux courses les ingrédients absents du frigo actuel (quantités ajustées). Renvoie le nombre ajouté. */
 export function addMissingIngredients(recipe, factor = 1) {
   return recipeAvailability(recipe).missing
-    .reduce((count, i) => count + (addShoppingItem(i.name, scaleIngredient(i, factor)) ? 1 : 0), 0);
+    .reduce((count, i) => count + (addShoppingItem(i.name, scaleIngredient(i, factor)) ? 1 : 0), 0); // chaque ajout est noté
 }
 
 /**
@@ -617,11 +751,17 @@ export function addReceiptProducts(items, shoppingIdsToRemove = []) {
   });
   shoppingIdsToRemove.forEach((id) => batch.delete(ref('courses', id)));
   write(batch.commit());
+  const bought = state.shopping.filter((i) => shoppingIdsToRemove.includes(i.id)).map((i) => i.name);
+  logChange({
+    scope: 'stock', action: 'ticket', name: `${items.length} produit${items.length > 1 ? 's' : ''}`,
+    details: [items.map((i) => (i.count > 1 ? `${i.name} ×${i.count}` : i.name)).join(', '), bought.length ? `retirés des courses : ${bought.join(', ')}` : '']
+  });
   return items.length;
 }
 
 export function saveRecipes(recipes) {
   if (!canWrite() || !recipes.length) return;
+  logChange({ scope: 'recettes', action: 'generation', name: `${recipes.length} recette${recipes.length > 1 ? 's' : ''}`, details: [recipes.map((r) => r.title).join(', ')] });
   const batch = writeBatch(db);
   recipes.forEach(({ id, ...data }) => batch.set(ref('recettes', id), data));
   // Garde les favoris + les 40 recettes les plus récentes.
@@ -636,11 +776,14 @@ export function saveRecipes(recipes) {
 export function toggleFavorite(id) {
   const recipe = state.recipes.find((r) => r.id === id);
   if (!recipe || !canWrite()) return;
+  logChange({ scope: 'recettes', action: recipe.favorite ? 'favori-retire' : 'favori', name: recipe.title, itemId: id });
   write(updateDoc(ref('recettes', id), { favorite: !recipe.favorite }));
 }
 
 export function deleteRecipe(id) {
   if (!canWrite()) return;
+  const recipe = state.recipes.find((r) => r.id === id);
+  if (recipe) logChange({ scope: 'recettes', action: 'suppression', name: recipe.title, itemId: id });
   write(deleteDoc(ref('recettes', id)));
 }
 
