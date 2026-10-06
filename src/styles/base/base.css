@@ -1,0 +1,78 @@
+/* Kookia — Base : page, textes, champs, accessibilité, animations. */
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; background: var(--bg); }
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  font: 17px/1.4 var(--font);
+  color: var(--ink);
+  background: var(--bg);
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+}
+
+button, input, select, textarea { font: inherit; color: inherit; }
+
+button { cursor: pointer; background: none; border: 0; padding: 0; }
+
+button:disabled { opacity: .45; cursor: default; }
+
+:focus-visible { outline: 3px solid color-mix(in srgb, var(--herb) 55%, transparent); outline-offset: 2px; }
+
+svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+[hidden] { display: none !important; }
+
+body.onboarding #screen { padding-bottom: calc(var(--safe-bottom) + 32px); }
+
+body.onboarding .tabbar { display: none; }
+
+h1 {
+  font: 800 34px/1.1 var(--font-round);
+  letter-spacing: -.02em;
+  margin: 0;
+}
+
+h2.section {
+  font: 700 20px/1.2 var(--font-round);
+  margin: 26px 4px 10px;
+  display: flex; align-items: baseline; justify-content: space-between; gap: 8px;
+}
+
+h2.section small { font: 500 15px var(--font); color: var(--muted); }
+
+h2.section.expired { color: var(--tomato); }
+
+h2.section.soon { color: var(--apricot); }
+
+.spinner {
+  width: 26px; height: 26px; border-radius: 50%;
+  border: 3px solid var(--herb-soft); border-top-color: var(--herb);
+  animation: spin .8s linear infinite; display: inline-block;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+textarea {
+  width: 100%; min-height: 110px; resize: vertical; border: 1px solid var(--line); border-radius: 12px;
+  padding: 10px 12px; background: var(--bg); font-size: 15px; line-height: 1.35; outline: none;
+}
+
+body.onboarding #toast { bottom: calc(var(--safe-bottom) + 20px); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  .days { transform: none !important; }
+}
+
+/* Pendant le scan, rien d'autre n'est dessiné sous la caméra (évite des écrans noirs sur iOS). */
+body.scanning .tabbar,
+body.scanning .fab,
+body.scanning .sheet-backdrop { visibility: hidden; }
+
+h2.section.pending { color: var(--herb-strong); }
+
+h2.section.old { color: var(--apricot); }

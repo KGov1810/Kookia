@@ -1,0 +1,26 @@
+/* Kookia — Pastilles de filtre. */
+
+.chips { display: flex; gap: 8px; overflow-x: auto; padding: 4px 16px 12px; scrollbar-width: none; }
+
+.chips::-webkit-scrollbar { display: none; }
+
+.chip {
+  flex: none; display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 999px;
+  background: var(--surface-2); font-size: 15px; white-space: nowrap;
+}
+
+.chip i { font-style: normal; font-weight: 700; }
+
+.chip i.soon { color: var(--apricot); }
+
+.chip i.expired { color: var(--tomato); }
+
+.filter-chip { gap: 6px; border: 1.5px solid transparent; font-weight: 600; min-height: 38px; }
+
+.filter-chip svg { width: 18px; height: 18px; }
+
+.filter-chip i { font-style: normal; font-weight: 700; color: var(--muted); font-size: 13px; }
+
+.filter-chip[aria-pressed="true"] { background: var(--herb-soft); border-color: var(--herb); color: var(--herb-strong); }
+
+.filter-chip[aria-pressed="true"] i { color: var(--herb-strong); }

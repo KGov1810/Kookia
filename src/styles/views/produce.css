@@ -1,0 +1,21 @@
+/* Kookia — Fruits et légumes sans code-barres. */
+
+.produce-search { margin: 4px 0 10px; }
+
+.produce-grid { display: flex; flex-wrap: wrap; gap: 8px; padding-bottom: 12px; }
+
+.produce-chip {
+  position: relative; display: inline-flex; align-items: center; gap: 6px; min-height: 42px; padding: 6px 14px;
+  border-radius: 999px; background: var(--surface); border: 1.5px solid var(--line); font-size: 15px; font-weight: 600;
+}
+
+.produce-chip span { font-size: 20px; line-height: 1; }
+
+.produce-chip b {
+  min-width: 22px; height: 22px; border-radius: 11px; padding: 0 6px; margin-left: 2px;
+  background: var(--herb); color: var(--on-accent); font-size: 13px; line-height: 22px; text-align: center;
+}
+
+.produce-chip.custom { border-style: dashed; color: var(--herb); }
+
+.produce-chip.custom svg { width: 18px; height: 18px; }

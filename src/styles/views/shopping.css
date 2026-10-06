@@ -1,0 +1,50 @@
+/* Kookia — Écran Courses. */
+
+.add-item { display: flex; gap: 8px; margin-bottom: 8px; }
+
+.add-item input {
+  flex: 1; min-height: 50px; border-radius: 14px; border: 1.5px solid var(--line);
+  background: var(--surface); padding: 0 14px; font-size: 17px; outline: none;
+}
+
+.add-item input:focus { border-color: var(--herb); }
+
+.add-item button { width: 50px; height: 50px; border-radius: 14px; background: var(--herb); color: var(--on-accent); display: grid; place-items: center; }
+
+.add-item button svg { stroke-width: 2.4; }
+
+.shop-item {
+  display: flex; align-items: center; gap: 2px; background: var(--surface); border-radius: 16px;
+  padding: 4px 4px 4px 6px; box-shadow: var(--shadow);
+}
+
+.tick { width: 44px; height: 44px; display: grid; place-items: center; flex: none; }
+
+.tick span {
+  width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--line);
+  display: grid; place-items: center; color: transparent;
+}
+
+.tick span svg { width: 16px; height: 16px; stroke-width: 3; }
+
+.shop-item.checked .tick span { background: var(--herb); border-color: var(--herb); color: var(--on-accent); }
+
+.shop-text { flex: 1; min-width: 0; text-align: left; display: flex; flex-direction: column; padding: 8px 0; min-height: 48px; justify-content: center; }
+
+.shop-text small { color: var(--muted); font-size: 14px; }
+
+.shop-item.checked .shop-text > span { text-decoration: line-through; color: var(--muted); }
+
+.add-item input.qty { flex: none; width: 88px; padding: 0 10px; }
+
+.qty-pill {
+  flex: none; max-width: 36%; padding: 6px 11px; border-radius: 999px;
+  background: var(--herb-soft); color: var(--herb-strong); font-weight: 700; font-size: 15px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.shop-item.checked .qty-pill { background: var(--surface-2); color: var(--muted); }
+
+.shop-item { padding-right: 4px; gap: 6px; }
+
+.shop-text small.in-stock { color: var(--apricot); font-weight: 600; }

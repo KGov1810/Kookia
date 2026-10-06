@@ -1,0 +1,22 @@
+/* Kookia — Écran Stock : lieux, sections, date à compléter. */
+
+.add-hint { margin-top: 0; }
+
+.same-product { display: flex; flex-direction: column; gap: 8px; }
+
+.same-product small { color: var(--muted); font-size: 13px; }
+
+.location-filter { padding: 0 0 8px; margin: 0 -16px 4px; padding-left: 16px; padding-right: 16px; }
+
+.location-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 6px 16px 14px; }
+
+.location-grid button {
+  display: flex; align-items: center; gap: 8px; min-height: 46px; padding: 8px 12px; border-radius: 12px;
+  background: var(--surface-2); font-weight: 600; font-size: 15px; text-align: left; border: 1.5px solid transparent;
+}
+
+.location-grid button svg { width: 20px; height: 20px; color: var(--muted); }
+
+.location-grid button[aria-pressed="true"] { background: var(--herb-soft); border-color: var(--herb); color: var(--herb-strong); }
+
+.location-grid button[aria-pressed="true"] svg { color: var(--herb-strong); }

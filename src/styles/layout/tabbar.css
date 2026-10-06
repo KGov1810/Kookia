@@ -1,0 +1,28 @@
+/* Kookia — Barre d'onglets. */
+
+.tabbar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  padding: 4px max(8px, calc(50vw - 320px)) calc(var(--safe-bottom) + 2px);
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter: saturate(1.6) blur(18px); -webkit-backdrop-filter: saturate(1.6) blur(18px);
+  border-top: 1px solid var(--line);
+}
+
+.tab {
+  position: relative; height: var(--tabbar-h);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  color: var(--muted); font-size: 11px; font-weight: 600;
+}
+
+.tab svg { width: 26px; height: 26px; }
+
+.tab[aria-current="page"] { color: var(--herb); }
+
+.tab-badge {
+  position: absolute; top: 5px; left: calc(50% + 6px);
+  min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px;
+  background: var(--tomato); color: #fff; font-size: 12px; line-height: 18px; text-align: center;
+}
+
+.tab-badge.calm { background: var(--herb); }

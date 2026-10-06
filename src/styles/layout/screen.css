@@ -1,0 +1,58 @@
+/* Kookia — Écran, en-têtes, sections et messages. */
+
+#screen {
+  padding: calc(var(--safe-top) + 12px) 16px calc(var(--tabbar-h) + var(--safe-bottom) + 96px);
+  max-width: 640px;
+  margin: 0 auto;
+  outline: none;
+}
+
+.top { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin: 8px 0 14px; }
+
+.sync { margin: 4px 0 0; font-size: 14px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+
+.sync::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--herb); }
+
+.sync[data-state="offline"]::before { background: var(--apricot); }
+
+.sync[data-state="error"] { color: var(--tomato); }
+
+.sync[data-state="error"]::before { background: var(--tomato); }
+
+.hint { font-size: 14px; color: var(--muted); margin: 8px 4px; }
+
+.note { font-size: 15px; margin: 10px 4px; padding: 10px 12px; border-radius: 12px; }
+
+.note.ok { background: var(--herb-soft); color: var(--herb-strong); }
+
+.note.warn { background: var(--apricot-soft); color: var(--ink); }
+
+.note.error { background: var(--tomato-soft); color: var(--ink); }
+
+.boot { display: grid; place-items: center; min-height: 60dvh; }
+
+.list { display: flex; flex-direction: column; gap: 8px; }
+
+.empty {
+  text-align: center; padding: 36px 16px 8px; display: flex; flex-direction: column; gap: 10px; align-items: center;
+}
+
+.empty .emoji { font-size: 52px; line-height: 1; }
+
+.empty h2 { font: 700 22px var(--font-round); margin: 4px 0 0; }
+
+.empty p { color: var(--muted); margin: 0 0 8px; max-width: 32ch; }
+
+.empty .secondary, .empty .primary { max-width: 320px; }
+
+.plain { padding: 4px 16px 14px; margin: 0; }
+
+.hint.inset { margin: 0; padding: 4px 16px 12px; }
+
+.muted { color: var(--muted); }
+
+.top > div { min-width: 0; }
+
+.empty.small { padding: 18px 8px; }
+
+.boot.small { min-height: 80px; }

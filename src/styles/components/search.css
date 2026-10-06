@@ -1,0 +1,13 @@
+/* Kookia — Recherche. */
+
+.search {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surface-2); border-radius: 12px; padding: 0 12px; margin-bottom: 4px;
+  color: var(--muted);
+}
+
+.search svg { width: 20px; height: 20px; }
+
+.search input { flex: 1; border: 0; background: none; min-height: 42px; outline: none; color: var(--ink); font-size: 17px; }
+
+.search input::-webkit-search-cancel-button { display: none; }

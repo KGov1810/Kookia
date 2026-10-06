@@ -1,0 +1,72 @@
+/* Kookia — Ligne d'un produit : vignette, compteur de jours façon magnet. */
+
+.product {
+  display: flex; align-items: center; gap: 4px;
+  background: var(--surface); border-radius: 18px; padding: 6px 10px 6px 6px;
+  box-shadow: var(--shadow);
+}
+
+.product.leaving { opacity: 0; transform: translateX(24px); transition: opacity .2s, transform .2s; }
+
+.consume {
+  width: 44px; height: 44px; flex: none; display: grid; place-items: center; border-radius: 50%;
+}
+
+.consume::before {
+  content: ""; width: 24px; height: 24px; border-radius: 50%;
+  border: 2px solid var(--line); transition: border-color .15s, background .15s;
+}
+
+.consume:active::before { border-color: var(--herb); background: var(--herb-soft); }
+
+.product-main {
+  flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; text-align: left; padding: 4px 0; min-height: 56px;
+}
+
+.thumb {
+  width: 46px; height: 46px; flex: none; border-radius: 12px; overflow: hidden;
+  display: grid; place-items: center; font-size: 24px; background: var(--herb-soft);
+}
+
+.thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+.product-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+
+.product-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+
+.product-meta { font-size: 14px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Le compteur de jours : l'élément fort de l'app. */
+.days {
+  flex: none; min-width: 58px; padding: 6px 8px 5px; border-radius: 14px;
+  display: flex; flex-direction: column; align-items: center; line-height: 1;
+  background: var(--herb-soft); color: var(--herb-strong);
+  transform: rotate(-2deg);
+}
+
+.days b { font: 800 26px/1 var(--font-round); letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+
+.days small { font-size: 11px; font-weight: 600; margin-top: 3px; white-space: nowrap; }
+
+.days.soon { background: var(--apricot); color: #fff; transform: rotate(2deg); }
+
+.days.expired { background: var(--tomato); color: #fff; transform: rotate(-3deg); }
+
+@media (prefers-color-scheme: dark) {
+  .days.soon, .days.expired { color: var(--on-accent); }
+}
+
+.thumb { position: relative; }
+
+.thumb .count {
+  position: absolute; right: 2px; bottom: 2px; padding: 1px 5px; border-radius: 7px;
+  font: 800 12px/1.3 var(--font-round); background: var(--ink); color: var(--bg);
+}
+
+.days.pending { background: var(--surface-2); color: var(--muted); transform: rotate(1deg); }
+
+.days.age { background: var(--surface-2); color: var(--muted); transform: rotate(1deg); }
+
+.days.old { background: color-mix(in srgb, var(--apricot) 22%, var(--surface)); color: var(--apricot); transform: rotate(-1deg); }
+
+.days small { text-align: center; }

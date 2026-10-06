@@ -1,0 +1,58 @@
+/* Kookia — Boutons. */
+
+.primary {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%; min-height: 52px; padding: 12px 18px;
+  border-radius: 16px; background: var(--herb); color: var(--on-accent);
+  font-weight: 650; font-size: 17px;
+}
+
+.primary:active { background: var(--herb-strong); }
+
+.secondary {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; min-height: 48px; padding: 10px 16px;
+  border-radius: 14px; background: var(--surface-2); color: var(--ink); font-weight: 600;
+}
+
+.danger { color: var(--tomato); }
+
+.link { color: var(--herb); font-weight: 500; padding: 8px 4px; min-height: 44px; }
+
+.link.strong { font-weight: 700; }
+
+.icon-btn {
+  width: 44px; height: 44px; display: inline-grid; place-items: center;
+  border-radius: 12px; color: var(--muted);
+}
+
+.icon-btn:active { background: var(--surface-2); }
+
+.icon-btn[aria-pressed="true"] { color: var(--apricot); }
+
+.icon-btn[aria-pressed="true"] svg { fill: currentColor; }
+
+.fab {
+  position: fixed; z-index: 20;
+  right: max(18px, calc(50vw - 320px + 18px));
+  bottom: calc(var(--tabbar-h) + var(--safe-bottom) + 18px);
+  width: 60px; height: 60px; border-radius: 20px;
+  background: var(--herb); color: var(--on-accent);
+  display: grid; place-items: center;
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--herb) 40%, transparent);
+}
+
+.fab svg { width: 30px; height: 30px; stroke-width: 2.4; }
+
+.fab:active { transform: scale(.95); }
+
+.row-button {
+  display: flex; align-items: center; gap: 12px; width: 100%; text-align: left;
+  min-height: 52px; padding: 6px 16px; border-top: 1px solid var(--line); color: var(--herb); font-weight: 500;
+}
+
+.row-button.danger { color: var(--tomato); }
+
+.row-button:first-child { border-top: 0; }
+
+.primary .spinner { width: 20px; height: 20px; border-width: 2.5px; border-color: rgba(255, 255, 255, .35); border-top-color: var(--on-accent); }

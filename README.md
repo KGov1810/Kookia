@@ -1,6 +1,5 @@
 # Kookia
 
-
 Le stock de nourriture de la maison, partagé à deux : **frigo, congélateur, placard, fruits et légumes**. Application installée sur l'écran d'accueil de chaque iPhone depuis Safari. **Elle n'expire jamais** et ne demande ni Mac ni compte développeur Apple.
 
 - **Tout le stock** : chaque produit a un lieu (Frigo, Congélateur, Placard, Fruits & légumes) et une date adaptée. Date limite (DLC) ou « de préférence » (DDM) imprimée, date estimée pour les fruits et légumes, durée conseillée pour ce qu'on congèle, et simple ancienneté (« au placard depuis 8 mois ») pour les produits secs sans date.
@@ -20,7 +19,7 @@ Tout est gratuit, sauf les fonctions Claude (facultatives, quelques centimes par
 ## Ce qu'il faut
 
 - Un **compte Google** (pour Firebase) et un **compte GitHub** (pour héberger l'app), tous deux gratuits.
-- Un ordinateur (Windows convient) est plus confortable pour les étapes 1 et 2, mais elles sont faisables depuis Safari sur iPhone.
+- Un ordinateur (Windows convient) avec **git** (ou l'application GitHub Desktop) pour envoyer le code sur GitHub. Node.js n'est pas nécessaire : c'est GitHub qui teste et construit l'app.
 - iOS 16.4 ou plus récent sur les deux iPhone.
 
 Comptez environ 25 minutes, une seule fois.
@@ -42,12 +41,9 @@ L'offre gratuite « Spark » suffit largement et ne demande aucune carte bancair
 
 1. Créez un compte sur [github.com](https://github.com) si besoin.
 2. En haut à droite : **+** → **New repository**. Nom : `frigo`. Laissez **Public** (obligatoire pour GitHub Pages gratuit). Cliquez **Create repository**.
-3. Sur la page suivante, cliquez le lien **uploading an existing file**.
-4. Décompressez le zip, ouvrez le dossier `kookia` et **glissez tous les fichiers qu'il contient** (pas le dossier lui-même) dans la zone. Cliquez **Commit changes**.
-5. Onglet **Settings** → **Pages** (menu de gauche) → *Branch* : `main`, dossier `/ (root)` → **Save**.
-6. Patientez une à deux minutes. L'adresse de l'app apparaît en haut de cette page, du type `https://votre-pseudo.github.io/frigo/`.
-
-> Sur iPhone, si le lien « uploading an existing file » n'apparaît pas, touchez **aA** dans la barre d'adresse → **Demander le site pour ordinateur**. Pour décompresser le zip, touchez-le dans l'app Fichiers.
+3. Envoyez le contenu du dossier `kookia` (pas le dossier lui-même) dans ce dépôt, avec git : `git init`, `git add .`, `git commit -m "Kookia"`, puis les commandes `git remote add` et `git push` que GitHub affiche. Avec GitHub Desktop : *Add an Existing Repository*, puis *Publish*.
+4. Onglet **Settings** → **Pages** (menu de gauche) → *Source* : **GitHub Actions**.
+5. Onglet **Actions** : la tâche « Tests et mise en ligne » se lance (2 à 3 minutes). Quand elle est verte, l'adresse de l'app apparaît dans **Settings → Pages**, du type `https://votre-pseudo.github.io/frigo/`. Si elle ne s'est pas lancée, ouvrez-la et touchez **Run workflow**.
 
 Aucun secret n'est publié : la configuration Firebase n'est saisie que dans l'app, et vos données sont protégées par le code du foyer.
 
@@ -113,7 +109,7 @@ Le nombre de jours de prévenance (0 à 7, 2 par défaut) se règle dans **Régl
 
 ## Passer de « Frigo partagé » à Kookia
 
-Après avoir mis les nouveaux fichiers sur GitHub (section suivante), l'app ouverte affiche déjà Kookia : vos produits passent automatiquement dans « Frigo », rien n'est perdu.
+Après la mise à jour sur GitHub (voir « Mettre à jour l'app »), l'app ouverte affiche déjà Kookia : vos produits passent automatiquement dans « Frigo », rien n'est perdu.
 
 L'iPhone garde cependant **l'ancien nom et l'ancienne icône** sur l'écran d'accueil. Pour les remplacer (facultatif), sur chaque iPhone :
 
@@ -125,15 +121,26 @@ L'iPhone garde cependant **l'ancien nom et l'ancienne icône** sur l'écran d'ac
 
 Le stock, les courses et les recettes, partagés dans Firebase, sont retrouvés tels quels. Gardez la **même adresse GitHub** : en changer créerait une app vide.
 
+## Passer à la version 2 (nouvelle organisation du code)
+
+La version 2 range le code dans des dossiers et le fait tester puis construire par GitHub à chaque envoi. Rien ne change dans l'app ni dans vos données. Une seule fois :
+
+1. Dans votre dépôt, **supprimez les anciens fichiers** : `app.js`, `services.js`, `store.js`, `ui.js`, `styles.css`, `sw.js`, `icon-*.png`, `manifest.json`, `config.js` et `.nojekyll`. Avec git, le plus simple est de vider le dossier du dépôt (sauf le dossier caché `.git`), d'y copier le contenu du nouveau dossier `kookia`, puis `git add -A`, `git commit` et `git push`.
+2. **Settings → Pages → Source : GitHub Actions** (au lieu de *Deploy from a branch*).
+3. Onglet **Actions** : attendez que « Tests et mise en ligne » soit vert.
+4. Sur chaque iPhone, fermez complètement l'app et rouvrez-la. Pas besoin de la réinstaller : l'adresse est la même.
+
+Si vous avez déjà publié les règles Firebase de la version avec l'historique, il n'y a rien à changer dans Firebase.
+
 ## Mettre à jour l'app
 
-> **Version avec l'historique : mettez aussi à jour les règles Firebase.** Console Firebase → Firestore Database → onglet **Règles** → remplacez tout par le contenu du nouveau fichier `firestore.rules` → **Publier**. Sans cela, l'app continue de fonctionner normalement, mais l'écran Historique affiche « L'historique n'est pas encore autorisé » et rien n'est noté.
+1. Remplacez les fichiers du dépôt par ceux de la nouvelle version, puis `git add -A`, `git commit` et `git push`.
+2. GitHub lance automatiquement **les tests puis la mise en ligne** (onglet **Actions**, 2 à 3 minutes). Si un test échoue, la tâche devient rouge et **rien n'est mis en ligne** : les iPhone gardent la version précédente, qui fonctionne. Ouvrez la tâche rouge pour lire quel test a échoué.
+3. Quand elle est verte, fermez complètement l'app sur chaque iPhone (balayez-la vers le haut dans le sélecteur d'apps) et rouvrez-la. Si l'ancienne version s'affiche encore, recommencez une fois.
 
-1. Sur GitHub, ouvrez le dépôt `frigo` → **Add file → Upload files**.
-2. Glissez **tous les fichiers** de la nouvelle version (ils remplacent les anciens), puis **Commit changes**.
-3. Attendez une à deux minutes, puis sur chaque iPhone fermez complètement l'app (balayez-la vers le haut dans le sélecteur d'apps) et rouvrez-la. Si l'ancienne version s'affiche encore, recommencez une fois.
+Aucune donnée n'est perdue : ni le stock, ni les recettes, ni la clé Claude.
 
-Aucune donnée n'est perdue : ni le frigo, ni les recettes, ni la clé Claude.
+> Si une version demande de mettre à jour les règles Firebase (c'est indiqué dans ses notes), collez le nouveau fichier `firestore.rules` dans Firebase → Firestore Database → onglet **Règles** → **Publier**.
 
 ## Limites connues
 
@@ -173,16 +180,46 @@ Aucune donnée n'est perdue : ni le frigo, ni les recettes, ni la clé Claude.
 
 **Autre hébergement possible** : [Netlify Drop](https://app.netlify.com/drop) (glisser le dossier dans la page, puis créer un compte gratuit pour garder le site en ligne).
 
-## Contenu du dossier
+## Architecture
 
-| Fichier | Rôle |
+Le code est organisé par couche technique. Chaque couche n'utilise que celles situées en dessous d'elle ; un test vérifie cette règle à chaque envoi, ainsi qu'une taille maximale de 200 lignes par fichier.
+
+```
+index.html                 Page d'entrée (Vite)
+src/
+  main.js                  Démarrage
+  views/                   Écrans et fiches : un dossier par écran
+    app/                   Navigation, barre d'onglets, actions, événements
+    stock/  product-editor/  scanner/  produce/  receipt/
+    recipes/  shopping/  settings/  onboarding/  history/
+  components/              Éléments d'affichage réutilisables (fiches, icônes, gabarits…)
+  data/
+    store/                 État partagé, Firebase, synchronisation, historique
+    reference/             Données fixes : catégories, lieux, fruits et légumes, cuisines
+  services/                Règles métier (dates, quantités, catégories, statuts)
+                           et services externes (Claude, Open Food Facts, caméra, OCR)
+  styles/                  Feuilles de style : base, mise en page, composants, écrans
+  sw/service-worker.js     Modèle du service worker (complété au build)
+public/                    Fichiers copiés tels quels : manifeste, icônes, config.js
+build/                     Génération du service worker au build
+tests/
+  unit/                    Calculs (dates, quantités, catégories…) et règles d'architecture
+  scenarios/               Parcours complets sur un iPhone simulé (Firebase simulé)
+.github/workflows/         Tests, build et mise en ligne automatiques
+firestore.rules            Règles de sécurité à coller dans Firebase (étape 1.6)
+```
+
+Sens des dépendances : `views` → `components` → `data/store` → `services` → `data/reference`.
+
+### Travailler sur le code (facultatif)
+
+Avec Node.js 22 ou plus récent :
+
+| Commande | Effet |
 |---|---|
-| `index.html`, `styles.css` | Page et apparence |
-| `app.js`, `ui.js` | Écrans et interactions |
-| `store.js` | Données partagées (Firebase) et réglages |
-| `services.js` | Dates, lecture de date, Open Food Facts, Claude, code-barres |
-| `sw.js`, `manifest.json`, `icon-*.png` | Installation sur l'écran d'accueil, fonctionnement hors ligne |
-| `config.js` | Facultatif : configuration Firebase pré-remplie pour les deux iPhone |
-| `firestore.rules` | Règles de sécurité à coller dans Firebase (étape 1.6) |
+| `npm install` | Installe les outils (une fois) |
+| `npm run dev` | Lance l'app en local avec rechargement automatique |
+| `npm test` | Lance tous les tests |
+| `npm run build` | Construit le site dans `dist/` |
 
 Données produits : © les contributeurs d'Open Food Facts, licence ODbL.

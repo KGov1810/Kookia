@@ -1,0 +1,9 @@
+/* Kookia — Écran Réglages. */
+
+.code-box {
+  font: 700 20px/1.3 ui-monospace, "SF Mono", Menlo, monospace; word-break: break-all;
+  background: var(--surface); border: 1.5px dashed var(--line); border-radius: 14px; padding: 14px; text-align: center;
+  user-select: all; -webkit-user-select: all;
+}
+
+.code-box.long { font-size: 12px; font-weight: 500; text-align: left; max-height: 120px; overflow: auto; }

@@ -1,0 +1,11 @@
+/* Kookia — Accueil : installation, connexion, foyer. */
+
+.welcome { text-align: center; padding: 24px 8px 8px; }
+
+.welcome img { width: 88px; height: 88px; border-radius: 22px; box-shadow: var(--shadow); }
+
+.welcome h1 { margin: 16px 0 8px; }
+
+.welcome p { color: var(--muted); margin: 0 auto 12px; max-width: 34ch; }
+
+.welcome .emoji { font-size: 64px; line-height: 1; }

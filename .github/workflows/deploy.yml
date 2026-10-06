@@ -1,0 +1,56 @@
+# Kookia — à chaque push : tests, puis build et mise en ligne sur GitHub Pages.
+# Si un test échoue, rien n'est mis en ligne : les téléphones gardent la version précédente.
+name: Tests et mise en ligne
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Un seul déploiement à la fois ; les versions intermédiaires en attente sont sautées,
+# celle en cours se termine (recommandation de GitHub pour Pages).
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Tests et build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Installer les dépendances
+        run: npm ci
+      - name: Lancer les tests
+        run: npm test
+      - name: Construire le site
+        run: npm run build
+      - name: Préparer GitHub Pages
+        if: github.event_name != 'pull_request' && github.ref_name == github.event.repository.default_branch
+        uses: actions/configure-pages@v6
+      - name: Envoyer le site construit
+        if: github.event_name != 'pull_request' && github.ref_name == github.event.repository.default_branch
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
+
+  deploy:
+    name: Mise en ligne
+    needs: build
+    if: github.event_name != 'pull_request' && github.ref_name == github.event.repository.default_branch
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
