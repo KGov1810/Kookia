@@ -1,5 +1,6 @@
 # Kookia
 
+
 Le stock de nourriture de la maison, partagé à deux : **frigo, congélateur, placard, fruits et légumes**. Application installée sur l'écran d'accueil de chaque iPhone depuis Safari. **Elle n'expire jamais** et ne demande ni Mac ni compte développeur Apple.
 
 - **Tout le stock** : chaque produit a un lieu (Frigo, Congélateur, Placard, Fruits & légumes) et une date adaptée. Date limite (DLC) ou « de préférence » (DDM) imprimée, date estimée pour les fruits et légumes, durée conseillée pour ce qu'on congèle, et simple ancienneté (« au placard depuis 8 mois ») pour les produits secs sans date.
