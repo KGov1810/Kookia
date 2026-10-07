@@ -117,7 +117,7 @@ test("Historique des changements", async () => {
   log(items().length === 2 && items()[0].textContent.includes('Marie a consommé Pommes'), 'Mise à jour en direct (action de l\'autre iPhone)');
   await click(sheet().querySelector('[data-action="close"]'), 350);
   await click('.tab[data-tab="reglages"]');
-  log($$('[data-action="open-history"]').some((b) => b.textContent.includes('Historique des changements (90 jours)')), 'Accès depuis les Réglages');
+  log($$('[data-action="open-history"]').length === 0, 'Plus d\'accès à l\'historique depuis les Réglages');
 
   console.log('\n— Règles Firebase pas encore mises à jour —');
   globalThis.__denyHistory = true;

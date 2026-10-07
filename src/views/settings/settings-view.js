@@ -56,8 +56,7 @@ export const settingsView = {
         </div>
       </section>
 
-      <section class="group"><h2>Foyer partagé</h2><div id="household"></div>
-        <button class="row-button" data-action="open-history">${I.history}Historique des changements (${store.HISTORY_DAYS} jours)</button></section>
+      <section class="group"><h2>Foyer partagé</h2><div id="household"></div></section>
 
       <section class="group">
         <h2>Synchronisation</h2>
