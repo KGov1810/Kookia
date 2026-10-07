@@ -19,6 +19,8 @@ test('Prix, produits jetés et statistiques', async () => {
     [F + 'produits/yaourt', prod('Yaourt', { count: 4, unitPrice: 0.5 })],
     [F + 'produits/steak', prod('Steak haché', { category: 'viande', unitPrice: 3.5 })],
     [F + 'produits/comte', prod('Comté', { category: 'fromage', count: 2 })],
+    [F + 'produits/oeufs', prod('Œufs', { category: 'oeufs', count: 10, unitPrice: 0.3, expiry: iso(20) })],
+    [F + 'produits/creme', prod('Crème fraîche', { count: 1, unitPrice: 1.6, expiry: iso(1) })],
     [F + 'mouvements/m-mois-dernier', old('achat', 'Lait', 'laitier', 1, 20, 'Marie', lastMonth)],
     [F + 'mouvements/m-ancien', old('achat', 'Riz', 'feculents', 2.5, 4, 'Kevin', longAgo)],
     [F + 'mouvements/m-pain', old('jete', 'Pain', 'boulangerie', null, 1, 'Kevin', Date.now() - 1000)]
@@ -77,13 +79,13 @@ test('Prix, produits jetés et statistiques', async () => {
   console.log('\n— Jeté —');
   await click(row('Yaourt').querySelector('.product-main'), 400);
   await click(sheet().querySelector('[data-action="discard"]'));
-  const box = () => sheet().querySelector('.discard-box');
+  const box = () => sheet().querySelector('.units-box');
   log(box()?.textContent.includes('Combien en jetez-vous ?') && box().querySelector('output').textContent === '1 sur 3', 'Plusieurs unités : on choisit combien (1 sur 3)');
-  await click(box().querySelector('[data-action="discard-plus"]'));
-  await click(box().querySelector('[data-action="discard-plus"]'));
-  log(box().querySelector('[data-action="discard-plus"]').disabled && box().querySelector('output').textContent === '3 sur 3', 'Pas plus que le stock (3 sur 3)');
-  await click(box().querySelector('[data-action="discard-minus"]'));
-  await click(box().querySelector('[data-action="discard-confirm"]'), 350);
+  await click(box().querySelector('[data-action="units-plus"]'));
+  await click(box().querySelector('[data-action="units-plus"]'));
+  log(box().querySelector('[data-action="units-plus"]').disabled && box().querySelector('output').textContent === '3 sur 3', 'Pas plus que le stock (3 sur 3)');
+  await click(box().querySelector('[data-action="units-minus"]'));
+  await click(box().querySelector('[data-action="units-confirm"]'), 350);
   log(product('Yaourt').count === 1, '2 yaourts jetés : il en reste 1');
   log(lastMove().type === 'jete' && lastMove().count === 2 && lastMove().unitPrice === 0.5, 'Mouvement « jeté » : 2 × 0,50 €');
   log(history().action === 'jete' && history().details.includes('2 sur 3') && history().details.includes('il en reste 1'), 'Historique : « a jeté », « 2 sur 3 », « il en reste 1 »');
@@ -97,8 +99,43 @@ test('Prix, produits jetés et statistiques', async () => {
   await click(sheet().querySelector('[data-action="discard"]'), 350);
   await click(row('Comté').querySelector('.product-main'), 400);
   await type(sheet().querySelector('[name="price"]'), '6');
-  await click(sheet().querySelector('[data-action="consume"]'), 350);
+  await click(sheet().querySelector('[data-action="consume"]'));
+  log(box()?.textContent.includes('Combien en consommez-vous ?') && box().querySelector('output').textContent === '1 sur 2', 'Consommé, plusieurs unités : on choisit combien, à partir de 1');
+  // Le cadre ne doit reprendre aucune classe déjà stylée ailleurs (ex. « .consume », le rond de la liste).
+  log([...box().classList].every((c) => c.startsWith('units-')), `Cadre « Combien ? » : classes propres (${box().className})`);
+  await click(box().querySelector('[data-action="units-all"]'));
+  log(box().querySelector('output').textContent === '2 sur 2' && box().querySelector('[data-action="units-all"]').getAttribute('aria-pressed') === 'true', 'Raccourci « Tout (2) »');
+  await click(box().querySelector('[data-action="units-confirm"]'), 350);
   log(!product('Comté') && lastMove().type === 'consomme' && lastMove().count === 2 && lastMove().unitPrice === 6, 'Consommé (tout) : 2 × 6 € avec le prix saisi dans la fiche');
+  log(history().action === 'suppression' && history().details[0] === 'tout consommé', 'Tout consommer : historique « tout consommé »');
+
+  console.log('\n— Consommer ou congeler une partie —');
+  await click(row('Œufs').querySelector('.product-main'), 400);
+  await click(sheet().querySelector('[data-action="consume"]'));
+  await click(box().querySelector('[data-action="units-plus"]'));
+  log(box().querySelector('[data-action="units-confirm"]').textContent.trim() === 'Consommer 2', 'Bouton « Consommer 2 »');
+  await click(box().querySelector('[data-action="units-confirm"]'), 350);
+  log(product('Œufs').count === 8 && lastMove().type === 'consomme' && lastMove().count === 2 && lastMove().unitPrice === 0.3, '2 œufs sur 10 consommés : 0,60 € dans les stats, il en reste 8');
+  log(history().action === 'consommation' && history().details.includes('2 sur 10') && history().details.includes('il en reste 8'), 'Historique : « 2 sur 10 », « il en reste 8 »');
+  log($('#toast').textContent.includes('Œufs : 2 consommés, il en reste 8'), 'Message : « Œufs : 2 consommés, il en reste 8 »');
+  const eggs = () => docs('produits').filter((d) => d.name === 'Œufs');
+  const freezeThree = async () => {
+    await click(row('Œufs').querySelector('.product-main'), 400);
+    await click(sheet().querySelector('[data-action="freeze"]'));
+    await click(box().querySelector('[data-action="units-plus"]'));
+    await click(box().querySelector('[data-action="units-plus"]'));
+    await click(box().querySelector('[data-action="units-confirm"]'), 350);
+  };
+  const movesBeforeFreeze = moves().length;
+  await freezeThree();
+  const frozen = () => eggs().find((d) => d.location === 'congelateur');
+  log(eggs().length === 2 && eggs().find((d) => d.location === 'frigo').count === 5 && frozen()?.count === 3 && frozen().dateKind === 'congele' && frozen().frozenAt === iso(0), 'Congeler 3 sur 8 : 5 au frigo, 3 sur une ligne à part au congélateur');
+  log(moves().length === movesBeforeFreeze, 'Congeler n\'est ni un achat ni une consommation');
+  log(history().action === 'congelation' && history().details.includes('3 sur 8'), 'Historique : « a congelé », « 3 sur 8 »');
+  log($('#toast').textContent.includes('Œufs : 3 au congélateur'), 'Message : « Œufs : 3 au congélateur… »');
+  await click('#toast button', 40);
+  log(eggs().length === 1 && eggs()[0].count === 8 && eggs()[0].location === 'frigo' && history().details[0] === 'congélation annulée', 'Annuler : 8 œufs au frigo, plus de ligne au congélateur');
+  await freezeThree();
 
   console.log('\n— Ticket de caisse avec prix —');
   w.HTMLCanvasElement.prototype.getContext = () => ({ fillRect() {}, drawImage() {}, set fillStyle(v) {} });
@@ -149,9 +186,17 @@ test('Prix, produits jetés et statistiques', async () => {
   await click('.tab[data-tab="stats"]', 80);
   log($('h1').textContent === 'Statistiques' && $('[data-action="stats-period"][aria-pressed="true"]').textContent === '12 mois', 'Écran Statistiques, « 12 mois » par défaut');
   const spent = () => $('.stats-spent strong').textContent;
+  const euro = (n) => n.toFixed(2).replace('.', ',') + ' €';
+  const stockTotal = docs('produits').reduce((sum, d) => sum + (d.unitPrice ?? 0) * d.count, 0);
+  log($('.stock-total strong').textContent === euro(Math.round(stockTotal * 100) / 100), `Valeur du stock : ${$('.stock-total strong').textContent}`);
+  const place = (label) => $$('.stock-place').find((p) => p.textContent.includes(label))?.querySelector('b').textContent;
+  log(place('Congélateur') === '0,90 €', 'Détail par lieu : congélateur 0,90 € (3 œufs)');
+  log($('.stock-soon').textContent.replace(/\s+/g, ' ').includes('1,60 € à consommer vite (1 produit)'), 'À consommer vite : 1,60 € (la crème)');
+  log(!$('.stock-unpriced'), 'Tous les produits en stock ont un prix : pas de mention « sans prix »');
+  log($('.stats-period-title').textContent === 'Sur la période', 'La période ne concerne que la suite de l\'écran');
   // 2 × 1,15 + 3,58 + 2,10 + 1,79 + 20 (mois dernier) = 29,77 ; le riz d'il y a 14 mois n'est pas compté.
   log(spent() === '29,77 €', `Dépensé sur 12 mois : ${spent()}`);
-  log($('.stats-out.consumed b').textContent === '12,50 €' && $('.stats-out.wasted b').textContent === '4,50 €', 'Consommé 12,50 € (yaourt + comté), jeté 4,50 € (yaourts + steak)');
+  log($('.stats-out.consumed b').textContent === '13,10 €' && $('.stats-out.wasted b').textContent === '4,50 €', 'Consommé 13,10 € (yaourt, comté, œufs), jeté 4,50 € (yaourts, steak)');
   log(text().includes('26 % de ce qui est sorti du stock a été jeté.'), 'Part jetée : 26 %');
   log(text().includes('Sans prix, non comptés : 1 produit jeté.'), 'Produit sans prix signalé (pain)');
   log($$('.month-col').length === 12 && $('.month-col[aria-pressed="true"]').dataset.value === monthKey(now), '12 mois, le mois en cours sélectionné');
@@ -180,6 +225,13 @@ test('Prix, produits jetés et statistiques', async () => {
   log(spent() === '39,77 €' && $$('.month-col').length === 15, 'Tout : le riz d\'il y a 14 mois compté (39,77 €), 15 mois');
   await click('[data-action="stats-period"][data-value="mois"]', 60);
   log(spent() === '9,77 €' && !text().includes('Mois par mois'), 'Ce mois : 9,77 €, pas de graphique sur un seul mois');
+
+  await click('[data-action="stats-soon"]');
+  log($('h1').textContent === 'Stock', 'Toucher « à consommer vite » ouvre le stock');
+  await click('.tab[data-tab="stats"]');
+  await type('[data-stats-filter="location"]', 'congelateur', 'change');
+  log(place('Congélateur') === '0,90 €' && $('.stock-total strong').textContent === euro(Math.round(stockTotal * 100) / 100), 'La carte du stock ignore les filtres');
+  await click('[data-action="stats-reset"]');
 
   console.log('\n— Règles Firebase pas encore mises à jour —');
   globalThis.__denyStats = true;

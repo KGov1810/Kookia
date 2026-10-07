@@ -4,6 +4,7 @@ import { cleanPrice, formatEuro, lineAmount, parsePrice, priceInputValue } from 
 import { monthKey, monthLabel, periodMonths, periodStart } from '../../src/services/stats/periods.js';
 import { categoryTotals, filterMovements, monthlyTotals, peopleIn, summarize, topWasted } from '../../src/services/stats/stats.js';
 import { priceKeys } from '../../src/data/store/prices.js';
+import { stockValue } from '../../src/services/stats/stock-value.js';
 
 describe('prix', () => {
   it.each([
@@ -128,5 +129,30 @@ describe('mémoire des prix', () => {
     expect(priceKeys({ name: 'lait DEMI ecreme' })).toEqual(['nom:demi ecreme lait']);
     expect(priceKeys({ name: 'Pommes' })).toEqual(priceKeys({ name: 'pomme' }));
     expect(priceKeys({ name: '' })).toEqual([]);
+  });
+});
+
+describe('valeur du stock', () => {
+  const today = new Date(2026, 9, 7);
+  const p = (name, location, unitPrice, count, expiry, dateKind = 'dlc') => ({ name, location, unitPrice, count, expiry, dateKind, createdAt: today.getTime() });
+  const products = [
+    p('Yaourt', 'frigo', 0.5, 4, '2026-10-08'),          // à consommer vite (demain)
+    p('Comté', 'frigo', 4.2, 1, '2026-11-01'),
+    p('Steak', 'congelateur', 3.5, 2, '2027-03-01', 'congele'),
+    p('Riz', 'placard', null, 1, '', 'aucune'),            // sans prix
+    p('Lait périmé', 'frigo', 1, 1, '2026-10-01')           // périmé : compté dans le total, pas « à consommer vite »
+  ];
+  it('total, détail par lieu, à consommer vite, produits sans prix', () => {
+    const v = stockValue(products, 2, today);
+    expect(v.total).toBe(14.2);
+    expect(v.places).toEqual([
+      { location: 'frigo', amount: 7.2, count: 3 },
+      { location: 'congelateur', amount: 7, count: 1 },
+      { location: 'placard', amount: 0, count: 1 }
+    ]);
+    expect([v.soon, v.soonCount, v.unpriced, v.count]).toEqual([2, 1, 1, 5]);
+  });
+  it('stock vide', () => {
+    expect(stockValue([], 2, today)).toEqual({ total: 0, soon: 0, soonCount: 0, unpriced: 0, count: 0, places: [] });
   });
 });

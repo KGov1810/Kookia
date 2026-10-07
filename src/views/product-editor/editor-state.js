@@ -18,7 +18,7 @@ export function createEditorContext({ product = null, draft = null, mode = 'manu
   const view = {
     dateTouched: !isNew, locationTouched: !isNew || Boolean(draft?.location), categoryTouched: !isNew || Boolean(draft?.category),
     busy: '', info: '', error: '', sameProductId: null,
-    priceText: S.priceInputValue(p.unitPrice), priceTouched: false, priceSuggested: false, discard: null
+    priceText: S.priceInputValue(p.unitPrice), priceTouched: false, priceSuggested: false, take: null
   };
   if (isNew && !draft?.location && p.name) {
     // Fruit ou légume reconnu (ex. rangé depuis la liste de courses) : son lieu habituel, date estimée.

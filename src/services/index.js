@@ -19,6 +19,7 @@ export * from './recipes/recipe-filters.js';
 export * from './stats/money.js';
 export * from './stats/periods.js';
 export * from './stats/stats.js';
+export * from './stats/stock-value.js';
 export * from './stock/categorization.js';
 export * from './stock/matching.js';
 export * from './stock/stock-dates.js';

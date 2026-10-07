@@ -2,6 +2,41 @@
 
 .stats-period { margin: 0 0 4px; }
 
+/* Valeur du stock en ce moment : total, détail par lieu, montant à consommer vite. */
+.stats-stock { background: var(--surface); border-radius: 18px; box-shadow: var(--shadow); padding: 14px 16px; margin: 4px 0 8px; }
+
+.stats-stock p { margin: 0; }
+
+.stock-total { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+
+.stock-total span { font-size: 15px; font-weight: 600; color: var(--muted); }
+
+.stock-total strong { font: 800 28px/1.1 var(--font-round); font-variant-numeric: tabular-nums; }
+
+.stock-places { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; margin-top: 12px; }
+
+.stock-place { display: grid; grid-template-columns: auto 1fr; align-items: center; column-gap: 8px; min-width: 0; }
+
+.stock-place svg { grid-row: span 2; width: 20px; height: 20px; color: var(--muted); }
+
+.stock-place span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; color: var(--muted); }
+
+.stock-place b { font-size: 16px; font-weight: 650; font-variant-numeric: tabular-nums; }
+
+.stock-soon {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%;
+  margin-top: 12px; padding: 10px 12px; border-radius: 12px;
+  background: var(--apricot-soft); color: var(--ink); font-size: 15px; text-align: left;
+}
+
+.stock-soon b { color: var(--apricot); font-variant-numeric: tabular-nums; }
+
+.stock-soon svg { flex: none; width: 18px; height: 18px; color: var(--muted); }
+
+.stats-stock .stock-unpriced { margin-top: 10px; padding: 0; }
+
+.stats-period-title { margin-top: 18px; }
+
 /* Filtres : pastilles sur une ligne, comme les lieux de l'écran Stock. */
 .stats-filters { margin: 4px -16px 0; padding: 4px 16px 4px; }
 

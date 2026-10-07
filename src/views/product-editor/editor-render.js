@@ -8,8 +8,8 @@ import * as store from '../../data/store/index.js';
 import { hasClaudeKey } from '../../data/store/selectors.js';
 import * as S from '../../services/index.js';
 import { dateSection } from './editor-date-section.js';
-import { discardSection } from './editor-discard.js';
 import { priceField } from './editor-price.js';
+import { unitsButton } from './editor-units.js';
 
 export function renderEditor(ctx) {
   const { p, view, isNew } = ctx;
@@ -57,9 +57,9 @@ export function renderEditor(ctx) {
         <section class="group">
           ${p.addedBy ? html`<div class="field"><span>Ajouté par</span><span class="muted">${p.addedBy}</span></div>` : ''}
           <button class="row-button" data-action="to-shopping">${I.cart}Ajouter à la liste de courses</button>
-          ${p.location !== 'congelateur' && p.location !== 'placard' ? html`<button class="row-button" data-action="freeze">${I.snow}Congeler (se garde plusieurs mois)</button>` : ''}
-          <button class="row-button" data-action="consume">${I.check}Consommé : retirer du stock</button>
-          ${discardSection(ctx)}
+          ${p.location !== 'congelateur' && p.location !== 'placard' ? unitsButton(ctx, 'freeze') : ''}
+          ${unitsButton(ctx, 'consume')}
+          ${unitsButton(ctx, 'discard')}
         </section>`}
     </div>
     ${view.busy ? html`<div class="busy"><span class="spinner"></span><p>${view.busy}</p></div>` : ''}`;

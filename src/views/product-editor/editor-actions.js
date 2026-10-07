@@ -6,10 +6,10 @@ import * as R from '../../data/reference/index.js';
 import * as store from '../../data/store/index.js';
 import * as S from '../../services/index.js';
 import { openScanner } from '../scanner/scanner.js';
-import { discardActions } from './editor-discard.js';
 import { priceIsInvalid } from './editor-price.js';
 import { handleBarcode, handleDatePhoto, handleProductPhoto } from './editor-recognition.js';
 import { setKind, setLocation } from './editor-state.js';
+import { unitsActions } from './editor-units.js';
 
 /** Actions des boutons de la fiche, liées au produit en cours. */
 export function editorActions(ctx) {
@@ -39,16 +39,6 @@ export function editorActions(ctx) {
       setKind(ctx, el.dataset.value);
       ctx.sheet.update();
     },
-    freeze: () => {
-      // Un produit qui va périmer gagne plusieurs mois au congélateur.
-      p.location = 'congelateur';
-      p.dateKind = 'congele';
-      p.frozenAt = S.isoInDays(0);
-      p.expiry = S.freezerLimit(p.category, p.frozenAt);
-      store.saveProduct(p);
-      toast(`${p.name} : au congélateur, idéalement avant ${S.formatDate(p.expiry, { month: 'long', year: 'numeric' })}`);
-      ctx.sheet.close();
-    },
     'remove-photo': () => {
       p.image = '';
       p.imageUrl = '';
@@ -67,12 +57,6 @@ export function editorActions(ctx) {
       view.error = '';
       ctx.sheet.update();
     },
-    consume: () => {
-      const price = view.priceTouched ? { unitPrice: p.unitPrice } : {};
-      const removed = store.removeProducts([p.id], { reason: 'tout consommé', movement: 'consomme', ...price });
-      ctx.sheet.close();
-      if (removed.length) toast(`${removed[0].name} : retiré du stock`, 'Annuler', () => store.restoreProducts(removed));
-    },
     'add-to-same': () => {
       const same = store.productById(view.sameProductId);
       if (!same) return;
@@ -82,7 +66,7 @@ export function editorActions(ctx) {
       toast(`${same.name} : ${count} en stock`);
       ctx.sheet.close();
     },
-    ...discardActions(ctx)
+    ...unitsActions(ctx)
   };
 }
 

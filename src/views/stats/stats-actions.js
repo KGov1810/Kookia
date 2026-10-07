@@ -1,5 +1,6 @@
 // Kookia — Actions de l'écran Statistiques : période, mois touché, filtres.
 
+import { showTab } from '../app/router.js';
 import { ui } from '../app/ui-state.js';
 import { statsView } from './stats-view.js';
 
@@ -23,6 +24,7 @@ export const statsActions = {
     redraw();
     window.scrollTo(0, 0);
   },
+  'stats-soon': () => showTab('frigo'),
   'stats-reset': () => {
     Object.assign(ui.stats, { what: '', location: '', person: '' });
     redraw();

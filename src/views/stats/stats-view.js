@@ -7,15 +7,19 @@ import * as S from '../../services/index.js';
 import { ui } from '../app/ui-state.js';
 import { categorySection, monthSection } from './stats-charts.js';
 import { filterFields, periodPicker } from './stats-filters.js';
+import { stockCard } from './stats-stock.js';
 import { emptyState, summaryCard, unpricedNote, wastedSection } from './stats-summary.js';
 
-// Changements qui modifient l'écran (les autres, comme le stock, ne le concernent pas).
+// Changements qui modifient la carte du stock, puis le reste de l'écran (période, filtres, mouvements).
+const STOCK_REDRAW = ['products', 'sync', 'time', 'settings'];
 const REDRAW = ['movements', 'filters', 'sync', 'time', 'settings'];
 
 export const statsView = {
   render() {
     return html`
       <header class="top"><h1>Statistiques</h1></header>
+      <div id="stats-stock"></div>
+      <h2 class="section stats-period-title">Sur la période</h2>
       <div class="segmented stats-period" id="stats-period" role="group" aria-label="Période"></div>
       <div id="stats-body"></div>`;
   },
@@ -25,6 +29,7 @@ export const statsView = {
   update(what) {
     // Mouvements chargés à la demande, pour la période choisie seulement.
     store.watchMovements(S.periodStart(ui.stats.period));
+    if (!what || STOCK_REDRAW.includes(what)) setHTML('#stats-stock', stockCard());
     if (what && !REDRAW.includes(what)) return;
     setHTML('#stats-period', periodPicker());
     setHTML('#stats-body', body());

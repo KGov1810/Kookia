@@ -71,8 +71,8 @@ export function removeProducts(ids, { log = true, reason = '', movement = '', un
 }
 
 /** « Annuler » : remet les produits tels qu'ils étaient. */
-export function restoreProducts(products) {
-  cancelLastMovements(products.map((p) => p.id));
+export function restoreProducts(products, { movements = true } = {}) {
+  if (movements) cancelLastMovements(products.map((p) => p.id));
   products.forEach((p) => {
     logChange({ scope: 'stock', action: 'annulation', name: p.name, itemId: p.id, details: [quantityLabel(p) ? `remis en stock : ${quantityLabel(p)}` : 'remis en stock'] });
     saveProduct(p, { log: false });

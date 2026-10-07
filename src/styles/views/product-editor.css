@@ -32,18 +32,28 @@
 
 .price-field input { font-variant-numeric: tabular-nums; }
 
-.discard-box { border-top: 1px solid var(--line); background: var(--tomato-soft); }
+.units-box { border-top: 1px solid var(--line); background: var(--herb-soft); }
 
-.discard-box .field { border-top: 0; flex-wrap: wrap; row-gap: 4px; }
+.units-box.units-discard { background: var(--tomato-soft); }
 
-.discard-box .stepper output { min-width: 72px; }
+.units-box .field { border-top: 0; flex-wrap: wrap; row-gap: 8px; }
 
-.discard-box .row-actions { padding: 4px 16px 16px; }
+.units-box .field > span { flex: 1 0 100%; }
 
-.danger-fill {
+.units-box .stepper output { min-width: 72px; }
+
+.units-box .chip { margin-left: auto; }
+
+.units-box .row-actions { padding: 4px 16px 16px; }
+
+.primary-fill, .danger-fill {
   display: flex; align-items: center; justify-content: center; gap: 8px;
   min-height: 48px; padding: 10px 16px; border-radius: 14px;
-  background: var(--tomato); color: var(--on-accent); font-weight: 650;
+  background: var(--herb); color: var(--on-accent); font-weight: 650; white-space: nowrap;
 }
 
-.danger-fill svg { width: 20px; height: 20px; }
+.danger-fill { background: var(--tomato); }
+
+.primary-fill svg, .danger-fill svg { width: 20px; height: 20px; }
+
+.units-box .stepper button, .units-box .chip { background: var(--surface); }
