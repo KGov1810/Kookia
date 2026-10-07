@@ -5,6 +5,7 @@ import { onboardingActions } from '../onboarding/onboarding-actions.js';
 import { recipesActions } from '../recipes/recipes-actions.js';
 import { settingsActions } from '../settings/settings-actions.js';
 import { shoppingActions } from '../shopping/shopping-actions.js';
+import { statsActions } from '../stats/stats-actions.js';
 import { stockActions } from '../stock/stock-actions.js';
 
 let actions = null;
@@ -15,6 +16,7 @@ export function getAction(name) {
     ...stockActions,
     ...recipesActions,
     ...shoppingActions,
+    ...statsActions,
     ...settingsActions,
     ...onboardingActions,
     'open-history': () => openHistory()

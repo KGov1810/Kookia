@@ -4,6 +4,7 @@ import { longDate } from '../../components/product-visuals.js';
 import { hasClaudeKey } from '../../data/store/selectors.js';
 import { state } from '../../data/store/state.js';
 import * as S from '../../services/index.js';
+import { applyKnownPrice } from './editor-price.js';
 import { applyReadDate, setLocation } from './editor-state.js';
 
 const claude = () => ({ key: state.settings.claudeKey, model: state.settings.model });
@@ -56,6 +57,7 @@ export function handleBarcode(ctx, code) {
     if (S.dateKindOf(p) === 'congele') p.expiry = S.freezerLimit(p.category, p.frozenAt);
     view.sameProductId = state.products.find((x) => x.id !== p.id && x.barcode
       && S.normalizeBarcode(x.barcode) === S.normalizeBarcode(digits))?.id ?? null;
+    applyKnownPrice(ctx);
     view.info = 'Produit trouvé. Indiquez le nombre et la date de péremption (ou touchez « Lire la date »).';
   });
 }

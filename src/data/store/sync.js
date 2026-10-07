@@ -6,6 +6,8 @@ import { errorMessage } from './errors.js';
 import { purgeHistory } from './history.js';
 import { firebaseConfig } from './household-codes.js';
 import { toProduct, toRecipe, toShoppingItem } from './mappers.js';
+import { stopMovements } from './movements.js';
+import { listenPrices } from './prices.js';
 import { rememberRecipeLinks } from './recipes.js';
 import { emit, state } from './state.js';
 
@@ -50,7 +52,8 @@ export async function start() {
   unsubscribers = [
     listen('produits', 'products', toProduct),
     listen('courses', 'shopping', toShoppingItem),
-    listen('recettes', 'recipes', toRecipe)
+    listen('recettes', 'recipes', toRecipe),
+    listenPrices(code)
   ];
   state.connected = true;
   emit('sync');
@@ -59,6 +62,7 @@ export async function start() {
 export function stop() {
   unsubscribers.forEach((u) => u());
   unsubscribers = [];
+  stopMovements();
   state.connected = false;
 }
 

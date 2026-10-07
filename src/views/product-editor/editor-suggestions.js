@@ -5,6 +5,7 @@ import { thumb } from '../../components/product-visuals.js';
 import * as R from '../../data/reference/index.js';
 import * as S from '../../services/index.js';
 import { dateSection } from './editor-date-section.js';
+import { suggestPrice } from './editor-price.js';
 import { setKind, setLocation } from './editor-state.js';
 
 /**
@@ -43,4 +44,5 @@ export function suggestFromName(ctx) {
   if (S.dateKindOf(p) === 'congele') p.expiry = S.freezerLimit(p.category, p.frozenAt);
   const section = ctx.sheet.panel.querySelector('#date-section');
   if (changed && section) section.outerHTML = fmt(dateSection(ctx));
+  suggestPrice(ctx);
 }

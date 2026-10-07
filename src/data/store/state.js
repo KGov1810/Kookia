@@ -13,6 +13,10 @@ export const state = {
   pending: false,
   error: null,
   historyError: null,   // historique refusé (règles Firestore pas encore mises à jour)
+  movements: [],        // mouvements de la période affichée dans Stats (chargés à la demande)
+  movementsLoaded: false,
+  movementsError: null, // statistiques refusées (règles Firestore pas encore mises à jour)
+  prices: {},           // dernier prix payé, par code-barres ou par nom
   lastSync: null
 };
 

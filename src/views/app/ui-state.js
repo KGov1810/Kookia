@@ -1,6 +1,7 @@
 // Kookia — État de l'interface (onglet, filtres, recherche).
 
 import { state } from '../../data/store/state.js';
+import { DEFAULT_STATS_PERIOD } from '../../services/stats/periods.js';
 
 export const screen = document.getElementById('screen');
 
@@ -14,6 +15,7 @@ export const ui = {
   favoritesOnly: false,
   generating: false,
   recipeNote: null,
+  stats: { period: DEFAULT_STATS_PERIOD, month: '', what: '', location: '', person: '' }, // écran Statistiques
   onboarding: { text: '', joinText: '', name: '', invite: '', message: null, busy: false }
 };
 

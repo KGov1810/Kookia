@@ -2,8 +2,9 @@
 
 import { pickImage } from '../../components/platform.js';
 import { openSheet } from '../../components/sheet.js';
+import * as S from '../../services/index.js';
 import { addPhoto, analyze, confirmItems } from './receipt-analysis.js';
-import { renderReceipt } from './receipt-render.js';
+import { receiptTotal, renderReceipt } from './receipt-render.js';
 
 /**
  * Photos du ticket → analyse par Claude → vérification → ajout au stock.
@@ -53,6 +54,12 @@ export function openReceipt(firstFilePromise) {
       if (t.dataset.field === 'name') item.name = t.value;
       if (t.dataset.field === 'quantity') item.quantity = t.value;
       if (t.dataset.field === 'location') item.location = t.value;
+      if (t.dataset.field === 'price') {
+        item.priceText = t.value;
+        item.price = S.parsePrice(t.value);
+        const total = ctx.sheet.panel.querySelector('#receipt-total');
+        if (total) total.textContent = receiptTotal(ctx);
+      }
     }
   });
 

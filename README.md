@@ -9,8 +9,9 @@ Le stock de nourriture de la maison, partagé à deux : **frigo, congélateur, p
 - **Alertes** : les produits à consommer vite sont mis en avant à chaque ouverture, avec une pastille sur l'icône (voir les limites plus bas).
 - **Recettes** : l'app montre d'abord vos recettes déjà enregistrées réalisables avec le stock actuel (gratuit). Sinon, Claude en propose 5 nouvelles qui utilisent d'abord les produits qui vont périmer et ceux oubliés depuis longtemps, complétés par le reste du stock et la liste de courses. Filtres : nombre de personnes, végétarien ou vegan, **origine** (cuisines du monde, envie libre comme « nouilles » ou « couscous »), léger, difficulté, temps total, batch cooking. Calories estimées par portion, quantités recalculables selon le nombre de portions.
 - **Recettes toujours à jour** : un produit racheté est reconnu dans les anciennes recettes grâce à son code-barres (ou, à défaut, à son nom).
-- **Produits consommés** : le rond à gauche de chaque produit, la fiche du produit, ou « J'ai cuisiné cette recette ».
-- **Partage en temps réel** entre les deux iPhone (stock, liste de courses et recettes), via une base Firebase gratuite. Fonctionne aussi hors ligne.
+- **Produits consommés ou jetés** : le rond à gauche de chaque produit, la fiche du produit (*Consommé* ou *Jeté*, en choisissant combien), ou « J'ai cuisiné cette recette ».
+- **Prix et statistiques** : un prix facultatif par produit, relevé automatiquement sur les tickets de caisse. L'onglet **Stats** montre ce qui a été dépensé, consommé et jeté, mois par mois et par catégorie, avec des filtres (rayon, catégorie, lieu, personne).
+- **Partage en temps réel** entre les deux iPhone (stock, liste de courses, recettes et statistiques), via une base Firebase gratuite. Fonctionne aussi hors ligne.
 
 Tout est gratuit, sauf les fonctions Claude (facultatives, quelques centimes par usage).
 
@@ -98,13 +99,16 @@ Le nombre de jours de prévenance (0 à 7, 2 par défaut) se règle dans **Régl
 - **Congeler** : dans la fiche d'un produit du frigo qui va périmer, *Congeler* le passe au congélateur avec une durée conseillée.
 - **Nombre et poids** : dans la fiche, **Nombre** (boutons − et +) indique combien d'unités vous avez, **Poids ou contenance** la taille de chacune. Deux sachets de 2 kg de pommes de terre : nombre 2, poids « 2 kg », affiché « 2 × 2 kg » avec une pastille ×2. Un pack scanné « 4 x 125 g » est compris comme 4 pots de 125 g.
 - **Scanner un produit déjà en stock** : l'app le signale et propose de l'ajouter au produit existant (même date de péremption) plutôt que d'en créer un second.
-- **Ticket de caisse** : **+** → *Scanner un ticket de caisse*. Photographiez le ticket (plusieurs photos de haut en bas s'il est long, ou une capture de commande en ligne) → **Lire le ticket**. Vérifiez la liste : corrigez un nom, le nombre, le poids ou le **lieu** proposé, décochez ce qui ne va pas en stock, puis **Ajouter**. Placard, congélateur, fruits et légumes n'ont pas besoin de date ; les produits du frigo arrivent dans la section **Date à compléter** (compteur « ? ») : touchez-les pour indiquer la date, ou « Lire la date » pour la photographier. Les articles de la liste de courses retrouvés sur le ticket en sont retirés. Nécessite une clé Claude.
+- **Ticket de caisse** : **+** → *Scanner un ticket de caisse*. Photographiez le ticket (plusieurs photos de haut en bas s'il est long, ou une capture de commande en ligne) → **Lire le ticket**. Vérifiez la liste : corrigez un nom, le nombre, le poids, le **prix** (montant de la ligne, toutes unités comprises) ou le **lieu** proposé, décochez ce qui ne va pas en stock, puis **Ajouter**. Le total des prix lus est affiché pour le comparer au ticket (les produits non alimentaires n'y sont pas). Placard, congélateur, fruits et légumes n'ont pas besoin de date ; les produits du frigo arrivent dans la section **Date à compléter** (compteur « ? ») : touchez-les pour indiquer la date, ou « Lire la date » pour la photographier. Les articles de la liste de courses retrouvés sur le ticket en sont retirés. Nécessite une clé Claude.
 - **Consommé** : touchez le rond à gauche d'un produit. S'il y en a plusieurs, une seule unité est retirée (« il en reste 1 ») ; le produit disparaît à la dernière. Un bouton **Annuler** apparaît quelques secondes. Pour tout retirer d'un coup : fiche du produit → *Consommé : retirer du stock*.
+- **Jeté** : fiche du produit → *Jeté : retirer du stock*. S'il y en a plusieurs, choisissez combien partent à la poubelle (− et +), puis **Jeter**. **Annuler** reste possible quelques secondes. Le rond de la liste veut toujours dire « consommé ».
+- **Prix** : dans la fiche, *Prix à l'unité* est facultatif (« 2,49 » ou « 2.49 »). Pour plusieurs unités, le total s'affiche dessous (« Soit 4,98 € pour 2 »). Quand vous ajoutez un produit déjà acheté (même code-barres ou même nom), le dernier prix payé est proposé : vérifiez-le. Les fruits et légumes de la grille reprennent eux aussi le dernier prix connu, modifiable ensuite dans leur fiche. Avec un ticket de caisse, les prix sont remplis tout seuls.
+- **Stats** : l'onglet montre, pour la période choisie (*Ce mois*, *3 mois*, *12 mois* par défaut, *Tout*), ce qui a été **dépensé** (achats), **consommé** et **jeté**, ainsi que la part jetée de ce qui est sorti du stock. En dessous : un graphique **mois par mois** (touchez un mois pour voir ses montants), les **dépenses par catégorie** (touchez une ligne pour filtrer sur cette catégorie) et les **produits les plus jetés**. Les pastilles en haut filtrent par rayon ou catégorie, par lieu et par personne. Les produits sans prix ne sont pas comptés : l'écran indique combien il y en a.
 - **Racheter** : dans la fiche d'un produit, *Ajouter à la liste de courses*.
 - **Recettes** : choisissez **pour combien de personnes** (choix mémorisé), et si besoin **Végétarien**, **Vegan** ou **Léger** (500 kcal maximum par portion, seuil réglable dans Réglages → Recettes). **Origine** ouvre un sélecteur : cochez une ou plusieurs cuisines (italienne, japonaise, maghrébine…, ou *Tour du monde* pour varier), et/ou décrivez votre envie dans « Envie de… ». Avec une origine ou une envie, Claude peut prévoir jusqu'à 6 ingrédients à acheter par recette pour rester fidèle à l'originale (2 sinon). Les produits à consommer vite sont présélectionnés (*Choisir les produits* pour changer). La section **Déjà dans vos recettes** liste les recettes enregistrées réalisables avec le stock actuel (au plus deux ingrédients à se procurer), celles qui utilisent les produits à consommer vite en premier. Si aucune ne convient, **Proposer 5 nouvelles recettes**. Dans une recette : ajouter aux courses ce qui manque, favori (étoile), partager, **J'ai cuisiné cette recette** (retire une unité de chaque produit utilisé).
 - **Dans une recette**, les boutons **Portions** − et + recalculent les quantités (les temps de cuisson restent indicatifs) ; « ajouter aux courses » et « partager » suivent ce nombre. Les calories sont une **estimation** de Claude par portion.
 - Chaque ingrédient indique où il se trouve : *Au frigo*, *Au placard*, *Au congélateur*… (le produit d'origine), avec *(même code-barres)* pour un produit racheté ou *(produit similaire)* s'il est retrouvé par son nom (à vérifier), sinon *Sur la liste de courses* ou *À acheter*. Pour profiter du rapprochement par code-barres, ajoutez vos produits en les scannant.
-- **Historique** : bouton horloge en haut de l'écran Stock, ou Réglages → *Historique des changements*. Les actions sont groupées par jour, les plus récentes en premier, avec le prénom, l'heure et le détail des modifications (« Nombre : 2 → 3 », « Lieu : Frigo → Congélateur »). Filtres par type (Stock, Courses, Recettes) et par personne. Cocher ou décocher un article de courses n'est pas noté. Les entrées de plus de 90 jours sont supprimées automatiquement. C'est une consultation : on ne restaure rien depuis l'historique.
+- **Historique** : bouton horloge en haut de l'écran Stock (accès uniquement depuis cet écran). Les actions sont groupées par jour, les plus récentes en premier, avec le prénom, l'heure et le détail des modifications (« Nombre : 2 → 3 », « Lieu : Frigo → Congélateur »). Filtres par type (Stock, Courses, Recettes) et par personne. Cocher ou décocher un article de courses n'est pas noté. Les entrées de plus de 90 jours sont supprimées automatiquement. C'est une consultation : on ne restaure rien depuis l'historique.
 - **Courses** : tapez l'article et, si besoin, le **nombre** à acheter dans « Qté » (chiffres uniquement). Pour préciser un poids, écrivez-le avec l'article : « Farine 1 kg ». Les ingrédients ajoutés depuis une recette suivent la même règle (« Pâtes (400 g) »). Touchez le rond pour cocher, touchez le nom pour modifier. Ajouter un article déjà présent avec un nouveau nombre met simplement sa quantité à jour. Si l'article est déjà en stock, l'app l'indique (« En stock : 1 au placard ») pour éviter d'acheter en double. Une fois acheté, l'icône bocal le range dans le stock : « Farine 1 kg », nombre 2, devient nombre 2 et poids « 1 kg ».
 
 ## Passer de « Frigo partagé » à Kookia
@@ -140,6 +144,8 @@ Si vous avez déjà publié les règles Firebase de la version avec l'historique
 
 Aucune donnée n'est perdue : ni le stock, ni les recettes, ni la clé Claude.
 
+> **Version avec les prix et les statistiques : règles Firebase à recoller.** Collez le nouveau fichier `firestore.rules` dans Firebase → Firestore Database → onglet **Règles** → **Publier**. Il autorise deux nouvelles collections : `mouvements` (achats, consommations et produits jetés, lisibles, ajoutés ou effacés par « Annuler », jamais modifiés) et `prix` (le dernier prix payé par produit). Tant que ce n'est pas fait, l'app fonctionne normalement, mais rien n'est noté pour les statistiques et l'onglet Stats l'explique.
+
 > Si une version demande de mettre à jour les règles Firebase (c'est indiqué dans ses notes), collez le nouveau fichier `firestore.rules` dans Firebase → Firestore Database → onglet **Règles** → **Publier**.
 
 ## Limites connues
@@ -155,6 +161,8 @@ Aucune donnée n'est perdue : ni le stock, ni les recettes, ni la clé Claude.
 - **Catégories proposées** : la proposition d'après le nom repose sur une liste de mots courants ; elle peut se tromper ou ne rien proposer pour un produit original. Les produits enregistrés avant l'arrivée des catégories détaillées ont été reclassés automatiquement d'après leur nom ; vérifiez-en quelques-uns.
 - **Produits secs** : la section « Oubliés depuis longtemps » se base sur la date d'ajout dans l'app, pas sur la date d'achat réelle des produits déjà présents avant.
 - **Calories** : estimation de Claude, à environ 20 % près. Les recettes créées avant cette fonction n'ont ni calories ni régime : elles sont masquées quand un filtre Végétarien, Vegan, Léger ou une cuisine est choisi (l'« Envie de… », elle, cherche dans le titre et les ingrédients de toutes les recettes).
+- **Statistiques** : elles commencent à la mise à jour ; les achats et consommations d'avant ne sont pas connus, et les produits déjà en stock n'ont pas de prix (ajoutez-le dans leur fiche si vous voulez qu'ils comptent). Les mouvements sont gardés sans limite de durée. Ils sont écrits par les iPhone eux-mêmes : un iPhone pas encore mis à jour ne note rien. Changer le nombre à la main dans la fiche est une correction, pas un achat ni une consommation. Un produit ajouté par erreur puis retiré compte comme acheté puis consommé ou jeté.
+- **Prix** : un prix par produit, celui de la dernière fois. Si vous ajoutez des unités à un produit existant avec un autre prix, c'est le nouveau prix qui compte pour tout le produit. Les prix lus sur un ticket peuvent comporter des erreurs (remises, produits au poids) : vérifiez-les avant d'ajouter. Le choix *Tout* lit tous les mouvements depuis le début : sans conséquence pour un foyer, l'offre gratuite de Firebase le permet largement.
 - **Ticket de caisse** : pas de date de péremption sur un ticket, ni de code-barres (le rapprochement avec les anciennes recettes se fait alors par le nom). La photo est envoyée à Claude pour être lue (environ 1 à 3 centimes) ; elle peut contenir le nom du magasin et les derniers chiffres de la carte bancaire, et n'est pas conservée dans l'app.
 - **DLC ou DDM** : l'app ne fait pas la différence. Claude a pour consigne de ne jamais utiliser un produit frais (viande, poisson, laitier, traiteur) dont la date est dépassée.
 - **Sécurité** : toute personne qui possède l'invitation peut voir et modifier vos données. Ne la partagez qu'avec l'autre utilisateur.
@@ -170,6 +178,7 @@ Aucune donnée n'est perdue : ni le stock, ni les recettes, ni la clé Claude.
 | « Base Firestore introuvable » | Étape 1.5. |
 | « Accès refusé par Firebase » | Règles non publiées : étape 1.6. |
 | « L'historique n'est pas encore autorisé » | Recollez le fichier `firestore.rules` dans Firebase → Firestore → Règles → **Publier**. |
+| « Les statistiques ne sont pas encore autorisées » | Même chose : recollez le fichier `firestore.rules` à jour, **Publier**, puis fermez et rouvrez l'app. |
 | « Aucun foyer ne correspond à ce code » | Renvoyez l'invitation depuis le premier iPhone (Réglages → Foyer partagé). |
 | Page GitHub « 404 » | Attendez deux minutes après l'étape 2.5 ; vérifiez que `index.html` est à la racine du dépôt, pas dans un sous-dossier. |
 | « Accès à la caméra refusé » | Réglages de l'iPhone → Safari → Caméra → Autoriser (ou Demander), puis « Réessayer ». |
@@ -191,19 +200,22 @@ src/
   views/                   Écrans et fiches : un dossier par écran
     app/                   Navigation, barre d'onglets, actions, événements
     stock/  product-editor/  scanner/  produce/  receipt/
-    recipes/  shopping/  settings/  onboarding/  history/
+    recipes/  shopping/  stats/  settings/  onboarding/  history/
   components/              Éléments d'affichage réutilisables (fiches, icônes, gabarits…)
   data/
-    store/                 État partagé, Firebase, synchronisation, historique
+    store/                 État partagé, Firebase, synchronisation, historique,
+                           mouvements (statistiques) et mémoire des prix
     reference/             Données fixes : catégories, lieux, fruits et légumes, cuisines
-  services/                Règles métier (dates, quantités, catégories, statuts)
+  services/                Règles métier (dates, quantités, catégories, statuts,
+                           prix et calculs des statistiques)
                            et services externes (Claude, Open Food Facts, caméra, OCR)
   styles/                  Feuilles de style : base, mise en page, composants, écrans
   sw/service-worker.js     Modèle du service worker (complété au build)
 public/                    Fichiers copiés tels quels : manifeste, icônes, config.js
 build/                     Génération du service worker au build
 tests/
-  unit/                    Calculs (dates, quantités, catégories…) et règles d'architecture
+  unit/                    Calculs (dates, quantités, catégories, prix, statistiques…)
+                           et règles d'architecture
   scenarios/               Parcours complets sur un iPhone simulé (Firebase simulé)
 .github/workflows/         Tests, build et mise en ligne automatiques
 firestore.rules            Règles de sécurité à coller dans Firebase (étape 1.6)

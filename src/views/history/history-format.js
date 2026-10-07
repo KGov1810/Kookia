@@ -8,6 +8,7 @@ const HISTORY_TEXT = {
   'stock:ajout': 'a ajouté {n}',
   'stock:modification': 'a modifié {n}',
   'stock:consommation': 'a consommé {n}',
+  'stock:jete': 'a jeté {n}',
   'stock:suppression': 'a retiré {n} du stock',
   'stock:annulation': 'a annulé une action sur {n}',
   'stock:ticket': 'a ajouté {n} depuis un ticket de caisse',
@@ -23,7 +24,7 @@ const HISTORY_TEXT = {
 };
 
 export const HISTORY_ICON = {
-  ajout: () => I.plus, modification: () => I.pencil, consommation: () => I.check, suppression: () => I.trash,
+  ajout: () => I.plus, modification: () => I.pencil, consommation: () => I.check, suppression: () => I.trash, jete: () => I.trash,
   annulation: () => I.refresh, rangement: () => I.jar, panier: () => I.cart, ticket: () => I.receipt,
   generation: () => I.sparkle, favori: () => I.star, 'favori-retire': () => I.star
 };

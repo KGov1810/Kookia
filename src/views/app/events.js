@@ -6,6 +6,7 @@ import * as store from '../../data/store/index.js';
 import * as S from '../../services/index.js';
 import { needsOnboarding } from '../onboarding/onboarding.js';
 import { stockNote } from '../shopping/shopping-view.js';
+import { setStatsFilter } from '../stats/stats-actions.js';
 import { fridgeList } from '../stock/stock-list.js';
 import { getAction } from './actions.js';
 import { updateChrome } from './chrome.js';
@@ -45,6 +46,7 @@ export function wireEvents() {
     const t = event.target;
     if (t.dataset.setting === 'userName') store.updateSettings({ userName: t.value.trim() });
     else if (t.id === 'model') store.updateSettings({ model: t.value });
+    else if (t.dataset.statsFilter) setStatsFilter(t.dataset.statsFilter, t.value);
     else if (t.id === 'batch-toggle' || t.id === 'light-toggle') {
       if (t.id === 'batch-toggle') ui.filters.batchOnly = t.checked;
       else ui.filters.light = t.checked;

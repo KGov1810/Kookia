@@ -9,3 +9,4 @@ delete globalThis.__db;
 delete globalThis.__auth;
 globalThis.__authError = null;
 globalThis.__denyHistory = false;
+globalThis.__denyStats = false;

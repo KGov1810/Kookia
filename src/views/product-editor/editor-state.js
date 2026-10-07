@@ -4,17 +4,22 @@ import * as R from '../../data/reference/index.js';
 import { state } from '../../data/store/state.js';
 import * as S from '../../services/index.js';
 import { ui } from '../app/ui-state.js';
+import { applyKnownPrice } from './editor-price.js';
 
 /** Prépare le produit affiché et l'état de la fiche (ajout ou modification). */
 export function createEditorContext({ product = null, draft = null, mode = 'manual', filePromise = null, shoppingItemId = null, barcode = '' } = {}) {
   const isNew = !product;
   const p = {
     id: crypto.randomUUID(), name: '', expiry: S.isoInDays(7), category: 'autre', quantity: '', count: 1,
-    barcode: '', addedBy: '', createdAt: 0, image: '', imageUrl: '',
+    barcode: '', addedBy: '', createdAt: 0, image: '', imageUrl: '', unitPrice: null,
     location: ui.location || 'frigo', dateKind: '', frozenAt: '',
     ...(draft ?? {}), ...(product ?? {})
   };
-  const view = { dateTouched: !isNew, locationTouched: !isNew || Boolean(draft?.location), categoryTouched: !isNew || Boolean(draft?.category), busy: '', info: '', error: '', sameProductId: null };
+  const view = {
+    dateTouched: !isNew, locationTouched: !isNew || Boolean(draft?.location), categoryTouched: !isNew || Boolean(draft?.category),
+    busy: '', info: '', error: '', sameProductId: null,
+    priceText: S.priceInputValue(p.unitPrice), priceTouched: false, priceSuggested: false, discard: null
+  };
   if (isNew && !draft?.location && p.name) {
     // Fruit ou légume reconnu (ex. rangé depuis la liste de courses) : son lieu habituel, date estimée.
     const produce = S.produceFor(p.name);
@@ -25,6 +30,7 @@ export function createEditorContext({ product = null, draft = null, mode = 'manu
     }
   }
   const ctx = { p, view, isNew, shoppingItemId, draft, mode, filePromise, barcode, sheet: null };
+  applyKnownPrice(ctx); // nom déjà connu (article de courses rangé) : dernier prix payé
   if (!p.dateKind) setKind(ctx, R.KINDS_BY_LOCATION[p.location][0]);
   if (!isNew && S.dateKindOf(p) !== 'aucune' && !S.hasDate(p.expiry)) view.info = 'Date à compléter : saisissez-la, ou touchez « Lire la date » pour la photographier.';
   return ctx;

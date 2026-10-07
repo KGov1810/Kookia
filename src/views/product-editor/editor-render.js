@@ -8,6 +8,8 @@ import * as store from '../../data/store/index.js';
 import { hasClaudeKey } from '../../data/store/selectors.js';
 import * as S from '../../services/index.js';
 import { dateSection } from './editor-date-section.js';
+import { discardSection } from './editor-discard.js';
+import { priceField } from './editor-price.js';
 
 export function renderEditor(ctx) {
   const { p, view, isNew } = ctx;
@@ -41,6 +43,7 @@ export function renderEditor(ctx) {
         </div>
         <label class="field"><span>Poids ou contenance</span><input name="quantity" value="${p.quantity}" placeholder="2 kg, 500 g, 1 L…" autocomplete="off"></label>
         ${(p.count ?? 1) > 1 && p.quantity.trim() ? html`<p class="hint inset">En stock : ${S.quantityLabel(p)}</p>` : ''}
+        ${priceField(ctx)}
         ${p.image || p.imageUrl ? html`<button class="row-button danger" data-action="remove-photo">${I.trash}Retirer la photo</button>` : ''}
       </section>
       <section class="group">
@@ -56,6 +59,7 @@ export function renderEditor(ctx) {
           <button class="row-button" data-action="to-shopping">${I.cart}Ajouter à la liste de courses</button>
           ${p.location !== 'congelateur' && p.location !== 'placard' ? html`<button class="row-button" data-action="freeze">${I.snow}Congeler (se garde plusieurs mois)</button>` : ''}
           <button class="row-button" data-action="consume">${I.check}Consommé : retirer du stock</button>
+          ${discardSection(ctx)}
         </section>`}
     </div>
     ${view.busy ? html`<div class="busy"><span class="spinner"></span><p>${view.busy}</p></div>` : ''}`;

@@ -35,3 +35,14 @@
   align-self: flex-start; min-height: 32px; border: 1px solid var(--line); border-radius: 10px;
   background: var(--bg); color: var(--herb); font-weight: 600; font-size: 14px; padding: 0 8px;
 }
+
+.receipt-place { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+
+.receipt-price { display: flex; align-items: center; gap: 4px; flex: 0 1 112px; min-width: 0; }
+
+.receipt-price input {
+  width: 100%; min-width: 0; min-height: 32px; border: 1px solid var(--line); border-radius: 10px;
+  padding: 0 8px; background: var(--bg); font-size: 16px; text-align: right; outline: none;
+}
+
+.receipt-price b, .price-field b { flex: none; color: var(--muted); font-weight: 600; }

@@ -11,6 +11,16 @@ export function selected(ctx) {
   return view.items.filter((i) => i.selected && i.name.trim());
 }
 
+/** Total des prix lus sur les lignes gardées, à comparer au ticket. */
+export function receiptTotal(ctx) {
+  const kept = selected(ctx);
+  const priced = kept.filter((i) => i.price !== null);
+  if (!kept.length) return '';
+  const missing = kept.length - priced.length;
+  const total = priced.reduce((sum, i) => sum + i.price, 0);
+  return `Total des prix : ${S.formatEuro(total)}${missing ? ` (${S.plural(missing, 'produit')} sans prix)` : ''}. Comparez avec le ticket : les produits non alimentaires n'y sont pas.`;
+}
+
 export function renderReceipt(ctx) {
   const { view } = ctx;
   const head = view.stage === 'review'
@@ -58,7 +68,8 @@ export function reviewStep(ctx) {
   }
   const onList = view.items.filter((i) => i.selected && i.shoppingId);
   return html`
-    <p class="note ok">${S.plural(view.items.length, 'produit reconnu', 'produits reconnus')}. Vérifiez les noms, les nombres et le lieu ; décochez ce qui ne va pas en stock. Les dates du frigo seront à compléter ; placard, congélateur, fruits et légumes n'en ont pas besoin.</p>
+    <p class="note ok">${S.plural(view.items.length, 'produit reconnu', 'produits reconnus')}. Vérifiez les noms, les nombres, les prix et le lieu ; décochez ce qui ne va pas en stock. Les dates du frigo seront à compléter ; placard, congélateur, fruits et légumes n'en ont pas besoin.</p>
+    <p class="hint" id="receipt-total">${receiptTotal(ctx)}</p>
     <section class="group">
       ${view.items.map((item, index) => html`
         <div class="receipt-line ${item.selected ? '' : 'off'}">
@@ -75,9 +86,12 @@ export function reviewStep(ctx) {
               </div>
               <input data-field="quantity" data-index="${index}" value="${item.quantity}" placeholder="Poids" aria-label="Poids ou contenance" autocomplete="off">
             </div>
-            <select class="receipt-location" data-field="location" data-index="${index}" aria-label="Lieu de rangement">
-              ${R.LOCATIONS.map((loc) => html`<option value="${loc.id}" ${item.location === loc.id ? raw('selected') : ''}>${loc.label}</option>`)}
-            </select>
+            <div class="receipt-place">
+              <select class="receipt-location" data-field="location" data-index="${index}" aria-label="Lieu de rangement">
+                ${R.LOCATIONS.map((loc) => html`<option value="${loc.id}" ${item.location === loc.id ? raw('selected') : ''}>${loc.label}</option>`)}
+              </select>
+              <label class="receipt-price"><input data-field="price" data-index="${index}" value="${item.priceText}" inputmode="decimal" placeholder="Prix" aria-label="Prix payé pour la ligne, en euros" autocomplete="off"><b aria-hidden="true">€</b></label>
+            </div>
           </div>
         </div>`)}
     </section>

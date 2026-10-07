@@ -50,7 +50,8 @@ export function openProduceSheet() {
           location: item.place,
           dateKind: 'estimee',
           expiry: S.isoInDays(item.days),
-          frozenAt: ''
+          frozenAt: '',
+          unitPrice: store.lastKnownPrice({ name: item.name }) // modifiable ensuite dans la fiche
         }));
         sheet.close();
         toast(`${S.plural(entries.length, 'produit ajouté', 'produits ajoutés')} (dates estimées)`);

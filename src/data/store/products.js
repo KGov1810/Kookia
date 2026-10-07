@@ -3,23 +3,28 @@
 import { setDoc, writeBatch } from 'firebase/firestore';
 import { isoInDays, toISODate } from '../../services/dates/dates.js';
 import { quantityLabel } from '../../services/quantities/quantities.js';
+import { cleanPrice } from '../../services/stats/money.js';
 import { dateKindOf, estimateFreshDays, freezerLimit } from '../../services/stock/stock-dates.js';
 import { locationOf } from '../reference/locations.js';
 import { db } from './connection.js';
 import { logChange, productDiff, productSummary } from './history.js';
 import { CATEGORY_VERSION } from './mappers.js';
+import { cancelLastMovements, recordMovement } from './movements.js';
+import { rememberPrices } from './prices.js';
 import { rememberRecipeLinks } from './recipes.js';
 import { state } from './state.js';
 import { canWrite, ref, write } from './writes.js';
 
-export function saveProduct(product, { log = true } = {}) {
+/** Enregistre un produit. Un produit nouveau est noté comme un achat (sauf « Annuler », sans log). */
+export function saveProduct(product, { log = true, purchase = log } = {}) {
   if (!canWrite()) return;
   const before = state.products.find((p) => p.id === product.id);
+  const count = Math.max(1, Math.round(Number(product.count) || 1));
   if (log) {
     if (!before) {
       logChange({ scope: 'stock', action: 'ajout', name: product.name.trim(), itemId: product.id, details: [productSummary(product)] });
     } else {
-      const changes = productDiff(before, { ...product, name: product.name.trim(), count: Math.max(1, Math.round(Number(product.count) || 1)), dateKind: dateKindOf(product) });
+      const changes = productDiff(before, { ...product, name: product.name.trim(), count, dateKind: dateKindOf(product), unitPrice: cleanPrice(product.unitPrice) });
       if (changes.length) logChange({ scope: 'stock', action: 'modification', name: product.name.trim(), itemId: product.id, details: changes });
     }
   }
@@ -29,7 +34,7 @@ export function saveProduct(product, { log = true } = {}) {
     category: product.category || 'autre',
     categoryVersion: CATEGORY_VERSION,
     quantity: (product.quantity ?? '').trim(),
-    count: Math.max(1, Math.round(Number(product.count) || 1)),
+    count,
     location: product.location || 'frigo',
     dateKind: dateKindOf(product),
     frozenAt: product.frozenAt || '',
@@ -37,17 +42,26 @@ export function saveProduct(product, { log = true } = {}) {
     addedBy: product.addedBy || state.settings.userName,
     createdAt: product.createdAt || Date.now(),
     image: product.image || '',
-    imageUrl: product.imageUrl || ''
+    imageUrl: product.imageUrl || '',
+    unitPrice: cleanPrice(product.unitPrice)
   }));
+  if (!before && purchase) recordMovement('achat', product, count);
+  if (log) rememberPrices([product]);
 }
 
-/** Retire des produits (consommés ou jetés). Renvoie les produits retirés, pour « Annuler ». */
-export function removeProducts(ids, { log = true, reason = '' } = {}) {
+/**
+ * Retire des produits en entier. movement : 'consomme' ou 'jete' pour les statistiques
+ * (unitPrice : prix affiché dans la fiche, s'il diffère). Renvoie les produits retirés, pour « Annuler ».
+ */
+export function removeProducts(ids, { log = true, reason = '', movement = '', unitPrice } = {}) {
   if (!canWrite()) return [];
   const removed = state.products.filter((p) => ids.includes(p.id));
   if (!removed.length) return [];
   if (log) {
     removed.forEach((p) => logChange({ scope: 'stock', action: 'suppression', name: p.name, itemId: p.id, details: [reason, quantityLabel(p)] }));
+  }
+  if (movement) {
+    removed.forEach((p) => recordMovement(movement, unitPrice === undefined ? p : { ...p, unitPrice }, p.count ?? 1));
   }
   rememberRecipeLinks(removed);
   const batch = writeBatch(db);
@@ -58,29 +72,11 @@ export function removeProducts(ids, { log = true, reason = '' } = {}) {
 
 /** « Annuler » : remet les produits tels qu'ils étaient. */
 export function restoreProducts(products) {
+  cancelLastMovements(products.map((p) => p.id));
   products.forEach((p) => {
     logChange({ scope: 'stock', action: 'annulation', name: p.name, itemId: p.id, details: [quantityLabel(p) ? `remis en stock : ${quantityLabel(p)}` : 'remis en stock'] });
     saveProduct(p, { log: false });
   });
-}
-
-/**
- * Consomme une unité de chaque produit : le nombre diminue de 1,
- * et le produit n'est retiré du frigo qu'à la dernière unité.
- * Renvoie l'état d'avant (pour « Annuler ») et ce qui a été retiré ou diminué.
- */
-export function consumeOne(ids, { reason = '' } = {}) {
-  if (!canWrite()) return { before: [], removed: [], decremented: [] };
-  const before = state.products.filter((p) => ids.includes(p.id)).map((p) => ({ ...p }));
-  const removed = before.filter((p) => (p.count ?? 1) <= 1);
-  const decremented = before.filter((p) => (p.count ?? 1) > 1);
-  before.forEach((p) => logChange({
-    scope: 'stock', action: 'consommation', name: p.name, itemId: p.id,
-    details: [(p.count ?? 1) > 1 ? `il en reste ${p.count - 1}` : 'plus en stock', reason]
-  }));
-  if (removed.length) removeProducts(removed.map((p) => p.id), { log: false });
-  decremented.forEach((p) => saveProduct({ ...p, count: p.count - 1 }, { log: false }));
-  return { before, removed, decremented };
 }
 
 /**
@@ -92,6 +88,7 @@ export function addReceiptProducts(items, shoppingIdsToRemove = []) {
   const batch = writeBatch(db);
   const now = Date.now();
   const today = toISODate(new Date());
+  const added = [];
   items.forEach((item, index) => {
     const location = locationOf(item.location).id;
     const produce = ['fruits', 'legumes', 'fruits_legumes'].includes(item.category) || location === 'fruits';
@@ -108,7 +105,10 @@ export function addReceiptProducts(items, shoppingIdsToRemove = []) {
       dateKind = 'estimee';
       expiry = isoInDays(estimateFreshDays(item.name, location));
     }
-    batch.set(ref('produits', crypto.randomUUID()), {
+    const id = crypto.randomUUID();
+    const count = Math.max(1, Math.round(Number(item.count) || 1));
+    added.push({ id, name: item.name.trim(), category: item.category || 'autre', location, unitPrice: cleanPrice(item.unitPrice), count });
+    batch.set(ref('produits', id), {
       name: item.name.trim(),
       expiry,
       location,
@@ -117,16 +117,20 @@ export function addReceiptProducts(items, shoppingIdsToRemove = []) {
       category: item.category || 'autre',
       categoryVersion: CATEGORY_VERSION,
       quantity: (item.quantity ?? '').trim(),
-      count: Math.max(1, Math.round(Number(item.count) || 1)),
+      count,
       barcode: '',
       addedBy: state.settings.userName,
       createdAt: now + index,
       image: '',
-      imageUrl: ''
+      imageUrl: '',
+      unitPrice: cleanPrice(item.unitPrice)
     });
   });
   shoppingIdsToRemove.forEach((id) => batch.delete(ref('courses', id)));
   write(batch.commit());
+  // Statistiques : écrites à part, pour ne pas bloquer l'ajout si les règles ne les autorisent pas encore.
+  added.forEach((product) => recordMovement('achat', product, product.count));
+  rememberPrices(added);
   const bought = state.shopping.filter((i) => shoppingIdsToRemove.includes(i.id)).map((i) => i.name);
   logChange({
     scope: 'stock', action: 'ticket', name: `${items.length} produit${items.length > 1 ? 's' : ''}`,

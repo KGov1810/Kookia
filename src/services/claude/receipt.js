@@ -2,12 +2,14 @@
 
 import { CATEGORY_IDS } from '../../data/reference/categories.js';
 import { LOCATIONS } from '../../data/reference/locations.js';
+import { cleanPrice } from '../stats/money.js';
 import { normalizeCategory } from '../stock/categorization.js';
 import { callTool } from './client.js';
 
 /**
  * Lit un ticket de caisse (une ou plusieurs photos, de haut en bas).
- * Renvoie les produits alimentaires : [{ name, receiptText, category, count, quantity }].
+ * Renvoie les produits alimentaires : [{ name, receiptText, category, count, quantity, location, price }].
+ * price : montant payé pour la ligne (toutes unités), ou null s'il est illisible.
  * Les dates de péremption ne figurent pas sur un ticket : elles restent « à compléter ».
  */
 export async function analyzeReceipt({ key, model, images }) {
@@ -22,6 +24,7 @@ Liste uniquement les produits alimentaires et les boissons achetés.
 - nombre : quantité achetée de ce produit (ex. ligne « 2 x 1,19 » ou ligne répétée → 2). Regroupe les lignes identiques.
 - contenance : poids ou volume d'une unité s'il est indiqué (« 500 g », « 1 L »), sinon chaîne vide.
 - lieu : où ranger le produit à la maison : « frigo » (produits frais), « congelateur » (surgelés), « placard » (épicerie, conserves, boissons, produits secs), « fruits » (fruits et légumes qui se gardent hors du frigo : bananes, pommes de terre, oignons…).
+- prix : montant payé pour ce produit en euros, toutes unités regroupées (ex. « 2 x 1,19 » → 2.38). Déduis une remise immédiate imprimée juste sous le produit. Omets ce champ si le prix est illisible.
 - Si les photos se chevauchent, ne compte pas deux fois la même ligne.
 - Si la photo n'est pas un ticket de caisse, renvoie une liste vide.`
   });
@@ -44,7 +47,8 @@ Liste uniquement les produits alimentaires et les boissons achetés.
                 categorie: { type: 'string', enum: categoryIds },
                 nombre: { type: 'integer', description: "Nombre d'unités achetées (1 par défaut)." },
                 contenance: { type: 'string', description: 'Poids ou volume d\'une unité, sinon chaîne vide.' },
-                lieu: { type: 'string', enum: ['frigo', 'congelateur', 'placard', 'fruits'] }
+                lieu: { type: 'string', enum: ['frigo', 'congelateur', 'placard', 'fruits'] },
+                prix: { type: 'number', description: 'Montant payé pour la ligne, en euros (toutes unités). Omis si illisible.' }
               },
               required: ['nom', 'texte_ticket', 'categorie', 'nombre', 'contenance', 'lieu']
             }
@@ -66,6 +70,7 @@ Liste uniquement les produits alimentaires et les boissons achetés.
       category: categoryIds.includes(item.categorie) ? item.categorie : normalizeCategory(item.categorie, item.nom),
       count: Math.min(99, Math.max(1, Math.round(Number(item.nombre) || 1))),
       quantity: (item.contenance ?? '').trim(),
-      location: LOCATIONS.some((l) => l.id === item.lieu) ? item.lieu : 'frigo'
+      location: LOCATIONS.some((l) => l.id === item.lieu) ? item.lieu : 'frigo',
+      price: Number(item.prix) > 0 ? cleanPrice(item.prix) : null
     }));
 }

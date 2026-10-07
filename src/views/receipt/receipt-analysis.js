@@ -37,7 +37,7 @@ export async function analyze(ctx) {
       const match = state.shopping.find((s) => !used.has(s.id)
         && (S.nameMatchScore(s.name, item.name) > 0 || S.nameMatchScore(s.name, item.receiptText) > 0));
       if (match) used.add(match.id);
-      return { ...item, selected: true, shoppingId: match?.id ?? null, shoppingName: match?.name ?? '' };
+      return { ...item, priceText: S.priceInputValue(item.price), selected: true, shoppingId: match?.id ?? null, shoppingName: match?.name ?? '' };
     });
     view.stage = 'review';
   } catch (error) {
@@ -52,7 +52,9 @@ export function confirmItems(ctx) {
   const items = selected(ctx);
   if (!items.length) return;
   const shoppingIds = items.map((i) => i.shoppingId).filter(Boolean);
-  const added = store.addReceiptProducts(items, shoppingIds);
+  // Prix de la ligne → prix d'une unité (le nombre a pu être corrigé à la vérification).
+  const priced = items.map((i) => ({ ...i, unitPrice: i.price === null ? null : S.cleanPrice(i.price / Math.max(1, i.count)) }));
+  const added = store.addReceiptProducts(priced, shoppingIds);
   ctx.sheet.close();
   toast(`${S.plural(added, 'produit ajouté', 'produits ajoutés')} au stock`);
   showTab('frigo');

@@ -21,7 +21,7 @@
 
 .history-item.consommation .history-icon { background: color-mix(in srgb, var(--herb) 14%, transparent); color: var(--herb); }
 
-.history-item.suppression .history-icon, .history-item.panier .history-icon { background: var(--tomato-soft); color: var(--tomato); }
+.history-item.suppression .history-icon, .history-item.jete .history-icon, .history-item.panier .history-icon { background: var(--tomato-soft); color: var(--tomato); }
 
 .history-item.favori .history-icon svg { fill: currentColor; color: var(--apricot); }
 

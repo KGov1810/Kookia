@@ -3,6 +3,7 @@
 import { collection, getDocs, limit, onSnapshot, orderBy, query, serverTimestamp, setDoc, where, writeBatch } from 'firebase/firestore';
 import { formatDate } from '../../services/dates/dates.js';
 import { quantityLabel } from '../../services/quantities/quantities.js';
+import { formatEuro } from '../../services/stats/money.js';
 import { stockShort } from '../../services/stock/stock-status.js';
 import { category } from '../reference/categories.js';
 import { DATE_KINDS, locationOf } from '../reference/locations.js';
@@ -50,7 +51,8 @@ const TRACKED_FIELDS = [
   ['quantity', 'Poids', (v) => v || '—'],
   ['dateKind', 'Type de date', (v) => DATE_KINDS[v]?.label ?? v],
   ['expiry', 'Date', (v) => (v ? formatDate(v, { day: 'numeric', month: 'short', year: 'numeric' }) : 'à compléter')],
-  ['frozenAt', 'Congelé le', (v) => (v ? formatDate(v, { day: 'numeric', month: 'short' }) : '—')]
+  ['frozenAt', 'Congelé le', (v) => (v ? formatDate(v, { day: 'numeric', month: 'short' }) : '—')],
+  ['unitPrice', 'Prix', (v) => (v === '' || v === null ? '—' : formatEuro(v))]
 ];
 
 export function productDiff(before, after) {

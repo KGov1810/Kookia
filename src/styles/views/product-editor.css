@@ -27,3 +27,23 @@
 .expiry-status.pending { color: var(--muted); }
 
 .expiry-status.old, .expiry-status.age { color: var(--muted); }
+
+.price-field { column-gap: 6px; }
+
+.price-field input { font-variant-numeric: tabular-nums; }
+
+.discard-box { border-top: 1px solid var(--line); background: var(--tomato-soft); }
+
+.discard-box .field { border-top: 0; flex-wrap: wrap; row-gap: 4px; }
+
+.discard-box .stepper output { min-width: 72px; }
+
+.discard-box .row-actions { padding: 4px 16px 16px; }
+
+.danger-fill {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 48px; padding: 10px 16px; border-radius: 14px;
+  background: var(--tomato); color: var(--on-accent); font-weight: 650;
+}
+
+.danger-fill svg { width: 20px; height: 20px; }

@@ -17,13 +17,34 @@ function docsIn(path, constraints = []) {
   let docs = [...globalThis.__db.docs.entries()].filter(([p]) => parentOf(p) === path)
     .map(([p, data]) => ({ id: p.split('/').pop(), ref: { path: p, id: p.split('/').pop() }, data: () => structuredClone(data) }));
   for (const c of constraints) {
-    if (c.type === 'where') docs = docs.filter((d) => (c.op === '<' ? d.data()[c.field] < c.value : d.data()[c.field] === c.value));
+    if (c.type === 'where') docs = docs.filter((d) => compare(d.data()[c.field], c.op, c.value));
   }
   const order = constraints.find((c) => c.type === 'orderBy');
   if (order) docs.sort((a, b) => (a.data()[order.field] - b.data()[order.field]) * (order.dir === 'desc' ? -1 : 1));
   const lim = constraints.find((c) => c.type === 'limit');
   return lim ? docs.slice(0, lim.n) : docs;
 }
+function compare(a, op, b) {
+  if (op === '<') return a < b;
+  if (op === '<=') return a <= b;
+  if (op === '>') return a > b;
+  if (op === '>=') return a >= b;
+  return a === b;
+}
+// Comme le vrai Firestore : setDoc(…, { merge: true }) fusionne aussi les objets imbriqués.
+function deepMerge(target, source) {
+  const out = { ...target };
+  for (const [k, v] of Object.entries(source)) {
+    out[k] = v && typeof v === 'object' && !Array.isArray(v) && out[k] && typeof out[k] === 'object' ? deepMerge(out[k], v) : v;
+  }
+  return out;
+}
+// Règles Firestore pas encore mises à jour : historique, ou statistiques (mouvements et prix).
+function denied(path) {
+  return (globalThis.__denyHistory && /\/historique(\/|$)/.test(path))
+    || (globalThis.__denyStats && /\/(mouvements|prix)(\/|$)/.test(path));
+}
+const deniedError = () => Object.assign(new Error('denied'), { code: 'permission-denied' });
 function fire(l, fromCache = false) {
   l.cb({ docs: docsIn(l.path, l.constraints), metadata: { fromCache, hasPendingWrites: false } });
 }
@@ -37,10 +58,10 @@ function check(data) {
 }
 const notFound = () => Object.assign(new Error('No document to update'), { code: 'not-found' });
 export async function setDoc(ref, data, options) {
-  if (globalThis.__denyHistory && ref.path.includes('/historique/')) throw Object.assign(new Error('denied'), { code: 'permission-denied' });
+  if (denied(ref.path)) throw deniedError();
   check(data); globalThis.__db.writes++;
   const prev = globalThis.__db.docs.get(ref.path);
-  globalThis.__db.docs.set(ref.path, options?.merge && prev ? { ...prev, ...data } : { ...data });
+  globalThis.__db.docs.set(ref.path, options?.merge && prev ? deepMerge(prev, data) : { ...data });
   notify(ref.path);
 }
 export async function updateDoc(ref, data) {
@@ -50,14 +71,17 @@ export async function updateDoc(ref, data) {
   globalThis.__db.docs.set(ref.path, { ...prev, ...data });
   notify(ref.path);
 }
-export async function deleteDoc(ref) { globalThis.__db.docs.delete(ref.path); notify(ref.path); }
+export async function deleteDoc(ref) {
+  if (denied(ref.path)) throw deniedError();
+  globalThis.__db.docs.delete(ref.path); notify(ref.path);
+}
 export async function getDoc(ref) { return { exists: () => globalThis.__db.docs.has(ref.path), data: () => globalThis.__db.docs.get(ref.path) }; }
 export function onSnapshot(ref, ...args) {
   // Comme le vrai Firestore : onSnapshot(ref, options?, onNext, onError?)
   if (typeof args[0] === 'function') args.unshift({});
   const [, cb, errCb] = args;
-  if (globalThis.__denyHistory && ref.path.endsWith('/historique')) {
-    queueMicrotask(() => errCb?.(Object.assign(new Error('denied'), { code: 'permission-denied' })));
+  if (denied(ref.path)) {
+    queueMicrotask(() => errCb?.(deniedError()));
     return () => {};
   }
   const l = { path: ref.path, constraints: ref.constraints ?? [], cb, errCb };

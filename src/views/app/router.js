@@ -6,6 +6,7 @@ import { needsOnboarding, renderOnboarding } from '../onboarding/onboarding.js';
 import { recipesView } from '../recipes/recipes-view.js';
 import { settingsView } from '../settings/settings-view.js';
 import { shoppingView } from '../shopping/shopping-view.js';
+import { statsView } from '../stats/stats-view.js';
 import { fridgeView } from '../stock/stock-view.js';
 import { updateChrome } from './chrome.js';
 import { screen, ui } from './ui-state.js';
@@ -14,7 +15,7 @@ let views = null;
 
 /** Écran d'un onglet (liste assemblée au premier usage, une fois tous les écrans chargés). */
 export function viewFor(tab) {
-  views ??= { frigo: fridgeView, recettes: recipesView, courses: shoppingView, reglages: settingsView };
+  views ??= { frigo: fridgeView, recettes: recipesView, courses: shoppingView, stats: statsView, reglages: settingsView };
   return views[tab];
 }
 

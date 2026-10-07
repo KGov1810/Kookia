@@ -1,0 +1,106 @@
+/* Kookia — Écran Statistiques : résumé, graphiques par mois et par catégorie. */
+
+.stats-period { margin: 0 0 4px; }
+
+/* Filtres : pastilles sur une ligne, comme les lieux de l'écran Stock. */
+.stats-filters { margin: 4px -16px 0; padding: 4px 16px 4px; }
+
+.filter-select {
+  flex: none; appearance: none; -webkit-appearance: none; field-sizing: content; max-width: 62vw;
+  min-height: 38px; padding: 7px 30px 7px 12px; border-radius: 999px; border: 1.5px solid transparent;
+  background: var(--surface-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5l3 3 3-3' fill='none' stroke='%235C6C64' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 10px center / 12px;
+  font-size: 15px; font-weight: 600; color: var(--ink); text-overflow: ellipsis;
+}
+
+.filter-select[data-active="true"] { background-color: var(--herb-soft); border-color: var(--herb); color: var(--herb-strong); }
+
+/* Résumé : le montant dépensé en grand, puis ce qui est sorti du stock. */
+.stats-summary { background: var(--surface); border-radius: 18px; box-shadow: var(--shadow); padding: 16px 16px 14px; margin: 12px 0; }
+
+.stats-summary p { margin: 0; }
+
+.stats-spent { display: flex; flex-direction: column; gap: 2px; }
+
+.stats-spent span, .stats-out span { font-size: 14px; font-weight: 600; color: var(--muted); }
+
+.stats-spent strong {
+  font: 800 40px/1.05 var(--font-round); letter-spacing: -.02em; font-variant-numeric: tabular-nums;
+}
+
+.stats-split { display: flex; justify-content: space-between; gap: 12px; margin: 16px 0 8px; }
+
+.stats-out { display: flex; flex-direction: column; gap: 1px; }
+
+.stats-out b { font: 700 22px/1.2 var(--font-round); font-variant-numeric: tabular-nums; }
+
+.stats-out.consumed b { color: var(--herb); }
+
+.stats-out.wasted { text-align: right; }
+
+.stats-out.wasted b { color: var(--tomato); }
+
+.split-bar { display: flex; gap: 2px; height: 12px; border-radius: 6px; overflow: hidden; background: var(--surface-2); }
+
+.split-bar i { display: block; min-width: 0; background: var(--herb); }
+
+.split-bar i.waste { background: var(--tomato); }
+
+.stats-summary .stats-share { margin-top: 10px; font-size: 15px; color: var(--muted); }
+
+/* Mois par mois : une colonne par mois, défilement horizontal au-delà de l'écran. */
+.month-chart {
+  display: grid; grid-auto-flow: column; grid-auto-columns: minmax(25px, 1fr); gap: 2px; align-items: end;
+  position: relative; padding: 14px 8px 4px; overflow-x: auto; scrollbar-width: none;
+}
+
+.month-chart::-webkit-scrollbar { display: none; }
+
+.month-col { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 6px 0 4px; border-radius: 10px; }
+
+.month-col .bars { display: flex; align-items: flex-end; justify-content: center; gap: 2px; height: 120px; width: 100%; }
+
+.month-col .bars i { display: block; width: 8px; border-radius: 4px 4px 1px 1px; background: var(--herb); }
+
+.month-col .bars i.waste { background: var(--tomato); }
+
+.month-col small { font-size: 11px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+
+.month-col[aria-pressed="true"] { background: var(--herb-soft); }
+
+.month-col[aria-pressed="true"] small { color: var(--herb-strong); }
+
+.month-detail { margin: 0; padding: 8px 16px 2px; font-size: 15px; }
+
+.stats-legend { display: flex; gap: 16px; margin: 0; padding: 4px 16px 14px; font-size: 13px; color: var(--muted); }
+
+.stats-legend span::before {
+  content: ""; display: inline-block; width: 10px; height: 10px; margin-right: 6px; border-radius: 3px;
+  background: var(--herb); vertical-align: -1px;
+}
+
+.stats-legend .waste::before { background: var(--tomato); }
+
+/* Par catégorie : une barre par catégorie, proportionnelle à la plus grosse dépense. */
+.cat-row { display: block; width: 100%; text-align: left; padding: 12px 16px; border-top: 1px solid var(--line); }
+
+.cat-row:first-child { border-top: 0; }
+
+.cat-head { display: flex; justify-content: space-between; gap: 12px; font-size: 16px; }
+
+.cat-head b { flex: none; font-variant-numeric: tabular-nums; }
+
+.cat-bar { display: block; height: 8px; margin-top: 8px; border-radius: 4px; background: var(--surface-2); overflow: hidden; }
+
+.cat-bar i { display: block; height: 100%; border-radius: 4px; background: var(--herb); }
+
+.cat-waste { display: block; margin-top: 4px; font-size: 13px; color: var(--tomato); }
+
+/* Les plus jetés. */
+.waste-row > span { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
+
+.waste-row small { color: var(--muted); font-size: 14px; }
+
+.waste-row b { color: var(--tomato); font-variant-numeric: tabular-nums; }
+
+.waste-row b small { font-weight: 500; }
+
