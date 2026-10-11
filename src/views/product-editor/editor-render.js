@@ -9,6 +9,7 @@ import { hasClaudeKey } from '../../data/store/selectors.js';
 import * as S from '../../services/index.js';
 import { dateSection } from './editor-date-section.js';
 import { priceField } from './editor-price.js';
+import { quantityField } from './editor-quantity.js';
 import { unitsButton } from './editor-units.js';
 
 export function renderEditor(ctx) {
@@ -41,7 +42,7 @@ export function renderEditor(ctx) {
             <button data-action="count-plus" aria-label="Un de plus">+</button>
           </div>
         </div>
-        <label class="field"><span>Poids ou contenance</span><input name="quantity" value="${p.quantity}" placeholder="2 kg, 500 g, 1 L…" autocomplete="off"></label>
+        ${quantityField(ctx)}
         ${(p.count ?? 1) > 1 && p.quantity.trim() ? html`<p class="hint inset">En stock : ${S.quantityLabel(p)}</p>` : ''}
         ${priceField(ctx)}
         ${p.image || p.imageUrl ? html`<button class="row-button danger" data-action="remove-photo">${I.trash}Retirer la photo</button>` : ''}

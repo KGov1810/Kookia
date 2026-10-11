@@ -2,6 +2,7 @@
 
 import { pickImage } from '../../components/platform.js';
 import { openSheet } from '../../components/sheet.js';
+import { markUnit } from '../../components/unit-input.js';
 import * as S from '../../services/index.js';
 import { addPhoto, analyze, confirmItems } from './receipt-analysis.js';
 import { receiptTotal, renderReceipt } from './receipt-render.js';
@@ -45,6 +46,14 @@ export function openReceipt(firstFilePromise) {
         ctx.view.items = [];
         ctx.sheet.update();
       },
+      'set-unit': (el) => {
+        const item = ctx.view.items[Number(el.dataset.index)];
+        if (!item) return;
+        item.qtyUnit = el.dataset.unit;
+        if (item.qtyLegacy && S.amountValue(item.qtyAmount) !== null) item.qtyLegacy = false;
+        if (!item.qtyLegacy) item.quantity = S.joinAmount(item.qtyAmount, item.qtyUnit) ?? item.qtyAmount.trim();
+        markUnit(el.closest('.unit-input'), item.qtyUnit);
+      },
       confirm: () => confirmItems(ctx)
     },
     onInput(event) {
@@ -52,7 +61,11 @@ export function openReceipt(firstFilePromise) {
       const item = ctx.view.items[Number(t.dataset.index)];
       if (!item) return;
       if (t.dataset.field === 'name') item.name = t.value;
-      if (t.dataset.field === 'quantity') item.quantity = t.value;
+      if (t.dataset.field === 'quantity') {
+        item.qtyAmount = t.value;
+        item.qtyLegacy = false;
+        item.quantity = S.joinAmount(t.value, item.qtyUnit ?? S.defaultUnit(item.category)) ?? t.value.trim();
+      }
       if (t.dataset.field === 'location') {
         item.location = t.value;
         item.locationTouched = true; // lieu corrigé à la main : retenu pour la prochaine fois

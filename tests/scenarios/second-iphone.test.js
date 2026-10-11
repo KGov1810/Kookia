@@ -48,7 +48,7 @@ test("Second iPhone : invitation, code-barres, photo, erreurs Claude, synchronis
   $('.scan-manual').dispatchEvent(new w.Event('submit', { bubbles: true, cancelable: true })); await tick(80);
   log(!$('.scanner'), 'Scanner refermé');
   log(sheet().querySelector('[name="name"]').value === 'Pâte à tartiner (Nutella)', `Nom trouvé : ${sheet().querySelector('[name="name"]').value}`);
-  log(sheet().querySelector('[name="quantity"]').value === '400 g' && sheet().querySelector('[name="category"]').value === 'sucre', 'Quantité et catégorie remplies (pâte à tartiner → biscuits, chocolat et petit-déjeuner)');
+  log([sheet().querySelector('[name="quantity"]').value, sheet().querySelector('.unit-field [aria-pressed="true"]')?.dataset.unit].join(' ') === '400 g' && sheet().querySelector('[name="category"]').value === 'sucre', 'Quantité et catégorie remplies (pâte à tartiner → biscuits, chocolat et petit-déjeuner)');
   log(sheet().querySelector('.thumb img')?.getAttribute('src').includes('openfoodfacts'), 'Photo Open Food Facts affichée');
   log(sheet().textContent.includes('Produit trouvé'), 'Message « Produit trouvé »');
   await click(sheet().querySelector('[data-action="scan"]'), 60);

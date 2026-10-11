@@ -2,12 +2,18 @@
 // Le poids et le prix tapés valent pour toute la ligne ; ils sont enregistrés par pièce.
 
 import { html, raw } from '../../components/html.js';
+import { unitInput } from '../../components/unit-input.js';
 import * as R from '../../data/reference/index.js';
 import * as store from '../../data/store/index.js';
 import * as S from '../../services/index.js';
 
 export function newEntry(item) {
-  return { item, count: 0, weight: '', priceText: '', priceTouched: false, suggested: false };
+  return { item, count: 0, weight: '', unit: 'kg', priceText: '', priceTouched: false, suggested: false };
+}
+
+/** Poids total tapé, avec son unité (« 1,2 kg ») ; '' si vide ; null si le chiffre est illisible. */
+function weightText(entry) {
+  return S.joinAmount(entry.weight, entry.unit);
 }
 
 /** Prix proposé : dernier prix payé par pièce × nombre, tant que le prix n'a pas été tapé. */
@@ -21,9 +27,9 @@ export function suggestLinePrice(entry) {
 /** Ligne d'aide : poids et prix par pièce, origine du prix, ou saisie illisible. */
 export function lineHint(entry) {
   const parts = [];
-  const weight = S.parseWeight(entry.weight);
-  if (entry.weight.trim() && !weight && entry.count > 1) parts.push('poids illisible : écrivez par exemple 1,2 kg ou 800 g');
-  else if (weight && entry.count > 1) parts.push(`${S.formatWeight(weight)} au total, ≈ ${S.weightPerPiece(entry.weight, entry.count)} pièce`);
+  const weight = weightText(entry);
+  if (weight === null) parts.push('poids illisible : tapez un nombre, par exemple 1,2');
+  else if (weight && entry.count > 1) parts.push(`${S.formatWeight(S.parseWeight(weight))} au total, ≈ ${S.weightPerPiece(weight, entry.count)} pièce`);
   const price = S.parsePrice(entry.priceText);
   if (entry.priceText.trim() && price === null) parts.push('prix illisible : écrivez par exemple 3,58');
   else if (price !== null && entry.count > 1) parts.push(`${S.formatEuro(price / entry.count)} pièce`);
@@ -46,12 +52,21 @@ export function selectionLines(entries) {
           </div>
         </div>
         <div class="produce-extra">
-          <input data-field="weight" data-name="${item.name}" value="${entry.weight}" placeholder="Poids total" autocomplete="off" enterkeyhint="next" aria-label="Poids total de ${item.name}, par exemple 1,2 kg">
+          ${unitInput({ amount: entry.weight, unit: entry.unit, units: S.PRODUCE_UNITS, dataset: { name: item.name }, inputData: { field: 'weight' },
+            label: `Poids total de ${item.name} (chiffre)`, placeholder: 'Poids total' })}
           <label class="produce-price"><input data-field="price" data-name="${item.name}" value="${entry.priceText}" inputmode="decimal" placeholder="Prix payé" autocomplete="off" enterkeyhint="done" aria-label="Prix payé pour ${item.name}, en euros"><b aria-hidden="true">€</b></label>
         </div>
         <p class="hint produce-hint" data-hint="${item.name}" ${hint ? '' : raw('hidden')}>${hint}</p>
       </div>`;
   });
+}
+
+function refreshHint(entry, panel) {
+  const element = [...panel.querySelectorAll('[data-hint]')].find((e) => e.dataset.hint === entry.item.name);
+  if (!element) return;
+  const hint = lineHint(entry);
+  element.textContent = hint;
+  element.hidden = !hint;
 }
 
 /** Saisie dans une ligne : sans tout redessiner (le clavier d'iOS se fermerait). */
@@ -62,11 +77,16 @@ export function onSelectionInput(entry, field, value, panel) {
     entry.priceTouched = true;
     entry.suggested = false;
   }
-  const element = [...panel.querySelectorAll('[data-hint]')].find((e) => e.dataset.hint === entry.item.name);
-  if (!element) return;
-  const hint = lineHint(entry);
-  element.textContent = hint;
-  element.hidden = !hint;
+  refreshHint(entry, panel);
+}
+
+/** Bouton g | kg d'une ligne. */
+export function setEntryUnit(entry, unit, panel) {
+  entry.unit = unit;
+  panel.querySelectorAll('[data-action="set-unit"]').forEach((b) => {
+    if (b.dataset.name === entry.item.name) b.setAttribute('aria-pressed', String(b.dataset.unit === unit));
+  });
+  refreshHint(entry, panel);
 }
 
 /** Première saisie illisible, ou '' si tout va bien. */
@@ -75,8 +95,8 @@ export function selectionError(entries) {
     if (entry.priceText.trim() && S.parsePrice(entry.priceText) === null) {
       return `Prix illisible pour ${entry.item.name} : écrivez par exemple 3,58 (ou laissez vide).`;
     }
-    if (S.weightPerPiece(entry.weight, entry.count) === null) {
-      return `Poids illisible pour ${entry.item.name} : écrivez par exemple 1,2 kg ou 800 g (ou laissez vide).`;
+    if (weightText(entry) === null) {
+      return `Poids illisible pour ${entry.item.name} : tapez un nombre, par exemple 1,2 (ou laissez vide).`;
     }
   }
   return '';
@@ -104,7 +124,7 @@ export function toProduct(entry) {
     id: crypto.randomUUID(),
     name: item.name,
     category,
-    quantity: S.weightPerPiece(entry.weight, count) ?? '',
+    quantity: S.weightPerPiece(weightText(entry) ?? '', count) ?? '',
     count,
     location,
     ...dates(location, category, item.days),

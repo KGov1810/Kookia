@@ -39,8 +39,9 @@ export async function analyze(ctx) {
       if (match) used.add(match.id);
       // Corrections déjà faites pour ce produit : elles passent avant la proposition de Claude.
       const memo = store.rememberedPlacement(item);
+      const category = memo.category ?? item.category;
       return {
-        ...item, category: memo.category ?? item.category, location: memo.location ?? item.location,
+        ...item, category, location: memo.location ?? item.location, ...S.receiptAmount(item.quantity, category),
         priceText: S.priceInputValue(item.price), selected: true, shoppingId: match?.id ?? null, shoppingName: match?.name ?? ''
       };
     });

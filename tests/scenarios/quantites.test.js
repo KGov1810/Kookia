@@ -28,7 +28,7 @@ test("Nombre d'unités et quantités des courses", async () => {
   await click('[data-action="add-menu"]'); await click('.menu [data-action="scan"]', 40);
   await type('.scan-manual input', '3270190207924');
   $('.scan-manual').dispatchEvent(new w.Event('submit', { bubbles: true, cancelable: true })); await tick(80);
-  log(sheet().querySelector('[name="quantity"]').value === '2 kg' && sheet().querySelector('.stepper output').textContent === '1', 'Scan : poids « 2 kg », nombre 1');
+  log([sheet().querySelector('[name="quantity"]').value, sheet().querySelector('.unit-field [aria-pressed="true"]')?.dataset.unit].join(' ') === '2 kg' && sheet().querySelector('.stepper output').textContent === '1', 'Scan : poids « 2 kg », nombre 1');
   log(sheet().querySelector('[data-action="count-minus"]').disabled, 'Bouton − désactivé à 1');
   await click(sheet().querySelector('[data-action="count-plus"]'));
   log(sheet().querySelector('.stepper output').textContent === '2' && sheet().textContent.includes('En stock : 2 × 2 kg'), 'Nombre 2 → « En stock : 2 × 2 kg »');
@@ -63,7 +63,7 @@ test("Nombre d'unités et quantités des courses", async () => {
   await click('[data-action="add-menu"]'); await click('.menu [data-action="scan"]', 40);
   await type('.scan-manual input', '3033490004743');
   $('.scan-manual').dispatchEvent(new w.Event('submit', { bubbles: true, cancelable: true })); await tick(80);
-  log(sheet().querySelector('.stepper output').textContent === '4' && sheet().querySelector('[name="quantity"]').value === '125 g', 'Pack « 4 x 125 g » → 4 pots de 125 g');
+  log(sheet().querySelector('.stepper output').textContent === '4' && [sheet().querySelector('[name="quantity"]').value, sheet().querySelector('.unit-field [aria-pressed="true"]')?.dataset.unit].join(' ') === '125 g', 'Pack « 4 x 125 g » → 4 pots de 125 g');
   await click(sheet().querySelector('[data-action="close"]'), 350);
 
   console.log('\n— Quantités dans les courses —');
@@ -98,7 +98,7 @@ test("Nombre d'unités et quantités des courses", async () => {
   // Acheté → ranger au frigo : nombre et poids repris
   await click($$('.tick').find((b) => b.getAttribute('aria-label').includes('Farine')));
   await click($$('[data-action="item-to-fridge"]').find((b) => b.getAttribute('aria-label').includes('Farine')), 400);
-  log(sheet().querySelector('.stepper output').textContent === '2' && sheet().querySelector('[name="quantity"]').value === '1 kg' && sheet().querySelector('[name="name"]').value === 'Farine', 'Rangé au frigo : « Farine 1 kg » × 2 → Farine, nombre 2, poids 1 kg');
+  log(sheet().querySelector('.stepper output').textContent === '2' && [sheet().querySelector('[name="quantity"]').value, sheet().querySelector('.unit-field [aria-pressed="true"]')?.dataset.unit].join(' ') === '1 kg' && sheet().querySelector('[name="name"]').value === 'Farine', 'Rangé au frigo : « Farine 1 kg » × 2 → Farine, nombre 2, poids 1 kg');
   await click(sheet().querySelector('[data-action="save"]'), 350);
   log(docs(P0).find((d) => d.name === 'Farine')?.count === 2 && !docs(C0).some((d) => d.name === 'Farine'), 'Produit créé (×2) et article retiré des courses');
   // « Ajouter à la liste de courses » depuis un produit : quantité reprise

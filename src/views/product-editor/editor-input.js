@@ -2,6 +2,7 @@
 
 import * as S from '../../services/index.js';
 import { onPriceInput } from './editor-price.js';
+import { onQuantityInput, refreshQuantityUnit } from './editor-quantity.js';
 import { refreshStatus } from './editor-state.js';
 import { suggestFromName } from './editor-suggestions.js';
 
@@ -14,13 +15,14 @@ export function handleEditorInput(ctx, event) {
       if (button) button.disabled = !p.name.trim();
       if (event.type === 'change') suggestFromName(ctx);
     } else if (t.name === 'quantity') {
-      p.quantity = t.value;
+      if (event.type === 'input') onQuantityInput(ctx, t.value);
     } else if (t.name === 'price') {
       if (event.type === 'input') onPriceInput(ctx, t.value);
     } else if (t.name === 'category' && event.type === 'change') {
       p.category = t.value;
       view.categoryTouched = true;
       view.userCategory = true; // choisie à la main : retenue à l'enregistrement
+      refreshQuantityUnit(ctx); // l'unité par défaut suit la catégorie
       if (S.dateKindOf(p) === 'congele') p.expiry = S.freezerLimit(p.category, p.frozenAt);
       ctx.sheet.update();
     } else if (t.name === 'expiry' && event.type === 'change') {

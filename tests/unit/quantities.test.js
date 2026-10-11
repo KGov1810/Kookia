@@ -38,3 +38,28 @@ describe('poids total réparti par pièce', () => {
     expect(S.formatWeight({ base: 'g', amount: 1500 })).toBe('1,5 kg');
   });
 });
+
+describe('chiffre + unité', () => {
+  it.each([
+    ['500 g', S.QUANTITY_UNITS, { amount: '500', unit: 'g' }], ['1,5 kg', S.QUANTITY_UNITS, { amount: '1,5', unit: 'kg' }],
+    ['1 L', S.QUANTITY_UNITS, { amount: '1', unit: 'L' }], ['75cl', S.QUANTITY_UNITS, { amount: '75', unit: 'cl' }],
+    ['330 ml', S.QUANTITY_UNITS, { amount: '33', unit: 'cl' }], ['500', S.QUANTITY_UNITS, { amount: '500', unit: null }],
+    ['', S.QUANTITY_UNITS, { amount: '', unit: null }], ['1 pot', S.QUANTITY_UNITS, null], ['1 L', S.PRODUCE_UNITS, null]
+  ])('splitAmount(%j)', (text, units, expected) => {
+    expect(S.splitAmount(text, units)).toEqual(expected);
+  });
+
+  it('assemblage et unité par défaut', () => {
+    expect(S.joinAmount('1,5', 'kg')).toBe('1,5 kg');
+    expect(S.joinAmount('1.5', 'kg')).toBe('1,5 kg');
+    expect(S.joinAmount('', 'g')).toBe('');
+    expect(S.joinAmount('un sac', 'g')).toBe(null);
+    expect(S.amountValue('0')).toBe(null);
+    expect(S.defaultUnit('legumes')).toBe('kg');
+    expect(S.defaultUnit('laitier')).toBe('g');
+    expect(S.unitsFor('fruits')).toEqual(['g', 'kg']);
+    expect(S.receiptAmount('20 cl', 'laitier')).toEqual({ qtyAmount: '20', qtyUnit: 'cl', qtyLegacy: false, quantity: '20 cl' });
+    expect(S.receiptAmount('500', 'feculents').quantity).toBe('500 g');
+    expect(S.receiptAmount('boîte de 6', 'oeufs')).toEqual({ qtyAmount: 'boîte de 6', qtyUnit: null, qtyLegacy: true, quantity: 'boîte de 6' });
+  });
+});

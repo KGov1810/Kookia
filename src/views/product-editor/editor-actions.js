@@ -7,6 +7,7 @@ import * as store from '../../data/store/index.js';
 import * as S from '../../services/index.js';
 import { openScanner } from '../scanner/scanner.js';
 import { priceIsInvalid } from './editor-price.js';
+import { setQuantityUnit } from './editor-quantity.js';
 import { handleBarcode, handleDatePhoto, handleProductPhoto } from './editor-recognition.js';
 import { setKind, setLocation } from './editor-state.js';
 import { unitsActions } from './editor-units.js';
@@ -29,6 +30,7 @@ export function editorActions(ctx) {
       view.dateTouched = true;
       ctx.sheet.update();
     },
+    'set-unit': (el) => setQuantityUnit(ctx, el.dataset.unit),
     'set-loc': (el) => {
       view.locationTouched = true;
       view.userLocation = true; // choisi à la main : retenu à l'enregistrement

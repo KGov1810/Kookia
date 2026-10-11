@@ -8,7 +8,7 @@ import * as R from '../../data/reference/index.js';
 import * as store from '../../data/store/index.js';
 import * as S from '../../services/index.js';
 import { simplify } from '../../services/text/text.js';
-import { newEntry, onSelectionInput, selectionError, selectionLines, suggestLinePrice, toProduct } from './produce-selection.js';
+import { newEntry, onSelectionInput, selectionError, selectionLines, setEntryUnit, suggestLinePrice, toProduct } from './produce-selection.js';
 
 /** Grille de fruits et légumes courants : chaque toucher ajoute 1 ; lieu et date estimée automatiques, poids et prix facultatifs. */
 export function openProduceSheet() {
@@ -40,6 +40,10 @@ export function openProduceSheet() {
       plus: (el) => {
         const entry = picked.get(el.dataset.name);
         if (entry) setCount(entry, entry.count + 1);
+      },
+      'set-unit': (el) => {
+        const entry = picked.get(el.dataset.name);
+        if (entry) setEntryUnit(entry, el.dataset.unit, sheet.panel);
       },
       confirm: () => {
         const entries = [...picked.values()];
@@ -90,7 +94,7 @@ export function openProduceSheet() {
         ${total ? html`
           <section class="group">
             <h2>Sélection</h2>
-            <p class="hint inset">Poids et prix facultatifs, pour toute la ligne : par exemple 1,2 kg et 3,58 € pour 6 pommes.</p>
+            <p class="hint inset">Poids et prix facultatifs, pour toute la ligne : par exemple 1,2 kg et 3,58 € pour 6 pommes. Tapez le chiffre, puis touchez g ou kg.</p>
             ${selectionLines(entries)}
           </section>
           <button class="primary" data-action="confirm">${I.check}Ajouter ${S.plural(total, 'produit')} au stock</button>` : html`

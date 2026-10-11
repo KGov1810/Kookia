@@ -34,9 +34,9 @@
   padding: 0 10px; background: var(--bg); font-size: 16px; outline: none;
 }
 
-.produce-extra > input { flex: 1 1 55%; }
+.produce-extra > .unit-input { flex: 1 1 60%; }
 
-.produce-price { display: flex; align-items: center; gap: 4px; flex: 1 1 45%; min-width: 0; }
+.produce-price { display: flex; align-items: center; gap: 4px; flex: 1 1 40%; min-width: 0; }
 
 .produce-price input { text-align: right; font-variant-numeric: tabular-nums; }
 

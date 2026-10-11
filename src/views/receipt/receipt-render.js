@@ -2,6 +2,7 @@
 
 import { html, raw } from '../../components/html.js';
 import { I } from '../../components/icons.js';
+import { unitInput } from '../../components/unit-input.js';
 import * as R from '../../data/reference/index.js';
 import { hasClaudeKey } from '../../data/store/selectors.js';
 import * as S from '../../services/index.js';
@@ -84,7 +85,8 @@ export function reviewStep(ctx) {
                 <output>${item.count}</output>
                 <button data-action="line-plus" data-index="${index}" aria-label="Un de plus">+</button>
               </div>
-              <input data-field="quantity" data-index="${index}" value="${item.quantity}" placeholder="Poids" aria-label="Poids ou contenance" autocomplete="off">
+              ${unitInput({ amount: item.qtyAmount ?? item.quantity, unit: item.qtyLegacy ? null : item.qtyUnit, units: S.unitsFor(item.category),
+                dataset: { index }, inputData: { field: 'quantity' }, label: 'Poids ou contenance (chiffre)', placeholder: 'Poids' })}
             </div>
             <div class="receipt-place">
               <select class="receipt-location" data-field="location" data-index="${index}" aria-label="Lieu de rangement">

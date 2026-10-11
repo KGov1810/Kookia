@@ -24,7 +24,9 @@
 
 .receipt-fields .on-list { color: var(--herb); font-weight: 700; }
 
-.receipt-qty { display: flex; align-items: center; gap: 10px; }
+.receipt-qty { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
+
+.receipt-qty .unit-input { flex: 1 1 190px; }
 
 .receipt-qty input {
   flex: 1; min-width: 0; min-height: 34px; border: 1px solid var(--line); border-radius: 10px;

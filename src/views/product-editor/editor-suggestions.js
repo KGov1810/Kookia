@@ -8,6 +8,7 @@ import { state } from '../../data/store/state.js';
 import * as S from '../../services/index.js';
 import { dateSection } from './editor-date-section.js';
 import { suggestPrice } from './editor-price.js';
+import { refreshQuantityUnit } from './editor-quantity.js';
 import { setKind, setLocation } from './editor-state.js';
 
 // Réponses de Claude pour les noms non reconnus, le temps de la session (un seul appel par nom).
@@ -28,6 +29,7 @@ export function applyCategory(ctx, category, rememberedLocation = null) {
     if (select) select.value = category;
     const thumbEl = panel.querySelector('.name-row .thumb');
     if (thumbEl && !p.image && !p.imageUrl) thumbEl.outerHTML = fmt(thumb(p));
+    refreshQuantityUnit(ctx); // kg pour un fruit ou un légume, g sinon (si aucune unité n'a été choisie)
   }
   const place = view.locationTouched ? null : rememberedLocation ?? S.defaultLocationFor(category, p.name, p.location);
   if (place && place !== p.location) {
