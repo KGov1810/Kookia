@@ -5,16 +5,24 @@ const VERSION = '__VERSION__';
 const PRECACHE = __PRECACHE__;
 const LIBRARY_HOSTS = ['cdn.jsdelivr.net'];
 
+// Mise en cache depuis le serveur, jamais depuis le cache HTTP de Safari (il peut garder
+// quelques minutes une ancienne page index.html qui demanderait des fichiers disparus).
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(VERSION).then((cache) => cache.addAll(PRECACHE)).then(() => self.skipWaiting()));
+  event.waitUntil(caches.open(VERSION)
+    .then((cache) => cache.addAll(PRECACHE.map((url) => new Request(url, { cache: 'reload' }))))
+    .then(() => self.skipWaiting()));
 });
 
+// Les anciennes versions restent en cache : une page encore ouverte (ou servie en retard)
+// y retrouve ses fichiers. Elles sont effacées quand la nouvelle version a démarré (message « cleanup »).
 self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== VERSION).map((k) => caches.delete(k))))
-      .then(() => self.clients.claim())
-  );
+  event.waitUntil(self.clients.claim());
+});
+
+self.addEventListener('message', (event) => {
+  if (event.data !== 'cleanup') return;
+  event.waitUntil(caches.keys()
+    .then((keys) => Promise.all(keys.filter((k) => k.startsWith('kookia-') && k !== VERSION).map((k) => caches.delete(k)))));
 });
 
 self.addEventListener('fetch', (event) => {
@@ -28,9 +36,9 @@ self.addEventListener('fetch', (event) => {
       event.respondWith(caches.match(request).then((cached) => cached ?? fetch(request)));
       return;
     }
-    // Page et fichiers publics : réseau d'abord (dernière version), cache si hors ligne.
+    // Page et fichiers publics : réseau d'abord, en revalidant auprès du serveur (dernière version), cache si hors ligne.
     event.respondWith(
-      fetch(request)
+      fetch(request, { cache: 'no-cache' })
         .then((response) => {
           if (response.ok) {
             const copy = response.clone();

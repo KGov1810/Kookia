@@ -183,6 +183,7 @@ Aucune donnée n'est perdue : ni le stock, ni les recettes, ni la clé Claude.
 | « Accès refusé par Firebase » | Règles non publiées : étape 1.6. |
 | « L'historique n'est pas encore autorisé » | Recollez le fichier `firestore.rules` dans Firebase → Firestore → Règles → **Publier**. |
 | « Les statistiques ne sont pas encore autorisées » | Même chose : recollez le fichier `firestore.rules` à jour, **Publier**, puis fermez et rouvrez l'app. |
+| Juste après une mise en ligne : écran sans mise en forme (onglets bruts, rien d'autre), ou « Kookia ne s'est pas chargée » | L'iPhone a affiché l'ancienne page alors que ses fichiers avaient disparu. Depuis la version 2.7.1, l'ancienne version reste en cache jusqu'au démarrage de la nouvelle, l'app se recharge d'elle-même une fois, puis propose **Recharger l'app** (vide les caches de l'app, sans toucher au stock, enregistré en ligne). Sur une version plus ancienne : fermez l'app depuis le sélecteur d'apps et rouvrez-la quelques minutes plus tard. |
 | « Aucun foyer ne correspond à ce code » | Renvoyez l'invitation depuis le premier iPhone (Réglages → Foyer partagé). |
 | Page GitHub « 404 » | Attendez deux minutes après l'étape 2.5 ; vérifiez que `index.html` est à la racine du dépôt, pas dans un sous-dossier. |
 | « Accès à la caméra refusé » | Réglages de l'iPhone → Safari → Caméra → Autoriser (ou Demander), puis « Réessayer ». |
