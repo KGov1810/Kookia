@@ -6,6 +6,7 @@ import * as R from '../../data/reference/index.js';
 import * as store from '../../data/store/index.js';
 import * as S from '../../services/index.js';
 import { openScanner } from '../scanner/scanner.js';
+import { openingActions } from './editor-opening.js';
 import { priceIsInvalid } from './editor-price.js';
 import { setQuantityUnit } from './editor-quantity.js';
 import { handleBarcode, handleDatePhoto, handleProductPhoto } from './editor-recognition.js';
@@ -69,7 +70,8 @@ export function editorActions(ctx) {
       toast(`${same.name} : ${count} en stock`);
       ctx.sheet.close();
     },
-    ...unitsActions(ctx)
+    ...unitsActions(ctx),
+    ...openingActions(ctx)
   };
 }
 

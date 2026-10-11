@@ -49,7 +49,7 @@ export function wastedSection(movements) {
     <section class="group">
       ${rows.map((row) => html`
         <div class="field waste-row">
-          <span>${row.name}${row.count > 1 ? html` <small>×${row.count}</small>` : ''}</span>
+          <span>${row.name}${row.count !== 1 ? html` <small>×${String(Math.round(row.count * 100) / 100).replace('.', ',')}</small>` : ''}</span>
           <b>${row.priced ? S.formatEuro(row.amount) : html`<small>prix inconnu</small>`}</b>
         </div>`)}
     </section>`;

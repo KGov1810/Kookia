@@ -3,68 +3,46 @@
 import { isoInDays } from '../../services/dates/dates.js';
 import { cleanPrice } from '../../services/stats/money.js';
 import { freezerLimit } from '../../services/stock/stock-dates.js';
+import { unitsAmount } from '../../services/stock/opened.js';
 import { logChange } from './history.js';
 import { recordMovement } from './movements.js';
+import { restText, takeAmounts } from './opening.js';
 import { removeProducts, saveProduct } from './products.js';
 import { state } from './state.js';
 import { canWrite } from './writes.js';
 
-/**
- * Retire « units » unités de chaque produit ; un produit disparaît à sa dernière unité.
- * Renvoie l'état d'avant (pour « Annuler ») et ce qui a été retiré ou diminué.
- */
-function takeUnits(ids, { units = 1, type, details, unitPrice }) {
-  if (!canWrite()) return { before: [], removed: [], decremented: [] };
-  const before = state.products.filter((p) => ids.includes(p.id)).map((p) => ({ ...p }));
-  const taken = (p) => Math.min(units, p.count ?? 1);
-  const priced = (p) => (unitPrice === undefined ? p : { ...p, unitPrice: cleanPrice(unitPrice) });
-  const removed = before.filter((p) => (p.count ?? 1) <= taken(p));
-  const decremented = before.filter((p) => (p.count ?? 1) > taken(p));
-  before.forEach((p) => {
-    const rest = (p.count ?? 1) - taken(p);
-    logChange({
-      scope: 'stock', action: type === 'jete' ? 'jete' : 'consommation', name: p.name, itemId: p.id,
-      details: details(p, taken(p), rest)
-    });
-    recordMovement(type, priced(p), taken(p));
-  });
-  if (removed.length) removeProducts(removed.map((p) => p.id), { log: false });
-  decremented.forEach((p) => saveProduct({ ...priced(p), count: p.count - taken(p) }, { log: false }));
-  return { before, removed, decremented };
-}
+const byIds = (ids) => state.products.filter((p) => ids.includes(p.id));
 
-/** Consomme une unité de chaque produit (rond de la liste, recette cuisinée). */
+/** Consomme une unité de chaque produit (rond de la liste) ; l'unité entamée compte pour ce qu'il en reste. */
 export function consumeOne(ids, { reason = '' } = {}) {
-  return takeUnits(ids, {
-    units: 1,
+  return takeAmounts(byIds(ids).map((product) => ({ product, amount: unitsAmount(product, 1) })), {
     type: 'consomme',
-    details: (_p, _taken, rest) => [rest > 0 ? `il en reste ${rest}` : 'plus en stock', reason]
+    details: (_p, rest) => [restText(rest), reason]
   });
 }
 
-/** « 2 sur 10 », « il en reste 8 » : détails de l'historique quand on choisit un nombre d'unités. */
-function unitDetails(p, taken, rest) {
-  return [(p.count ?? 1) > 1 ? `${taken} sur ${p.count}` : '', rest > 0 ? `il en reste ${rest}` : 'plus en stock'];
+/** « 2 sur 10 » : unités choisies à la main dans la fiche (prix affiché dans la fiche, s'il a été saisi). */
+function takeChosen(id, units, type, unitPrice) {
+  const n = Math.max(1, Math.round(Number(units) || 1));
+  return takeAmounts(byIds([id]).map((product) => ({ product, amount: unitsAmount(product, n) })), {
+    type,
+    unitPrice,
+    details: (p, rest) => [(p.count ?? 1) > 1 ? `${Math.min(n, p.count)} sur ${p.count}` : '', restText(rest)]
+  });
 }
 
-/** Consomme « units » unités d'un produit (fiche produit ; prix affiché dans la fiche, s'il a été saisi). */
 export function consumeUnits(id, units, { unitPrice } = {}) {
-  return takeUnits([id], {
-    units: Math.max(1, Math.round(Number(units) || 1)),
-    type: 'consomme',
-    unitPrice,
-    details: unitDetails
-  });
+  return takeChosen(id, units, 'consomme', unitPrice);
 }
 
-/** Jette « units » unités d'un produit (prix affiché dans la fiche, s'il a été saisi). */
 export function discardUnits(id, units, { unitPrice } = {}) {
-  return takeUnits([id], {
-    units: Math.max(1, Math.round(Number(units) || 1)),
-    type: 'jete',
-    unitPrice,
-    details: unitDetails
-  });
+  return takeChosen(id, units, 'jete', unitPrice);
+}
+
+/** Recette cuisinée : uses [{ id, amount }] en unités (0,4 = 200 g d'un paquet de 500 g). */
+export function consumeAmounts(uses, { reason = '' } = {}) {
+  const entries = uses.map(({ id, amount }) => ({ product: state.products.find((p) => p.id === id), amount })).filter((e) => e.product);
+  return takeAmounts(entries, { type: 'consomme', details: (_p, rest) => [restText(rest), reason] });
 }
 
 /**

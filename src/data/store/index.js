@@ -8,6 +8,7 @@ export * from './household.js';
 export * from './mappers.js';
 export * from './placements.js';
 export * from './movements.js';
+export * from './opening.js';
 export * from './prices.js';
 export * from './products.js';
 export * from './recipes.js';

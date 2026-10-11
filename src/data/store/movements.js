@@ -32,7 +32,7 @@ export function recordMovement(type, product, count = 1) {
     productId: product.id ?? '',
     category: product.category || 'autre',
     location: product.location || 'frigo',
-    count: Math.max(1, Math.round(Number(count) || 1)),
+    count: Math.round(Math.max(0.001, Number(count) || 1) * 1000) / 1000, // une part d'un produit entamé : 0,5
     unitPrice: cleanPrice(product.unitPrice),
     by: state.settings.userName || '',
     uid: auth?.currentUser?.uid ?? '',

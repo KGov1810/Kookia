@@ -2,6 +2,7 @@
 // Calculée sur les produits en stock qui ont un prix (aucune lecture Firebase en plus).
 
 import { LOCATIONS, locationOf } from '../../data/reference/locations.js';
+import { stockAmount } from '../stock/opened.js';
 import { stockStatus } from '../stock/stock-status.js';
 import { lineAmount, roundCents } from './money.js';
 
@@ -11,7 +12,7 @@ export function stockValue(products, alertDays = 2, today = new Date()) {
   for (const product of products) {
     const place = places.get(locationOf(product.location).id);
     place.count += 1;
-    const amount = lineAmount(product.unitPrice, product.count ?? 1);
+    const amount = lineAmount(product.unitPrice, stockAmount(product)); // un produit entamé compte pour ce qu'il en reste
     if (amount === null) {
       out.unpriced += 1;
       continue;

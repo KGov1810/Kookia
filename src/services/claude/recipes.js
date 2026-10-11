@@ -4,6 +4,7 @@ import { category } from '../../data/reference/categories.js';
 import { originOf } from '../../data/reference/origins.js';
 import { quantityLabel } from '../quantities/quantities.js';
 import { filterLines } from '../recipes/recipe-filters.js';
+import { isOpened, remainingLabel, remainingOf } from '../stock/opened.js';
 import { promptStock } from '../stock/stock-status.js';
 import { nameMatchScore } from '../text/text.js';
 import { callTool } from './client.js';
@@ -22,6 +23,7 @@ export async function generateRecipes({ key, model, priority, others, shopping, 
     const parts = [`[P${index}] ${p.name}`];
     if (quantityLabel(p)) parts.push(`quantité : ${quantityLabel(p)}`);
     parts.push(category(p.category).label.toLowerCase(), promptStock(p));
+    if (isOpened(p)) parts.push(`entamé, il en reste ${remainingLabel(remainingOf(p))} : à finir en priorité`);
     return `- ${parts.join(' – ')}`;
   };
   const priorityLines = priority.map(describe);

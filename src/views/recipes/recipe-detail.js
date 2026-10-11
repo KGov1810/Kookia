@@ -62,12 +62,13 @@ export function openRecipe(id) {
       cooked: () => {
         const recipe = findRecipe();
         if (!recipe) return;
-        const used = store.recipeAvailability(recipe).inFridge;
-        if (!used.length) return;
-        const list = used.map((p) => ((p.count ?? 1) > 1 ? `${p.name} (1 sur ${p.count})` : p.name)).join(', ');
-        if (!window.confirm(`Retirer une unité du stock : ${list} ?`)) return;
-        const { before } = store.consumeOne(used.map((p) => p.id), { reason: `recette « ${recipe.title} »` });
-        toast(`${S.plural(before.length, 'produit')} mis à jour dans le stock`, 'Annuler', () => store.restoreProducts(before));
+        // Quantités de la recette (portions affichées) : 200 g d'un paquet de 500 g → le paquet est entamé.
+        const uses = store.recipeUses(recipe, factorFor(recipe));
+        if (!uses.length) return;
+        const list = uses.map((u) => `• ${u.product.name} : ${u.computed && u.quantity ? u.quantity : '1 unité'} → ${store.restText(S.splitAfter(u.product, u.amount))}`).join('\n');
+        if (!window.confirm(`Retirer du stock ?\n${list}`)) return;
+        const done = store.consumeAmounts(uses.map((u) => ({ id: u.product.id, amount: u.amount })), { reason: `recette « ${recipe.title} »` });
+        toast(`${S.plural(done.before.length, 'produit')} mis à jour dans le stock`, 'Annuler', () => store.undoTake(done));
       },
       share: () => {
         const recipe = findRecipe();

@@ -44,7 +44,7 @@ export function unitsButton(ctx, kind) {
 }
 
 /** Prix affiché dans la fiche : il compte pour ce qui sort du stock, même s'il vient d'être saisi. */
-function price(ctx) {
+export function price(ctx) {
   return ctx.view.priceTouched ? { unitPrice: ctx.p.unitPrice } : {};
 }
 
@@ -59,10 +59,13 @@ const RUN = {
     const { p } = ctx;
     const total = inStock(ctx);
     // Tout d'un coup : « tout consommé » dans l'historique ; une partie : « 2 sur 10, il en reste 8 ».
-    const before = units >= total
-      ? store.removeProducts([p.id], { reason: 'tout consommé', movement: 'consomme', ...price(ctx) })
-      : store.consumeUnits(p.id, units, price(ctx)).before;
-    if (before.length) toast(outMessage(before[0], Math.min(units, total), 'consommé'), 'Annuler', () => store.restoreProducts(before));
+    if (units >= total) {
+      const before = store.removeProducts([p.id], { reason: 'tout consommé', movement: 'consomme', ...price(ctx) });
+      if (before.length) toast(outMessage(before[0], total, 'consommé'), 'Annuler', () => store.restoreProducts(before));
+      return;
+    }
+    const done = store.consumeUnits(p.id, units, price(ctx));
+    if (done.before.length) toast(outMessage(done.before[0], units, 'consommé'), 'Annuler', () => store.undoTake(done));
   },
   freeze(ctx, units) {
     const done = store.freezeUnits(ctx.p, units);
@@ -72,8 +75,8 @@ const RUN = {
     toast(`${ctx.p.name} : ${what}, idéalement avant ${when}`, 'Annuler', () => store.undoFreeze(done));
   },
   discard(ctx, units) {
-    const { before } = store.discardUnits(ctx.p.id, units, price(ctx));
-    if (before.length) toast(outMessage(before[0], Math.min(units, before[0].count ?? 1), 'jeté'), 'Annuler', () => store.restoreProducts(before));
+    const done = store.discardUnits(ctx.p.id, units, price(ctx));
+    if (done.before.length) toast(outMessage(done.before[0], Math.min(units, done.before[0].count ?? 1), 'jeté'), 'Annuler', () => store.undoTake(done));
   }
 };
 
@@ -92,6 +95,7 @@ export function unitsActions(ctx) {
       return;
     }
     view.take = view.take?.kind === kind ? null : { kind, units: 1 };
+    view.opening = false;
     ctx.sheet.update();
   };
   const set = (units) => {

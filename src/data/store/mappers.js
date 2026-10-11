@@ -1,6 +1,7 @@
 // Kookia — Conversion des documents Firestore.
 
 import { cleanPrice } from '../../services/stats/money.js';
+import { remainingOf } from '../../services/stock/opened.js';
 import { normalizeCategory } from '../../services/stock/categorization.js';
 
 /** Version des catégories : 2 = catégories détaillées (fruits, légumes, fromages…). */
@@ -16,6 +17,8 @@ export function toProduct(id, d) {
     category: (d.categoryVersion ?? 1) >= CATEGORY_VERSION ? (d.category ?? 'autre') : normalizeCategory(d.category ?? 'autre', d.name),
     quantity: d.quantity ?? '',
     count: Number(d.count) >= 1 ? Math.round(Number(d.count)) : 1, // nombre d'unités (anciens produits : 1)
+    remaining: Number(d.count) > 1 ? 1 : remainingOf(d), // part restante d'un produit entamé (1 : intact)
+    openedAt: d.openedAt ?? '',
     location: d.location || 'frigo',   // anciens produits : au frigo
     dateKind: d.dateKind || 'dlc',     // anciens produits : date limite imprimée
     frozenAt: d.frozenAt ?? '',
@@ -39,7 +42,7 @@ export function toMovement(id, d) {
     name: d.name ?? '',
     category: d.category || 'autre',
     location: d.location || 'frigo',
-    count: Number(d.count) >= 1 ? Math.round(Number(d.count)) : 1,
+    count: Number(d.count) > 0 ? Math.round(Number(d.count) * 1000) / 1000 : 1, // fractions : produit entamé
     unitPrice: cleanPrice(d.unitPrice),
     by: d.by ?? '',
     clientAt: d.clientAt

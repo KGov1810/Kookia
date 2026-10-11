@@ -5,6 +5,8 @@ import { scaleIngredient } from '../../services/quantities/portions.js';
 import { splitItemName } from '../../services/quantities/quantities.js';
 import { matchesFilters, maxPurchases } from '../../services/recipes/recipe-filters.js';
 import { resolveIngredient } from '../../services/stock/matching.js';
+import { stockAmount } from '../../services/stock/opened.js';
+import { recipeUnits } from '../../services/stock/recipe-usage.js';
 import { db } from './connection.js';
 import { logChange } from './history.js';
 import { productStatus } from './selectors.js';
@@ -97,6 +99,24 @@ export function recipeAvailability(recipe, priorityIds = new Set()) {
   const priorityUsed = inFridge.filter((p) => priorityIds.has(p.id)).length;
   const urgentUsed = inFridge.filter((p) => ['expired', 'soon'].includes(productStatus(p))).length;
   return { rows, inFridge, missing, priorityUsed, urgentUsed };
+}
+
+/**
+ * Ce que « J'ai cuisiné » retire : pour chaque produit utilisé, la part calculée d'après les quantités
+ * de la recette (portions comprises), ou une unité entière si ce n'est pas calculable.
+ * Renvoie [{ product, amount, quantity, computed }].
+ */
+export function recipeUses(recipe, factor = 1) {
+  const uses = new Map();
+  for (const row of recipeAvailability(recipe).rows.filter((r) => r.product)) {
+    const units = recipeUnits(row.ingredient, row.product, factor);
+    const use = uses.get(row.product.id) ?? { product: row.product, amount: 0, quantity: [], computed: true };
+    use.amount += units ?? 1;
+    use.computed &&= units !== null;
+    use.quantity.push(scaleIngredient(row.ingredient, factor));
+    uses.set(row.product.id, use);
+  }
+  return [...uses.values()].map((u) => ({ ...u, amount: Math.min(u.amount, stockAmount(u.product)), quantity: u.quantity.filter(Boolean).join(' + ') }));
 }
 
 /**

@@ -4,6 +4,7 @@ import { setDoc, writeBatch } from 'firebase/firestore';
 import { isoInDays, toISODate } from '../../services/dates/dates.js';
 import { quantityLabel } from '../../services/quantities/quantities.js';
 import { cleanPrice } from '../../services/stats/money.js';
+import { remainingOf, stockAmount } from '../../services/stock/opened.js';
 import { dateKindOf, estimateFreshDays, freezerLimit } from '../../services/stock/stock-dates.js';
 import { locationOf } from '../reference/locations.js';
 import { db } from './connection.js';
@@ -14,6 +15,12 @@ import { rememberPrices } from './prices.js';
 import { rememberRecipeLinks } from './recipes.js';
 import { state } from './state.js';
 import { canWrite, ref, write } from './writes.js';
+
+/** Part restante (une ligne entamée n'a qu'un exemplaire) et date d'ouverture. */
+function openedFields(product, count) {
+  const remaining = count > 1 ? 1 : remainingOf(product);
+  return { remaining, openedAt: remaining < 1 ? product.openedAt || toISODate(new Date()) : '' };
+}
 
 /** Enregistre un produit. Un produit nouveau est noté comme un achat (sauf « Annuler », sans log). */
 export function saveProduct(product, { log = true, purchase = log } = {}) {
@@ -43,7 +50,8 @@ export function saveProduct(product, { log = true, purchase = log } = {}) {
     createdAt: product.createdAt || Date.now(),
     image: product.image || '',
     imageUrl: product.imageUrl || '',
-    unitPrice: cleanPrice(product.unitPrice)
+    unitPrice: cleanPrice(product.unitPrice),
+    ...openedFields(product, count)
   }));
   if (!before && purchase) recordMovement('achat', product, count);
   if (log) rememberPrices([product]);
@@ -61,7 +69,7 @@ export function removeProducts(ids, { log = true, reason = '', movement = '', un
     removed.forEach((p) => logChange({ scope: 'stock', action: 'suppression', name: p.name, itemId: p.id, details: [reason, quantityLabel(p)] }));
   }
   if (movement) {
-    removed.forEach((p) => recordMovement(movement, unitPrice === undefined ? p : { ...p, unitPrice }, p.count ?? 1));
+    removed.forEach((p) => recordMovement(movement, unitPrice === undefined ? p : { ...p, unitPrice }, stockAmount(p)));
   }
   rememberRecipeLinks(removed);
   const batch = writeBatch(db);

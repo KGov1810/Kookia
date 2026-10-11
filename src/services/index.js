@@ -25,6 +25,8 @@ export * from './stats/stats.js';
 export * from './stats/stock-value.js';
 export * from './stock/categorization.js';
 export * from './stock/matching.js';
+export * from './stock/opened.js';
+export * from './stock/recipe-usage.js';
 export * from './stock/stock-dates.js';
 export * from './stock/stock-status.js';
 export * from './text/text.js';

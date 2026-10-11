@@ -20,7 +20,8 @@ export function createEditorContext({ product = null, draft = null, mode = 'manu
     dateTouched: !isNew, locationTouched: !isNew || Boolean(draft?.location), categoryTouched: !isNew || Boolean(draft?.category),
     busy: '', info: '', error: '', sameProductId: null,
     priceText: S.priceInputValue(p.unitPrice), priceTouched: false, priceSuggested: false, take: null,
-    userCategory: false, userLocation: false // catégorie ou lieu changés à la main (mémoire des corrections)
+    userCategory: false, userLocation: false, // catégorie ou lieu changés à la main (mémoire des corrections)
+    opening: false // choix « Combien en reste-t-il ? » ouvert
   };
   if (isNew && p.name && !draft?.category) {
     // Nom déjà connu (article de courses rangé) : catégorie et lieu retenus ou proposés, date estimée pour un fruit ou un légume.

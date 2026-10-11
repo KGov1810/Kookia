@@ -70,3 +70,10 @@
 .days.old { background: color-mix(in srgb, var(--apricot) 22%, var(--surface)); color: var(--apricot); transform: rotate(-1deg); }
 
 .days small { text-align: center; }
+
+/* Produit entamé : petite jauge de la part qui reste, devant le texte. */
+.opened-gauge {
+  display: inline-block; width: 22px; height: 8px; margin-right: 6px; border-radius: 4px; vertical-align: 1px;
+  background: linear-gradient(to right, var(--apricot) var(--left), var(--surface-2) var(--left));
+  box-shadow: inset 0 0 0 1px var(--line);
+}

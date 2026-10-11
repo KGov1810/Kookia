@@ -1,6 +1,6 @@
 // Kookia — Liste des produits du stock.
 
-import { html } from '../../components/html.js';
+import { html, raw } from '../../components/html.js';
 import { I } from '../../components/icons.js';
 import { dayCounter, thumb } from '../../components/product-visuals.js';
 import { toast } from '../../components/toast.js';
@@ -48,6 +48,7 @@ export function fridgeList() {
 function productRow(product) {
   const status = store.productStatus(product);
   const meta = [
+    S.isOpened(product) ? `Entamé, reste ${S.remainingLabel(S.remainingOf(product))}` : '', // en tête : ne pas le couper
     ui.location ? '' : R.locationOf(product.location).label,
     S.quantityLabel(product),
     S.stockShort(product),
@@ -55,13 +56,18 @@ function productRow(product) {
   ].filter(Boolean).join(', ');
   return html`
     <div class="product" data-id="${product.id}">
-      <button class="consume" data-action="consume" data-id="${product.id}" aria-label="${(product.count ?? 1) > 1 ? `Consommé : un ${product.name} de moins (il en reste ${product.count - 1})` : `Consommé : retirer ${product.name} du stock`}"></button>
+      <button class="consume" data-action="consume" data-id="${product.id}" aria-label="${(product.count ?? 1) > 1 ? `Consommé : un ${product.name} de moins (il en reste ${product.count - 1})` : `Consommé : ${S.isOpened(product) ? 'finir' : 'retirer'} ${product.name} du stock`}"></button>
       <button class="product-main" data-action="edit" data-id="${product.id}">
         ${thumb(product)}
-        <span class="product-text"><span class="product-name">${product.name}</span><span class="product-meta">${meta}</span></span>
+        <span class="product-text"><span class="product-name">${product.name}</span><span class="product-meta">${S.isOpened(product) ? openedGauge(product) : ''}${meta}</span></span>
         ${dayCounter(product)}
       </button>
     </div>`;
+}
+
+/** Petite jauge d'un produit entamé : la part qui reste. */
+function openedGauge(product) {
+  return html`<i class="opened-gauge" style="${raw(`--left: ${Math.round(S.remainingOf(product) * 100)}%`)}" aria-hidden="true"></i>`;
 }
 
 /** Le rond d'un produit consomme une unité ; le produit disparaît à la dernière. */
@@ -72,14 +78,14 @@ export function consume(id) {
   const row = screen.querySelector(`.product[data-id="${CSS.escape(id)}"]`);
   if (last) row?.classList.add('leaving');
   setTimeout(() => {
-    const { before } = store.consumeOne([id]);
-    if (!before.length) {
+    const done = store.consumeOne([id]);
+    if (!done.before.length) {
       row?.classList.remove('leaving');
       return;
     }
     const message = last
-      ? `${product.name} : retiré du stock`
+      ? `${product.name} : ${S.isOpened(product) ? 'fini, ' : ''}retiré du stock`
       : `${product.name} : il en reste ${product.count - 1}`;
-    toast(message, 'Annuler', () => store.restoreProducts(before));
+    toast(message, 'Annuler', () => store.undoTake(done));
   }, last ? 180 : 0);
 }

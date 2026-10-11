@@ -38,5 +38,6 @@ export function priceInputValue(value) {
 /** Montant d'un lot : prix unitaire × nombre (null si le prix est inconnu). */
 export function lineAmount(unitPrice, count = 1) {
   const price = cleanPrice(unitPrice);
-  return price === null ? null : roundCents(price * Math.max(1, Number(count) || 1));
+  const units = Number(count) > 0 ? Number(count) : 1; // fractions comprises (une moitié de produit entamé)
+  return price === null ? null : roundCents(price * units);
 }

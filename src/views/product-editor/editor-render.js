@@ -9,6 +9,7 @@ import { hasClaudeKey } from '../../data/store/selectors.js';
 import * as S from '../../services/index.js';
 import { dateSection } from './editor-date-section.js';
 import { priceField } from './editor-price.js';
+import { openingSection } from './editor-opening.js';
 import { quantityField } from './editor-quantity.js';
 import { unitsButton } from './editor-units.js';
 
@@ -59,6 +60,7 @@ export function renderEditor(ctx) {
           ${p.addedBy ? html`<div class="field"><span>Ajouté par</span><span class="muted">${p.addedBy}</span></div>` : ''}
           <button class="row-button" data-action="to-shopping">${I.cart}Ajouter à la liste de courses</button>
           ${p.location !== 'congelateur' && p.location !== 'placard' ? unitsButton(ctx, 'freeze') : ''}
+          ${openingSection(ctx)}
           ${unitsButton(ctx, 'consume')}
           ${unitsButton(ctx, 'discard')}
         </section>`}
