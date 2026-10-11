@@ -15,6 +15,7 @@ export * from './device/script-loader.js';
 export * from './external/open-food-facts.js';
 export * from './quantities/portions.js';
 export * from './quantities/quantities.js';
+export * from './quantities/weights.js';
 export * from './recipes/recipe-filters.js';
 export * from './stats/money.js';
 export * from './stats/periods.js';

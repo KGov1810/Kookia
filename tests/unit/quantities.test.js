@@ -21,3 +21,20 @@ test('quantityLabel', () => {
   expect(S.quantityLabel({ quantity: '500 g' })).toBe('500 g');
   expect(S.quantityLabel({ count: 1, quantity: '' })).toBe('');
 });
+
+describe('poids total réparti par pièce', () => {
+  it.each([
+    ['1,2 kg', 6, '200 g'], ['1.2kg', 6, '200 g'], ['800 g', 3, '267 g'], ['800', 3, '267 g'],
+    ['1,2', 6, '200 g'], ['2,5 kg', 2, '1,25 kg'], ['1 L', 2, '500 ml'], ['75 cl', 1, '750 ml'],
+    ['500 g', 1, '500 g'], ['1 botte', 1, '1 botte'], ['', 4, ''], ['un sac', 3, null]
+  ])('« %s » pour %i → %s', (text, count, expected) => {
+    expect(S.weightPerPiece(text, count)).toBe(expected);
+  });
+
+  it('lecture et mise en forme', () => {
+    expect(S.parseWeight('3 kilos')).toEqual({ base: 'g', amount: 3000 });
+    expect(S.parseWeight('abc')).toBe(null);
+    expect(S.parseWeight('0 g')).toBe(null);
+    expect(S.formatWeight({ base: 'g', amount: 1500 })).toBe('1,5 kg');
+  });
+});

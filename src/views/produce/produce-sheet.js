@@ -8,11 +8,19 @@ import * as R from '../../data/reference/index.js';
 import * as store from '../../data/store/index.js';
 import * as S from '../../services/index.js';
 import { simplify } from '../../services/text/text.js';
+import { newEntry, onSelectionInput, selectionError, selectionLines, suggestLinePrice, toProduct } from './produce-selection.js';
 
-/** Grille de fruits et légumes courants : chaque toucher ajoute 1 ; lieu et date estimée automatiques. */
+/** Grille de fruits et légumes courants : chaque toucher ajoute 1 ; lieu et date estimée automatiques, poids et prix facultatifs. */
 export function openProduceSheet() {
-  const picked = new Map(); // nom → { item, count }
+  const picked = new Map(); // nom → { item, count, weight, priceText… }
   let query = '';
+  let error = '';
+  const setCount = (entry, count) => {
+    entry.count = Math.max(0, Math.min(99, count));
+    if (entry.count <= 0) picked.delete(entry.item.name);
+    else suggestLinePrice(entry);
+    sheet.update();
+  };
 
   const sheet = openSheet({
     tall: true,
@@ -21,43 +29,38 @@ export function openProduceSheet() {
       add: (el) => {
         const item = R.PRODUCE.find((x) => x.name === el.dataset.name)
           ?? { name: el.dataset.name, emoji: '🥬', place: 'fruits', days: S.estimateFreshDays(el.dataset.name, 'fruits') };
-        const entry = picked.get(item.name) ?? { item, count: 0 };
-        entry.count = Math.min(99, entry.count + 1);
+        const entry = picked.get(item.name) ?? newEntry(item);
         picked.set(item.name, entry);
-        sheet.update();
+        setCount(entry, entry.count + 1);
       },
       minus: (el) => {
         const entry = picked.get(el.dataset.name);
-        if (!entry) return;
-        entry.count -= 1;
-        if (entry.count <= 0) picked.delete(el.dataset.name);
-        sheet.update();
+        if (entry) setCount(entry, entry.count - 1);
       },
       plus: (el) => {
         const entry = picked.get(el.dataset.name);
-        if (entry) entry.count = Math.min(99, entry.count + 1);
-        sheet.update();
+        if (entry) setCount(entry, entry.count + 1);
       },
       confirm: () => {
         const entries = [...picked.values()];
         if (!entries.length) return;
-        entries.forEach(({ item, count }) => store.saveProduct({
-          id: crypto.randomUUID(),
-          name: item.name,
-          category: item.type ?? S.guessCategory(item.name) ?? 'legumes',
-          quantity: '',
-          count,
-          location: item.place,
-          dateKind: 'estimee',
-          expiry: S.isoInDays(item.days),
-          frozenAt: '',
-          unitPrice: store.lastKnownPrice({ name: item.name }) // modifiable ensuite dans la fiche
-        }));
+        error = selectionError(entries);
+        if (error) {
+          sheet.update();
+          return;
+        }
+        entries.forEach((entry) => store.saveProduct(toProduct(entry)));
         sheet.close();
         toast(`${S.plural(entries.length, 'produit ajouté', 'produits ajoutés')} (dates estimées)`);
       }
     },
     onInput: (event) => {
+      const field = event.target.dataset.field;
+      if (field && event.type === 'input') {
+        const entry = picked.get(event.target.dataset.name);
+        if (entry) onSelectionInput(entry, field, event.target.value, sheet.panel);
+        return;
+      }
       if (event.target.name !== 'produce-search') return;
       query = event.target.value;
       const results = sheet.panel.querySelector('#produce-results');
@@ -83,17 +86,12 @@ export function openProduceSheet() {
         <button class="link strong" data-action="confirm" ${total ? '' : raw('disabled')}>Ajouter</button>
       </header>
       <div class="sheet-body">
+        ${error ? html`<p class="note warn">${error}</p>` : ''}
         ${total ? html`
           <section class="group">
             <h2>Sélection</h2>
-            ${entries.map(({ item, count }) => html`
-              <div class="field"><span class="label-stack">${item.emoji} ${item.name}<small>${R.locationOf(item.place).label}, se garde ≈ ${S.durationText(item.days)}</small></span>
-                <div class="stepper small">
-                  <button data-action="minus" data-name="${item.name}" aria-label="Un ${item.name} de moins">−</button>
-                  <output>${count}</output>
-                  <button data-action="plus" data-name="${item.name}" aria-label="Un ${item.name} de plus">+</button>
-                </div>
-              </div>`)}
+            <p class="hint inset">Poids et prix facultatifs, pour toute la ligne : par exemple 1,2 kg et 3,58 € pour 6 pommes.</p>
+            ${selectionLines(entries)}
           </section>
           <button class="primary" data-action="confirm">${I.check}Ajouter ${S.plural(total, 'produit')} au stock</button>` : html`
           <p class="hint">Touchez ce que vous avez acheté (plusieurs fois pour en ajouter plusieurs). Le lieu et une date de conservation estimée sont choisis automatiquement ; modifiables ensuite.</p>`}

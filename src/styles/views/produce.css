@@ -19,3 +19,27 @@
 .produce-chip.custom { border-style: dashed; color: var(--herb); }
 
 .produce-chip.custom svg { width: 18px; height: 18px; }
+
+/* Sélection : poids total et prix payé sous chaque ligne. */
+.produce-line { border-top: 1px solid var(--line); }
+
+.group > h2 + .hint + .produce-line { border-top: 0; }
+
+.produce-line .field { border-top: 0; }
+
+.produce-extra { display: flex; gap: 8px; padding: 0 16px 10px; }
+
+.produce-extra input {
+  width: 100%; min-width: 0; min-height: 36px; border: 1px solid var(--line); border-radius: 10px;
+  padding: 0 10px; background: var(--bg); font-size: 16px; outline: none;
+}
+
+.produce-extra > input { flex: 1 1 55%; }
+
+.produce-price { display: flex; align-items: center; gap: 4px; flex: 1 1 45%; min-width: 0; }
+
+.produce-price input { text-align: right; font-variant-numeric: tabular-nums; }
+
+.produce-price b { flex: none; color: var(--muted); font-weight: 600; }
+
+.group .produce-hint { margin: -4px 0 0; padding: 0 16px 10px; }
