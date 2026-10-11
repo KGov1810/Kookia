@@ -6,6 +6,7 @@ export * from './history.js';
 export * from './household-codes.js';
 export * from './household.js';
 export * from './mappers.js';
+export * from './placements.js';
 export * from './movements.js';
 export * from './prices.js';
 export * from './products.js';

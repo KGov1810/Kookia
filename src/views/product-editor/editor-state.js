@@ -1,6 +1,7 @@
 // Kookia — Fiche produit : état (produit en cours, lieu, type de date).
 
 import * as R from '../../data/reference/index.js';
+import * as store from '../../data/store/index.js';
 import { state } from '../../data/store/state.js';
 import * as S from '../../services/index.js';
 import { ui } from '../app/ui-state.js';
@@ -18,16 +19,17 @@ export function createEditorContext({ product = null, draft = null, mode = 'manu
   const view = {
     dateTouched: !isNew, locationTouched: !isNew || Boolean(draft?.location), categoryTouched: !isNew || Boolean(draft?.category),
     busy: '', info: '', error: '', sameProductId: null,
-    priceText: S.priceInputValue(p.unitPrice), priceTouched: false, priceSuggested: false, take: null
+    priceText: S.priceInputValue(p.unitPrice), priceTouched: false, priceSuggested: false, take: null,
+    userCategory: false, userLocation: false // catégorie ou lieu changés à la main (mémoire des corrections)
   };
-  if (isNew && !draft?.location && p.name) {
-    // Fruit ou légume reconnu (ex. rangé depuis la liste de courses) : son lieu habituel, date estimée.
-    const produce = S.produceFor(p.name);
-    if (produce) {
-      p.location = produce.place;
-      p.category = produce.type;
-      p.dateKind = 'estimee';
-    }
+  if (isNew && p.name && !draft?.category) {
+    // Nom déjà connu (article de courses rangé) : catégorie et lieu retenus ou proposés, date estimée pour un fruit ou un légume.
+    const memo = store.rememberedPlacement(p);
+    const category = memo.category ?? S.guessCategory(p.name);
+    if (category) p.category = category;
+    const place = draft?.location ? null : memo.location ?? (category ? S.defaultLocationFor(category, p.name, p.location) : null);
+    if (place) p.location = place;
+    if ((category === 'fruits' || category === 'legumes') && R.KINDS_BY_LOCATION[p.location]?.includes('estimee')) p.dateKind = 'estimee';
   }
   const ctx = { p, view, isNew, shoppingItemId, draft, mode, filePromise, barcode, sheet: null };
   applyKnownPrice(ctx); // nom déjà connu (article de courses rangé) : dernier prix payé

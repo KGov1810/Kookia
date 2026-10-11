@@ -82,20 +82,32 @@ export function selectionError(entries) {
   return '';
 }
 
-/** Produit à enregistrer : poids et prix ramenés à une pièce. */
+/** Date selon le lieu : estimée d'ordinaire ; congelée ou sans date si le rangement retenu l'impose. */
+function dates(location, category, days) {
+  const kinds = R.KINDS_BY_LOCATION[location] ?? ['estimee'];
+  if (kinds.includes('estimee')) return { dateKind: 'estimee', expiry: S.isoInDays(days), frozenAt: '' };
+  if (kinds[0] === 'congele') {
+    const frozenAt = S.isoInDays(0);
+    return { dateKind: 'congele', frozenAt, expiry: S.freezerLimit(category, frozenAt) };
+  }
+  return { dateKind: kinds[0], expiry: '', frozenAt: '' };
+}
+
+/** Produit à enregistrer : poids et prix ramenés à une pièce, rangement corrigé auparavant s'il existe. */
 export function toProduct(entry) {
   const { item, count } = entry;
   const price = S.parsePrice(entry.priceText);
+  const memo = store.rememberedPlacement({ name: item.name });
+  const location = memo.location ?? item.place;
+  const category = memo.category ?? item.type ?? S.guessCategory(item.name) ?? 'legumes';
   return {
     id: crypto.randomUUID(),
     name: item.name,
-    category: item.type ?? S.guessCategory(item.name) ?? 'legumes',
+    category,
     quantity: S.weightPerPiece(entry.weight, count) ?? '',
     count,
-    location: item.place,
-    dateKind: 'estimee',
-    expiry: S.isoInDays(item.days),
-    frozenAt: '',
+    location,
+    ...dates(location, category, item.days),
     unitPrice: price === null ? null : S.cleanPrice(price / count)
   };
 }

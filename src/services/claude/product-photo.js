@@ -3,6 +3,7 @@
 import { CATEGORY_IDS } from '../../data/reference/categories.js';
 import { addDays, parseISODate, startOfDay, toISODate } from '../dates/dates.js';
 import { normalizeCategory } from '../stock/categorization.js';
+import { CATEGORY_GUIDE } from './category-guide.js';
 import { callTool } from './client.js';
 
 /** Analyse la photo d'un produit : { isFood, name, category, quantity, expiry } */
@@ -19,7 +20,7 @@ export async function analyzeProduct({ key, model, base64 }) {
         properties: {
           est_alimentaire: { type: 'boolean' },
           nom: { type: 'string', description: 'Nom court en français : type de produit + marque si visible (ex. Yaourt nature Danone).' },
-          categorie: { type: 'string', enum: categoryIds },
+          categorie: { type: 'string', enum: categoryIds, description: 'Identifiant de la catégorie, voir la liste des catégories.' },
           quantite: { type: 'string', description: 'Poids, volume ou nombre si visible, sinon chaîne vide.' },
           date_peremption: { type: 'string', description: 'Date DLC/DDM lisible au format AAAA-MM-JJ, sinon chaîne vide.' }
         },
@@ -32,7 +33,9 @@ export async function analyzeProduct({ key, model, base64 }) {
         type: 'text',
         text: `Identifie ce produit alimentaire photographié. Nous sommes le ${toISODate(new Date())}.
 Si une date de péremption (« à consommer jusqu'au », « à consommer de préférence avant », DLC, DDM, EXP) est lisible, donne-la au format AAAA-MM-JJ ; si seuls le mois et l'année figurent, prends le dernier jour du mois.
-N'invente jamais de date : laisse une chaîne vide si elle n'est pas lisible.`
+N'invente jamais de date : laisse une chaîne vide si elle n'est pas lisible.
+
+${CATEGORY_GUIDE}`
       }
     ],
     maxTokens: 1024,

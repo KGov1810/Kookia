@@ -4,6 +4,7 @@ import { CATEGORY_IDS } from '../../data/reference/categories.js';
 import { LOCATIONS } from '../../data/reference/locations.js';
 import { cleanPrice } from '../stats/money.js';
 import { normalizeCategory } from '../stock/categorization.js';
+import { CATEGORY_GUIDE } from './category-guide.js';
 import { callTool } from './client.js';
 
 /**
@@ -26,7 +27,9 @@ Liste uniquement les produits alimentaires et les boissons achetés.
 - lieu : où ranger le produit à la maison : « frigo » (produits frais), « congelateur » (surgelés), « placard » (épicerie, conserves, boissons, produits secs), « fruits » (fruits et légumes qui se gardent hors du frigo : bananes, pommes de terre, oignons…).
 - prix : montant payé pour ce produit en euros, toutes unités regroupées (ex. « 2 x 1,19 » → 2.38). Déduis une remise immédiate imprimée juste sous le produit. Omets ce champ si le prix est illisible.
 - Si les photos se chevauchent, ne compte pas deux fois la même ligne.
-- Si la photo n'est pas un ticket de caisse, renvoie une liste vide.`
+- Si la photo n'est pas un ticket de caisse, renvoie une liste vide.
+
+${CATEGORY_GUIDE}`
   });
   const input = await callTool({
     key, model,
@@ -44,7 +47,7 @@ Liste uniquement les produits alimentaires et les boissons achetés.
               properties: {
                 nom: { type: 'string', description: 'Nom clair en français.' },
                 texte_ticket: { type: 'string', description: 'Libellé tel qu\'imprimé sur le ticket.' },
-                categorie: { type: 'string', enum: categoryIds },
+                categorie: { type: 'string', enum: categoryIds, description: 'Identifiant de la catégorie, voir la liste des catégories.' },
                 nombre: { type: 'integer', description: "Nombre d'unités achetées (1 par défaut)." },
                 contenance: { type: 'string', description: 'Poids ou volume d\'une unité, sinon chaîne vide.' },
                 lieu: { type: 'string', enum: ['frigo', 'congelateur', 'placard', 'fruits'] },

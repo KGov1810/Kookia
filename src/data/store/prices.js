@@ -48,11 +48,13 @@ export function rememberPrices(products) {
   setDoc(ref('prix', 'memoire'), { prices: entries }, { merge: true }).catch(reportStatsDenied);
 }
 
-/** Écoute la mémoire des prix. Un refus des règles ne bloque pas le reste de l'app. */
+/** Écoute les mémoires du foyer (prix, catégories). Un refus des règles ne bloque pas le reste de l'app. */
 export function listenPrices(code) {
   return onSnapshot(collection(db, 'foyers', code, 'prix'), (snapshot) => {
     const memo = snapshot.docs.find((d) => d.id === 'memoire');
     state.prices = memo?.data().prices ?? {};
+    // Même collection : la mémoire des catégories et rangements corrigés (placements.js).
+    state.placements = snapshot.docs.find((d) => d.id === 'categories')?.data().entries ?? {};
   }, (error) => {
     reportStatsDenied(error);
   });

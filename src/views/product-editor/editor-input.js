@@ -20,6 +20,7 @@ export function handleEditorInput(ctx, event) {
     } else if (t.name === 'category' && event.type === 'change') {
       p.category = t.value;
       view.categoryTouched = true;
+      view.userCategory = true; // choisie à la main : retenue à l'enregistrement
       if (S.dateKindOf(p) === 'congele') p.expiry = S.freezerLimit(p.category, p.frozenAt);
       ctx.sheet.update();
     } else if (t.name === 'expiry' && event.type === 'change') {

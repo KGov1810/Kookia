@@ -53,7 +53,10 @@ export function openReceipt(firstFilePromise) {
       if (!item) return;
       if (t.dataset.field === 'name') item.name = t.value;
       if (t.dataset.field === 'quantity') item.quantity = t.value;
-      if (t.dataset.field === 'location') item.location = t.value;
+      if (t.dataset.field === 'location') {
+        item.location = t.value;
+        item.locationTouched = true; // lieu corrigé à la main : retenu pour la prochaine fois
+      }
       if (t.dataset.field === 'price') {
         item.priceText = t.value;
         item.price = S.parsePrice(t.value);

@@ -1,5 +1,7 @@
 // Kookia — Recherche d'un produit par code-barres (Open Food Facts).
 
+import { guessCategory } from '../stock/categorization.js';
+
 // Étiquettes Open Food Facts (« en:dry-pastas ») → catégorie. On teste la fin de l'étiquette
 // (mot entier), de la plus précise à la plus générale.
 const OFF_RULES = [
@@ -27,15 +29,23 @@ const OFF_RULES = [
 
 const OFF_GENERIC = new Set(['plant-based-foods-and-beverages', 'plant-based-foods', 'foods', 'groceries']);
 
+/**
+ * Catégorie d'après les étiquettes Open Food Facts, de la plus précise à la plus générale, ou null.
+ * Les étiquettes restées en français (« fr:viandes-hachees ») sont lues comme un nom de produit.
+ */
 export function categoryFromTags(tags = []) {
-  if (!tags.length) return 'autre';
-  const names = tags.map((t) => String(t).toLowerCase().replace(/^[a-z]{2}:/, '')).filter((t) => !OFF_GENERIC.has(t));
-  if (names.some((t) => t.includes('frozen') || t.endsWith('ice-creams'))) return 'surgele';
-  for (const name of [...names].reverse()) { // la plus précise en dernier chez Open Food Facts
+  const names = tags.map((t) => String(t).toLowerCase()).filter((t) => !OFF_GENERIC.has(t.replace(/^[a-z]{2}:/, '')));
+  if (names.some((t) => t.includes('frozen') || t.endsWith('ice-creams') || /^fr:.*surgel/.test(t))) return 'surgele';
+  for (const tag of [...names].reverse()) { // la plus précise en dernier chez Open Food Facts
+    const name = tag.replace(/^[a-z]{2}:/, '');
     const rule = OFF_RULES.find(([, pattern]) => pattern.test(name));
     if (rule) return rule[0];
+    if (tag.startsWith('fr:')) {
+      const guess = guessCategory(name.replace(/-/g, ' '));
+      if (guess) return guess;
+    }
   }
-  return 'epicerie';
+  return null;
 }
 
 /** Renvoie { name, quantity, category, imageUrl } ou null si le code est inconnu. */
@@ -60,7 +70,8 @@ export async function lookupBarcode(code) {
   return {
     name,
     quantity: (product.quantity ?? '').trim(),
-    category: categoryFromTags(product.categories_tags),
+    // Sans catégorie utile chez Open Food Facts : celle que suggère le nom.
+    category: categoryFromTags(product.categories_tags ?? []) ?? guessCategory(baseName) ?? ((product.categories_tags ?? []).length ? 'epicerie' : 'autre'),
     imageUrl: product.image_front_small_url ?? ''
   };
 }

@@ -1,6 +1,7 @@
 // Kookia — Fiche produit : code-barres, photo du produit et lecture de la date.
 
 import { longDate } from '../../components/product-visuals.js';
+import * as store from '../../data/store/index.js';
 import { hasClaudeKey } from '../../data/store/selectors.js';
 import { state } from '../../data/store/state.js';
 import * as S from '../../services/index.js';
@@ -42,8 +43,10 @@ export function handleBarcode(ctx, code) {
       return;
     }
     p.name = info.name;
-    p.category = info.category;
-    view.categoryTouched = true; // catégorie d'Open Food Facts : ne pas la remplacer
+    // Correction déjà faite pour ce produit : elle passe avant Open Food Facts.
+    const memo = store.rememberedPlacement(p);
+    p.category = memo.category ?? info.category;
+    view.categoryTouched = true; // catégorie retenue ou d'Open Food Facts : ne pas la remplacer
     if (!p.quantity && info.quantity) {
       const split = S.splitCount(info.quantity);
       p.quantity = split.quantity;
@@ -51,7 +54,7 @@ export function handleBarcode(ctx, code) {
     }
     if (!p.image && info.imageUrl) p.imageUrl = info.imageUrl;
     if (!view.locationTouched) {
-      const place = S.defaultLocationFor(info.category, info.name);
+      const place = memo.location ?? S.defaultLocationFor(p.category, info.name, p.location);
       if (place) setLocation(ctx, place);
     }
     if (S.dateKindOf(p) === 'congele') p.expiry = S.freezerLimit(p.category, p.frozenAt);
@@ -76,10 +79,11 @@ export function handleProductPhoto(ctx, file) {
         return;
       }
       if (result.name) p.name = result.name;
-      p.category = result.category;
-      view.categoryTouched = true; // catégorie reconnue par Claude
+      const memo = store.rememberedPlacement(p);
+      p.category = memo.category ?? result.category;
+      view.categoryTouched = true; // catégorie retenue ou reconnue par Claude
       if (!view.locationTouched) {
-        const place = S.defaultLocationFor(result.category, result.name);
+        const place = memo.location ?? S.defaultLocationFor(p.category, p.name, p.location);
         if (place) setLocation(ctx, place);
       }
       if (!p.quantity && result.quantity) {

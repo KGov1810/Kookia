@@ -38,7 +38,10 @@ const off = [
   [['en:plant-based-foods-and-beverages','en:plant-based-foods','en:frozen-foods','en:frozen-fried-potatoes','en:french-fries'], 'surgele'],
   [['en:dairies','en:milks'], 'laitier'], [['en:spreads'], 'sucre'], [['en:potatoes','en:vegetables'], 'legumes'],
   [['en:condiments','en:sauces','en:tomato-sauces'], 'condiments'], [['en:snacks','en:salty-snacks','en:appetizers','en:chips-and-fries','en:crisps','en:potato-crisps'], 'snacks'],
-  [['en:canned-foods','en:canned-vegetables','en:canned-corn'], 'conserves'], [['en:plant-based-foods'], 'epicerie'], [[], 'autre']
+  [['en:canned-foods','en:canned-vegetables','en:canned-corn'], 'conserves'],
+  [['en:meats', 'fr:viandes-hachees'], 'viande'], [['fr:farines-de-ble'], 'patisserie'], [['fr:pizzas-surgelees'], 'surgele'],
+  // Rien d'utile : null, et le nom du produit décide (lookupBarcode).
+  [['en:plant-based-foods'], null], [[], null]
 ];
 
 test.each(Object.entries(cases))('guessCategory(%j) → %s', (name, expected) => {
@@ -62,5 +65,11 @@ test('lieu habituel selon la catégorie', () => {
   expect(S.defaultLocationFor('surgele')).toBe('congelateur');
   expect(S.defaultLocationFor('legumes', 'Pommes de terre')).toBe('fruits');
   expect(S.defaultLocationFor('legumes', 'Carottes')).toBe('frigo');
-  expect(S.defaultLocationFor('viande')).toBeNull();
+  expect(S.defaultLocationFor('viande')).toBe('frigo');
+  expect(S.defaultLocationFor('boulangerie')).toBe('placard');
+  expect(S.defaultLocationFor('autre')).toBeNull();
+  // Jamais sorti du congélateur automatiquement (on peut ajouter de la viande directement congelée).
+  expect(S.defaultLocationFor('viande', 'Steak', 'congelateur')).toBeNull();
+  expect(S.defaultLocationFor('legumes', 'Haricots verts', 'congelateur')).toBeNull();
+  expect(S.defaultLocationFor('surgele', 'Glace', 'frigo')).toBe('congelateur');
 });

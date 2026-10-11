@@ -31,6 +31,7 @@ export function editorActions(ctx) {
     },
     'set-loc': (el) => {
       view.locationTouched = true;
+      view.userLocation = true; // choisi à la main : retenu à l'enregistrement
       setLocation(ctx, el.dataset.value);
       ctx.sheet.update();
     },
@@ -85,7 +86,18 @@ export function save(ctx) {
     return;
   }
   store.saveProduct(p);
+  rememberChoices(ctx);
   if (shoppingItemId) store.deleteShoppingItems([shoppingItemId], { reason: 'rangement' });
   toast(isNew ? `${p.name.trim()} : ajouté ${R.locationOf(p.location).at}` : 'Modifications enregistrées');
   ctx.sheet.close();
+}
+
+/**
+ * Catégorie ou lieu choisis à la main : retenus pour la prochaine fois (les deux iPhone).
+ * Déplacer un produit existant au congélateur, c'est le congeler, pas changer son rangement habituel.
+ */
+function rememberChoices(ctx) {
+  const { p, view, isNew } = ctx;
+  const location = view.userLocation && (isNew || p.location !== 'congelateur') ? p.location : '';
+  store.rememberPlacement(p, { category: view.userCategory ? p.category : '', location });
 }

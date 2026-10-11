@@ -1,5 +1,7 @@
 // Kookia — point d'entrée de la couche services.
 
+export * from './claude/categorize.js';
+export * from './claude/category-guide.js';
 export * from './claude/client.js';
 export * from './claude/product-photo.js';
 export * from './claude/receipt.js';
