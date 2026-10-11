@@ -72,6 +72,14 @@ test("Régimes, portions, calories, ticket de caisse", async () => {
   await click('[data-action="set-diet"][data-value=""]');
   light.checked = false; $('#light-toggle').checked = false; $('#light-toggle').dispatchEvent(new w.Event('change', { bubbles: true })); await tick();
   log([...mine().querySelectorAll('.recipe-card')].length === 3, 'Sans filtre : les 3 recettes');
+  await click('[data-action="set-diet"][data-value="omnivore"]');
+  const meat = [...mine().querySelectorAll('.recipe-card')];
+  log($('[data-action="set-diet"][data-value="omnivore"]').textContent === 'Viande, poisson' && meat.length === 1 && meat[0].textContent.includes('Poulet rôti'), '« Viande, poisson » : seul le poulet rôti est affiché');
+  await click('[data-action="generate"]', 80);
+  log(lastPrompt.includes('Toutes les recettes doivent contenir de la viande') && !lastPrompt.includes('Équilibre'), 'Demande à Claude : viande ou poisson dans toutes les recettes');
+  await click('[data-action="set-diet"][data-value=""]');
+  await click('[data-action="generate"]', 80);
+  log(lastPrompt.includes('Équilibre : au moins 2 des recettes contiennent de la viande') && lastPrompt.includes('ingrédients à acheter'), 'Sans filtre : au moins 2 recettes avec viande ou poisson demandées');
 
   console.log('\n— Portions et calories dans une recette —');
   await click([...mine().querySelectorAll('.recipe-card')].find((c) => c.textContent.includes('Gratin')), 400);

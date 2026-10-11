@@ -8,6 +8,7 @@ export const DIFFICULTIES = [
 
 export const DIETS = [
   { id: '', label: 'Tous' },
+  { id: 'omnivore', label: 'Viande, poisson' },
   { id: 'vegetarien', label: 'Végétarien' },
   { id: 'vegan', label: 'Vegan' }
 ];

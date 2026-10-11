@@ -22,6 +22,7 @@ export function matchesFilters(recipe, filters) {
   if (filters.maxMinutes && recipe.totalMinutes > filters.maxMinutes) return false;
   if (filters.batchOnly && !isBatchFriendly(recipe)) return false;
   // Les recettes sans régime ni calories (créées avant) sont écartées par prudence.
+  if (filters.diet === 'omnivore' && recipe.diet !== 'omnivore') return false;
   if (filters.diet === 'vegan' && recipe.diet !== 'vegan') return false;
   if (filters.diet === 'vegetarien' && !['vegetarien', 'vegan'].includes(recipe.diet)) return false;
   if (filters.light && !(recipe.kcal > 0 && recipe.kcal <= (filters.lightMax || 500))) return false;
@@ -79,6 +80,14 @@ export function filterLines(filters) {
   }
   if (maxPurchases(filters) > 2) {
     lines.push(`Recettes fidèles à leur cuisine d'origine : utilise les produits du frigo quand ils s'y prêtent, mais tu peux prévoir jusqu'à ${maxPurchases(filters)} ingrédients à acheter par recette (sauces, épices, féculents typiques).`);
+  }
+  // Viande ou poisson : à prendre dans le stock (congélateur compris), sinon à acheter.
+  const meatSource = "de préférence pris dans le stock (frigo ou congélateur, en indiquant la décongélation dans les étapes) ; s'il n'y en a pas, prévois-les dans les ingrédients à acheter (ils comptent dans la limite).";
+  if (filters.diet === 'omnivore') {
+    lines.push(`Toutes les recettes doivent contenir de la viande, de la volaille, du poisson ou des fruits de mer (regime = omnivore), ${meatSource}`);
+  } else if (!filters.diet) {
+    const unlessWish = (filters.wish ?? '').trim() ? " (sauf si l'envie de l'utilisateur ne s'y prête pas)" : '';
+    lines.push(`Équilibre${unlessWish} : au moins 2 des recettes contiennent de la viande, de la volaille, du poisson ou des fruits de mer, ${meatSource} Les autres peuvent être végétariennes.`);
   }
   if (filters.diet === 'vegetarien') {
     lines.push('Toutes les recettes doivent être végétariennes : ni viande, ni poisson, ni fruits de mer (œufs et produits laitiers autorisés). Ignore les produits du frigo incompatibles.');
