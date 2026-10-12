@@ -19,4 +19,5 @@ export * from './shopping.js';
 export * from './state.js';
 export * from './stock-moves.js';
 export * from './sync.js';
+export * from './week-plan.js';
 export * from './writes.js';

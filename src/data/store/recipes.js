@@ -14,14 +14,15 @@ import { addShoppingItem } from './shopping.js';
 import { state } from './state.js';
 import { canWrite, ref, write } from './writes.js';
 
-export function saveRecipes(recipes) {
+export function saveRecipes(recipes, { log = true } = {}) {
   if (!canWrite() || !recipes.length) return;
-  logChange({ scope: 'recettes', action: 'generation', name: `${recipes.length} recette${recipes.length > 1 ? 's' : ''}`, details: [recipes.map((r) => r.title).join(', ')] });
+  if (log) logChange({ scope: 'recettes', action: 'generation', name: `${recipes.length} recette${recipes.length > 1 ? 's' : ''}`, details: [recipes.map((r) => r.title).join(', ')] });
   const batch = writeBatch(db);
   recipes.forEach(({ id, ...data }) => batch.set(ref('recettes', id), data));
-  // Garde les favoris + les 40 recettes les plus récentes.
+  // Garde les favoris, les recettes du planning de la semaine et les 40 recettes les plus récentes.
+  const planned = new Set((state.plan?.slots ?? []).map((s) => s.recipeId));
   const all = [...recipes, ...state.recipes.filter((r) => !recipes.some((n) => n.id === r.id))];
-  all.filter((r) => !r.favorite)
+  all.filter((r) => !r.favorite && !planned.has(r.id))
     .sort((a, b) => b.createdAt - a.createdAt)
     .slice(40)
     .forEach((r) => batch.delete(ref('recettes', r.id)));

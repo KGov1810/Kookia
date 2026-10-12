@@ -25,6 +25,8 @@ export const ui = {
   freshIds: new Set(),  // recettes de la dernière génération (badge « Nouvelle », en tête)
   generating: false,
   recipeNote: null,
+  recipeMode: 'idees',  // écran Recettes : « idees » (5 recettes) ou « semaine » (planning)
+  week: { busy: '', note: null, slotBusy: -1 }, // génération du planning, ou d'un repas remplacé
   stats: { period: DEFAULT_STATS_PERIOD, month: '', what: '', location: '', person: '' }, // écran Statistiques
   onboarding: { text: '', joinText: '', name: '', invite: '', message: null, busy: false }
 };

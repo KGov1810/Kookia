@@ -12,6 +12,16 @@ import { rerenderKeepScroll } from '../app/router.js';
 import { currentFilters, ui } from '../app/ui-state.js';
 import { recipeCard } from './recipe-card.js';
 import { hasFilters, quickFilters } from './recipe-filters.js';
+import { weekView } from './week-view.js';
+
+/** Idées (5 recettes) ou Semaine (planning des repas). */
+function modeSwitch() {
+  return html`
+    <div class="segmented mode-switch" role="tablist" aria-label="Recettes">
+      ${[['idees', 'Idées'], ['semaine', 'Semaine']].map(([id, label]) => html`
+        <button role="tab" data-action="recipe-mode" data-value="${id}" aria-selected="${String(ui.recipeMode === id)}" aria-pressed="${String(ui.recipeMode === id)}">${id === 'semaine' ? I.calendar : I.sparkle}${label}</button>`)}
+    </div>`;
+}
 
 function applyDefaultPriority() {
   const ids = new Set(state.products.map((p) => p.id));
@@ -70,6 +80,7 @@ function generateBlock() {
 
 export const recipesView = {
   render() {
+    if (ui.recipeMode === 'semaine') return html`<header class="top"><h1>Recettes</h1></header>${modeSwitch()}${weekView()}`;
     applyDefaultPriority();
     const filters = currentFilters();
     const tabs = recipeTabs(filters);
@@ -80,6 +91,7 @@ export const recipesView = {
 
     return html`
       <header class="top"><h1>Recettes</h1></header>
+      ${modeSwitch()}
 
       <section class="group recipe-start">
         ${priorityBlock()}

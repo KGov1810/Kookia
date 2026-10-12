@@ -1,0 +1,98 @@
+/* Kookia — Recettes : bascule Idées / Semaine, planning des repas et préparation de la semaine. */
+
+.mode-switch { margin: 0 0 12px; }
+
+.mode-switch button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 38px; font-size: 15px; }
+
+.mode-switch svg { width: 17px; height: 17px; }
+
+.week-empty { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+
+.week-empty p { margin: 0; color: var(--muted); }
+
+.week-busy { display: flex; align-items: center; gap: 12px; padding: 16px; }
+
+.week-busy p { margin: 0; font-weight: 600; }
+
+.week-title { display: flex; flex-direction: column; gap: 2px; padding: 14px 16px 6px; }
+
+.week-title b { font: 700 17px var(--font-round); }
+
+.week-title small { color: var(--muted); font-size: 14px; }
+
+.week-head .row-actions { padding-top: 6px; }
+
+.week-new { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; margin-top: 16px; }
+
+.week-new svg { width: 18px; height: 18px; }
+
+.week-head .secondary i { font-style: normal; font-weight: 700; background: var(--herb); color: var(--on-accent); border-radius: 999px; padding: 1px 7px; font-size: 13px; }
+
+h2.section.today { color: var(--herb-strong); }
+
+.week-day { gap: 6px; }
+
+.week-slot {
+  display: flex; align-items: center; gap: 10px; padding: 8px 4px 8px 12px;
+  background: var(--surface); border-radius: 16px; box-shadow: var(--shadow);
+}
+
+.week-slot .meal {
+  flex: none; width: 46px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--muted);
+}
+
+.week-recipe { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; text-align: left; padding: 4px 0; }
+
+.week-recipe b { font: 650 16px/1.25 var(--font-round); }
+
+.week-recipe small { color: var(--muted); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.week-slot.leftovers .week-recipe b { color: var(--muted); font-weight: 600; }
+
+.week-slot.done { background: color-mix(in srgb, var(--herb-soft) 55%, var(--surface)); }
+
+.week-slot.done .week-recipe b { color: var(--herb-strong); }
+
+.week-slot.missing .week-recipe b { color: var(--apricot); }
+
+.cooked { color: var(--herb); display: inline-flex; vertical-align: -2px; margin-right: 4px; }
+
+.cooked svg { width: 17px; height: 17px; stroke-width: 3; }
+
+.week-change { flex: none; color: var(--herb); }
+
+.week-change svg { width: 20px; height: 20px; }
+
+.week-change .spinner { width: 18px; height: 18px; }
+
+.week-batch {
+  display: flex; flex-direction: column; gap: 2px; width: 100%; text-align: left; padding: 10px 14px; border-radius: 16px;
+  background: var(--apricot-soft); border: 1.5px solid color-mix(in srgb, var(--apricot) 35%, transparent);
+}
+
+.week-batch b { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; }
+
+.week-batch b svg { width: 18px; height: 18px; color: var(--apricot); }
+
+.week-batch small { color: var(--muted); font-size: 13px; }
+
+.planned-on { display: inline-flex; align-items: center; gap: 6px; margin: 0 0 6px; color: var(--herb-strong); font-weight: 650; font-size: 14px; }
+
+.planned-on svg { width: 16px; height: 16px; }
+
+.slot-current { text-align: right; min-width: 0; }
+
+/* Préparer la semaine */
+.week-starts { padding-left: 0; padding-right: 0; }
+
+.week-grid-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 16px 6px; color: var(--muted); font-weight: 700; font-size: 15px; }
+
+.week-grid-head .quick { padding: 0; justify-content: flex-end; }
+
+.week-grid-head .quick button { font-size: 13px; padding: 5px 10px; }
+
+.week-grid-row { display: grid; grid-template-columns: 1fr 88px 88px; align-items: center; gap: 8px; padding: 6px 16px; border-top: 1px solid var(--line); }
+
+.week-grid-row > span { font-weight: 600; text-transform: capitalize; }
+
+.week-grid-row .chip { justify-content: center; min-height: 38px; }

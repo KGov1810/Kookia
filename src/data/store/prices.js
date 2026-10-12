@@ -6,7 +6,7 @@ import { cleanPrice } from '../../services/stats/money.js';
 import { nameTokens, simplify } from '../../services/text/text.js';
 import { db } from './connection.js';
 import { reportStatsDenied } from './movements.js';
-import { state } from './state.js';
+import { emit, state } from './state.js';
 import { canWrite, ref } from './writes.js';
 
 /**
@@ -55,6 +55,12 @@ export function listenPrices(code) {
     state.prices = memo?.data().prices ?? {};
     // Même collection : la mémoire des catégories et rangements corrigés (placements.js).
     state.placements = snapshot.docs.find((d) => d.id === 'categories')?.data().entries ?? {};
+    // Et le planning de la semaine (week-plan.js) : l'écran se met à jour sur les deux iPhone.
+    const plan = snapshot.docs.find((d) => d.id === 'semaine')?.data() ?? null;
+    if (JSON.stringify(plan) !== JSON.stringify(state.plan)) {
+      state.plan = plan;
+      emit('plan');
+    }
   }, (error) => {
     reportStatsDenied(error);
   });

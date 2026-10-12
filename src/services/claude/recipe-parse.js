@@ -1,0 +1,78 @@
+// Kookia — Recettes de Claude : description du stock dans la demande, lecture des recettes reçues.
+
+import { category } from '../../data/reference/categories.js';
+import { originOf } from '../../data/reference/origins.js';
+import { quantityLabel } from '../quantities/quantities.js';
+import { isOpened, remainingLabel, remainingOf } from '../stock/opened.js';
+import { promptStock } from '../stock/stock-status.js';
+import { nameMatchScore } from '../text/text.js';
+
+/**
+ * Lignes « - [P3] Yaourt nature – quantité : 4 × 125 g – produits laitiers – expire dans 2 j »
+ * et table des références P1, P2… → id du produit (une seule table pour plusieurs listes).
+ */
+export function stockDescriber() {
+  const refs = new Map();
+  const describe = (p) => {
+    const ref = `P${refs.size + 1}`;
+    refs.set(ref, p.id);
+    const parts = [`[${ref}] ${p.name}`];
+    if (quantityLabel(p)) parts.push(`quantité : ${quantityLabel(p)}`);
+    parts.push(category(p.category).label.toLowerCase(), promptStock(p));
+    if (isOpened(p)) parts.push(`entamé, il en reste ${remainingLabel(remainingOf(p))} : à finir en priorité`);
+    return `- ${parts.join(' – ')}`;
+  };
+  return { refs, describe };
+}
+
+export function shoppingLines(shopping) {
+  return shopping.map((i) => `- ${i.name}${i.quantity ? ` (${i.quantity})` : ''}${i.checked ? ' – déjà acheté' : ''}`);
+}
+
+/** Recette reçue (outil) → recette de l'app. products : stock décrit ; refs : P1… → id. */
+export function parseRecipe(r, { products, refs, servings, createdAt }) {
+  const ingredients = (r.ingredients ?? []).map((item) => {
+    let source = ['stock', 'courses', 'placard', 'a_acheter'].includes(item.source) ? item.source : 'a_acheter';
+    const ref = String(item.ref_stock ?? '').replace(/[[\]\s]/g, '').toUpperCase();
+    let product = products.find((p) => p.id === refs.get(ref)) ?? null;
+    if (!product && source === 'stock') {
+      product = products
+        .map((p) => ({ p, score: nameMatchScore(item.nom, p.name) }))
+        .filter((x) => x.score > 0)
+        .sort((a, b) => b.score - a.score)[0]?.p ?? null;
+    }
+    if (product) source = 'stock';
+    return {
+      name: item.nom ?? '',
+      quantity: item.quantite ?? '',
+      amount: Number(item.valeur) > 0 ? Number(item.valeur) : null,
+      unit: String(item.unite ?? '').trim(),
+      source,
+      productId: product?.id ?? null,
+      // Mémorisés pour retrouver le produit s'il est racheté plus tard.
+      barcode: product?.barcode ?? '',
+      productName: product?.name ?? '',
+      category: product?.category ?? ''
+    };
+  });
+  return {
+    id: crypto.randomUUID(),
+    title: r.titre ?? 'Recette',
+    summary: r.resume ?? '',
+    difficulty: ['facile', 'moyen', 'difficile'].includes(r.difficulte) ? r.difficulte : 'moyen',
+    totalMinutes: Number(r.temps_total_minutes) || 30,
+    prepMinutes: Number(r.temps_preparation_minutes) || 15,
+    servings: Number(r.portions) || servings,
+    diet: ['vegan', 'vegetarien', 'omnivore'].includes(r.regime) ? r.regime : 'omnivore',
+    origin: originOf(r.origine) ? r.origine : 'autre',
+    kcal: Number(r.calories_par_portion) > 0 ? Math.round(Number(r.calories_par_portion)) : null,
+    batchCooking: Boolean(r.batch_cooking),
+    storageDays: Number(r.conservation_jours) || 0,
+    storageTips: r.conseils_conservation ?? '',
+    ingredients,
+    steps: r.etapes ?? [],
+    usedProductIds: [...new Set(ingredients.map((x) => x.productId).filter(Boolean))],
+    createdAt,
+    favorite: false
+  };
+}

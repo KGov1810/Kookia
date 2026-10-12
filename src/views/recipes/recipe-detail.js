@@ -29,6 +29,13 @@ function recipeShareText(recipe, servings = recipe.servings) {
   return lines.join('\n');
 }
 
+/** « mardi soir, mercredi midi (restes) » si la recette est au planning de la semaine, sinon ''. */
+function planned(recipe) {
+  const plan = state.plan;
+  return (plan?.slots ?? []).filter((s) => s.recipeId === recipe.id)
+    .map((s) => `${S.weekDayLabel(plan.start, s.day, { weekday: 'long' })} ${s.meal}${s.leftovers ? ' (restes)' : ''}`).join(', ');
+}
+
 export function openRecipe(id) {
   let servings = null; // nombre de portions affiché (null = celui de la recette)
   const baseServings = (recipe) => Math.max(1, recipe.servings || 2);
@@ -64,11 +71,20 @@ export function openRecipe(id) {
         if (!recipe) return;
         // Quantités de la recette (portions affichées) : 200 g d'un paquet de 500 g → le paquet est entamé.
         const uses = store.recipeUses(recipe, factorFor(recipe));
-        if (!uses.length) return;
+        if (!uses.length) {
+          // Recette du planning sans produit du stock : on note seulement le repas comme cuisiné.
+          store.markPlanCooked(recipe.id);
+          toast('Repas noté comme cuisiné', 'Annuler', () => store.markPlanCooked(recipe.id, false));
+          return;
+        }
         const list = uses.map((u) => `• ${u.product.name} : ${u.computed && u.quantity ? u.quantity : '1 unité'} → ${store.restText(S.splitAfter(u.product, u.amount))}`).join('\n');
         if (!window.confirm(`Retirer du stock ?\n${list}`)) return;
         const done = store.consumeAmounts(uses.map((u) => ({ id: u.product.id, amount: u.amount })), { reason: `recette « ${recipe.title} »` });
-        toast(`${S.plural(done.before.length, 'produit')} mis à jour dans le stock`, 'Annuler', () => store.undoTake(done));
+        store.markPlanCooked(recipe.id); // repas coché dans le planning de la semaine
+        toast(`${S.plural(done.before.length, 'produit')} mis à jour dans le stock`, 'Annuler', () => {
+          store.undoTake(done);
+          store.markPlanCooked(recipe.id, false);
+        });
       },
       share: () => {
         const recipe = findRecipe();
@@ -106,6 +122,7 @@ export function openRecipe(id) {
       </header>
       <div class="sheet-body">
         <div class="recipe-hero">
+          ${planned(recipe) ? html`<p class="planned-on">${I.calendar}Au menu : ${planned(recipe)}</p>` : ''}
           <h2>${recipe.title}</h2>
           ${recipe.summary ? html`<p>${recipe.summary}</p>` : ''}
           <div class="facts">
@@ -145,7 +162,7 @@ export function openRecipe(id) {
           </section>` : ''}
 
         <section class="group">
-          ${used.length ? html`<button class="row-button" data-action="cooked">${I.check}J'ai cuisiné cette recette</button>` : ''}
+          ${used.length || planned(recipe) ? html`<button class="row-button" data-action="cooked">${I.check}J'ai cuisiné cette recette</button>` : ''}
           <button class="row-button" data-action="share">${I.share}Partager la recette</button>
           <button class="row-button danger" data-action="delete">${I.trash}Supprimer la recette</button>
         </section>

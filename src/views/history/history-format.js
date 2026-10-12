@@ -20,6 +20,7 @@ const HISTORY_TEXT = {
   'courses:rangement': 'a acheté et rangé {n}',
   'courses:panier': 'a vidé le panier ({n})',
   'recettes:generation': 'a généré {n}',
+  'recettes:planning': 'a planifié la semaine ({n})',
   'recettes:suppression': 'a supprimé la recette {n}',
   'recettes:favori': 'a mis {n} en favori',
   'recettes:favori-retire': 'a retiré {n} des favoris'
@@ -28,7 +29,7 @@ const HISTORY_TEXT = {
 export const HISTORY_ICON = {
   ajout: () => I.plus, modification: () => I.pencil, consommation: () => I.check, suppression: () => I.trash, jete: () => I.trash, congelation: () => I.snow, entame: () => I.gauge,
   annulation: () => I.refresh, rangement: () => I.jar, panier: () => I.cart, ticket: () => I.receipt,
-  generation: () => I.sparkle, favori: () => I.star, 'favori-retire': () => I.star
+  generation: () => I.sparkle, planning: () => I.calendar, favori: () => I.star, 'favori-retire': () => I.star
 };
 
 export function historySentence(entry) {
