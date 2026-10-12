@@ -31,6 +31,11 @@ export function openReceipt(firstFilePromise) {
         item.selected = !item.selected;
         ctx.sheet.update();
       },
+      'toggle-list': (el) => {
+        const item = ctx.view.items[Number(el.dataset.index)];
+        item.removeFromList = !item.removeFromList;
+        ctx.sheet.update();
+      },
       'line-minus': (el) => {
         const item = ctx.view.items[Number(el.dataset.index)];
         item.count = Math.max(1, item.count - 1);

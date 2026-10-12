@@ -1,5 +1,6 @@
 // Kookia — point d'entrée de la couche data/reference.
 
+export * from './bread.js';
 export * from './categories.js';
 export * from './locations.js';
 export * from './models.js';

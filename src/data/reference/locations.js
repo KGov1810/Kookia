@@ -29,6 +29,6 @@ export const DATE_KINDS = {
 export const KINDS_BY_LOCATION = {
   frigo: ['dlc', 'ddm', 'estimee'],
   congelateur: ['congele', 'ddm'],
-  placard: ['aucune', 'ddm'],
+  placard: ['aucune', 'ddm', 'estimee'], // estimée : le pain
   fruits: ['estimee']
 };

@@ -168,9 +168,9 @@ test('Prix, produits jetés et statistiques', async () => {
   log(globalThis.__priceInSchema && prompt.includes('prix : montant payé pour ce produit'), 'Claude doit relever le prix de chaque ligne');
   const line = (name) => [...sheet().querySelectorAll('.receipt-line')].find((l) => l.querySelector('input').value === name);
   log(line('Pommes').querySelector('[data-field="price"]').value === '3,58' && line('Beurre doux').querySelector('[data-field="price"]').value === '', 'Prix lus : Pommes 3,58 €, Beurre sans prix');
-  log(sheet().querySelector('#receipt-total').textContent.startsWith('Total des prix : 3,58 € (1 produit sans prix)'), 'Total lu affiché, produit sans prix signalé');
+  log(sheet().querySelector('#receipt-total').textContent.startsWith('Total des lignes cochées : 3,58 € (1 produit sans prix)'), 'Total lu affiché, produit sans prix signalé');
   await type(line('Beurre doux').querySelector('[data-field="price"]'), '2,10');
-  log(sheet().querySelector('#receipt-total').textContent.startsWith('Total des prix : 5,68 €.'), 'Prix complété : total mis à jour (5,68 €)');
+  log(sheet().querySelector('#receipt-total').textContent.startsWith('Total des lignes cochées : 5,68 €.'), 'Prix complété : total mis à jour (5,68 €)');
   await click(sheet().querySelector('.sheet-body [data-action="confirm"]'), 350);
   log(product('Pommes')?.unitPrice === 1.79 && product('Beurre doux')?.unitPrice === 2.1, 'Prix à l\'unité : Pommes 3,58 € ÷ 2 = 1,79 €, Beurre 2,10 €');
   log(moves().filter((m) => m.type === 'achat' && ['Pommes', 'Beurre doux'].includes(m.name)).length === 2, 'Deux achats notés');

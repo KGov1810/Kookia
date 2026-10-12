@@ -12,20 +12,33 @@ export function selected(ctx) {
   return view.items.filter((i) => i.selected && i.name.trim());
 }
 
-/** Total des prix lus sur les lignes gardées, à comparer au ticket. */
+/** Articles de la liste de courses qui seront retirés (achetés, ajoutés au stock ou non). */
+export function removals(ctx) {
+  return ctx.view.items.filter((i) => i.shoppingId && i.removeFromList);
+}
+
+/** Total des prix lus sur les lignes cochées, à comparer au ticket. */
 export function receiptTotal(ctx) {
   const kept = selected(ctx);
   const priced = kept.filter((i) => i.price !== null);
   if (!kept.length) return '';
   const missing = kept.length - priced.length;
   const total = priced.reduce((sum, i) => sum + i.price, 0);
-  return `Total des prix : ${S.formatEuro(total)}${missing ? ` (${S.plural(missing, 'produit')} sans prix)` : ''}. Comparez avec le ticket : les produits non alimentaires n'y sont pas.`;
+  return `Total des lignes cochées : ${S.formatEuro(total)}${missing ? ` (${S.plural(missing, 'produit')} sans prix)` : ''}.`;
+}
+
+/** Bouton de validation : ajouter au stock, ou seulement retirer des articles de la liste. */
+function confirmLabel(ctx) {
+  const count = selected(ctx).length;
+  if (count) return `Ajouter ${S.plural(count, 'produit')} au stock`;
+  const listed = removals(ctx).length;
+  return listed ? `Retirer ${S.plural(listed, 'article')} de la liste` : 'Ajouter au stock';
 }
 
 export function renderReceipt(ctx) {
   const { view } = ctx;
   const head = view.stage === 'review'
-    ? html`<button class="link strong" data-action="confirm" ${selected(ctx).length ? '' : raw('disabled')}>Ajouter</button>`
+    ? html`<button class="link strong" data-action="confirm" ${canConfirm(ctx) ? '' : raw('disabled')}>OK</button>`
     : html`<span></span>`;
   return html`
     <header class="sheet-head">
@@ -60,44 +73,62 @@ export function photosStep(ctx) {
     <p class="hint">La photo est envoyée à Claude pour être lue ; elle n'est pas conservée dans l'app.</p>`;
 }
 
+const canConfirm = (ctx) => selected(ctx).length > 0 || removals(ctx).length > 0;
+
+/** Une ligne du ticket, et l'article de la liste de courses qu'elle achète (à retirer ou à garder). */
+function receiptLine(item, index) {
+  return html`
+    <div class="receipt-item ${item.food ? '' : 'nonfood'}">
+      <div class="receipt-line ${item.selected ? '' : 'off'}">
+        <button class="pick-box" role="checkbox" aria-checked="${String(item.selected)}" data-action="toggle-line" data-index="${index}" aria-label="Ajouter ${item.name} au stock"><span class="box">${I.check}</span></button>
+        <span class="thumb">${item.food ? R.category(item.category).emoji : '🧴'}</span>
+        <div class="receipt-fields">
+          <input data-field="name" data-index="${index}" value="${item.name}" aria-label="Nom du produit" autocomplete="off">
+          <small>${item.receiptText ? `« ${item.receiptText} »` : ''}</small>
+          <div class="receipt-qty">
+            <div class="stepper small">
+              <button data-action="line-minus" data-index="${index}" aria-label="Un de moins" ${item.count <= 1 ? raw('disabled') : ''}>−</button>
+              <output>${item.count}</output>
+              <button data-action="line-plus" data-index="${index}" aria-label="Un de plus">+</button>
+            </div>
+            ${unitInput({ amount: item.qtyAmount ?? item.quantity, unit: item.qtyLegacy ? null : item.qtyUnit, units: S.unitsFor(item.category),
+              dataset: { index }, inputData: { field: 'quantity' }, label: 'Poids ou contenance (chiffre)', placeholder: 'Poids' })}
+          </div>
+          <div class="receipt-place">
+            <select class="receipt-location" data-field="location" data-index="${index}" aria-label="Lieu de rangement">
+              ${R.LOCATIONS.map((loc) => html`<option value="${loc.id}" ${item.location === loc.id ? raw('selected') : ''}>${loc.label}</option>`)}
+            </select>
+            <label class="receipt-price"><input data-field="price" data-index="${index}" value="${item.priceText}" inputmode="decimal" placeholder="Prix" aria-label="Prix payé pour la ligne, en euros" autocomplete="off"><b aria-hidden="true">€</b></label>
+          </div>
+        </div>
+      </div>
+      ${item.shoppingId ? html`
+        <button class="list-toggle" role="checkbox" data-action="toggle-list" data-index="${index}" aria-pressed="${String(item.removeFromList)}" aria-checked="${String(item.removeFromList)}">
+          <span class="box">${I.check}</span>Retirer « ${item.shoppingName} » de la liste
+        </button>` : ''}
+    </div>`;
+}
+
 export function reviewStep(ctx) {
   const { view } = ctx;
   if (!view.items.length) {
     return html`
-      <p class="note warn">Aucun produit alimentaire reconnu sur ce ticket.</p>
+      <p class="note warn">Aucun article reconnu sur ce ticket.</p>
       <button class="secondary" data-action="back-to-photos">Reprendre les photos</button>`;
   }
-  const onList = view.items.filter((i) => i.selected && i.shoppingId);
+  const lines = view.items.map((item, index) => ({ item, index }));
+  const food = lines.filter((l) => l.item.food);
+  const other = lines.filter((l) => !l.item.food);
+  const listed = removals(ctx);
   return html`
-    <p class="note ok">${S.plural(view.items.length, 'produit reconnu', 'produits reconnus')}. Vérifiez les noms, les nombres, les prix et le lieu ; décochez ce qui ne va pas en stock. Les dates du frigo seront à compléter ; placard, congélateur, fruits et légumes n'en ont pas besoin.</p>
+    <p class="note ok">${S.plural(food.length, 'produit reconnu', 'produits reconnus')}${other.length ? `, et ${S.plural(other.length, 'article non alimentaire', 'articles non alimentaires')} (grisés, non ajoutés)` : ''}. Vérifiez les noms, les nombres, les prix et le lieu. Les dates du frigo seront à compléter.</p>
     <p class="hint" id="receipt-total">${receiptTotal(ctx)}</p>
-    <section class="group">
-      ${view.items.map((item, index) => html`
-        <div class="receipt-line ${item.selected ? '' : 'off'}">
-          <button class="pick-box" role="checkbox" aria-checked="${String(item.selected)}" data-action="toggle-line" data-index="${index}" aria-label="Garder ${item.name}"><span class="box">${I.check}</span></button>
-          <span class="thumb">${R.category(item.category).emoji}</span>
-          <div class="receipt-fields">
-            <input data-field="name" data-index="${index}" value="${item.name}" aria-label="Nom du produit" autocomplete="off">
-            <small>${item.receiptText ? `« ${item.receiptText} »` : ''}${item.shoppingId ? html` <b class="on-list">sur votre liste</b>` : ''}</small>
-            <div class="receipt-qty">
-              <div class="stepper small">
-                <button data-action="line-minus" data-index="${index}" aria-label="Un de moins" ${item.count <= 1 ? raw('disabled') : ''}>−</button>
-                <output>${item.count}</output>
-                <button data-action="line-plus" data-index="${index}" aria-label="Un de plus">+</button>
-              </div>
-              ${unitInput({ amount: item.qtyAmount ?? item.quantity, unit: item.qtyLegacy ? null : item.qtyUnit, units: S.unitsFor(item.category),
-                dataset: { index }, inputData: { field: 'quantity' }, label: 'Poids ou contenance (chiffre)', placeholder: 'Poids' })}
-            </div>
-            <div class="receipt-place">
-              <select class="receipt-location" data-field="location" data-index="${index}" aria-label="Lieu de rangement">
-                ${R.LOCATIONS.map((loc) => html`<option value="${loc.id}" ${item.location === loc.id ? raw('selected') : ''}>${loc.label}</option>`)}
-              </select>
-              <label class="receipt-price"><input data-field="price" data-index="${index}" value="${item.priceText}" inputmode="decimal" placeholder="Prix" aria-label="Prix payé pour la ligne, en euros" autocomplete="off"><b aria-hidden="true">€</b></label>
-            </div>
-          </div>
-        </div>`)}
-    </section>
-    ${onList.length ? html`<p class="hint">Retirés de la liste de courses à l'ajout : ${onList.map((i) => i.shoppingName).join(', ')}.</p>` : ''}
-    <button class="primary" data-action="confirm" ${selected(ctx).length ? '' : raw('disabled')}>${I.check}Ajouter ${S.plural(selected(ctx).length, 'produit')} au stock</button>
+    ${food.length ? html`<section class="group">${food.map((l) => receiptLine(l.item, l.index))}</section>` : ''}
+    ${other.length ? html`
+      <h2 class="section">Non alimentaire<small>${other.length}</small></h2>
+      <p class="hint">Pas ajoutés au stock ni aux statistiques. Cochez une ligne si c'est une erreur.</p>
+      <section class="group">${other.map((l) => receiptLine(l.item, l.index))}</section>` : ''}
+    ${listed.length ? html`<p class="hint">Retirés de la liste de courses : ${listed.map((i) => i.shoppingName).join(', ')}.</p>` : ''}
+    <button class="primary" data-action="confirm" ${canConfirm(ctx) ? '' : raw('disabled')}>${I.check}${confirmLabel(ctx)}</button>
     <button class="link" data-action="back-to-photos">Reprendre les photos</button>`;
 }

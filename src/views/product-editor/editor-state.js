@@ -29,7 +29,7 @@ export function createEditorContext({ product = null, draft = null, mode = 'manu
     if (category) p.category = category;
     const place = draft?.location ? null : memo.location ?? (category ? S.defaultLocationFor(category, p.name, p.location) : null);
     if (place) p.location = place;
-    if ((category === 'fruits' || category === 'legumes') && R.KINDS_BY_LOCATION[p.location]?.includes('estimee')) p.dateKind = 'estimee';
+    if (S.estimatedByDefault(category, p.name) && R.KINDS_BY_LOCATION[p.location]?.includes('estimee')) p.dateKind = 'estimee';
   }
   const ctx = { p, view, isNew, shoppingItemId, draft, mode, filePromise, barcode, sheet: null };
   applyKnownPrice(ctx); // nom déjà connu (article de courses rangé) : dernier prix payé
@@ -42,7 +42,7 @@ export function createEditorContext({ product = null, draft = null, mode = 'manu
 export function setKind(ctx, kind) {
   const { p, view, isNew } = ctx;
   p.dateKind = kind;
-  if (kind === 'estimee' && !view.dateTouched) p.expiry = S.isoInDays(S.estimateFreshDays(p.name, p.location));
+  if (kind === 'estimee' && !view.dateTouched) p.expiry = S.isoInDays(S.estimateFreshDays(p.name, p.location, p.category));
   if (kind === 'congele') {
     p.frozenAt = S.hasDate(p.frozenAt) ? p.frozenAt : S.isoInDays(0);
     p.expiry = S.freezerLimit(p.category, p.frozenAt);

@@ -37,18 +37,19 @@ export function applyCategory(ctx, category, rememberedLocation = null) {
     changed = true;
     panel.querySelectorAll('[data-action="set-loc"]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.value === p.location)));
   }
-  // Un fruit ou un légume n'a pas de date imprimée : date estimée ; l'inverse pour les autres produits.
-  const produce = category === 'fruits' || category === 'legumes';
+  // Fruits, légumes et pain n'ont pas de date imprimée : date estimée ; l'inverse pour les autres produits.
+  const estimated = S.estimatedByDefault(category, p.name);
   const kinds = R.KINDS_BY_LOCATION[p.location] ?? [];
-  if (!view.dateTouched && produce && S.dateKindOf(p) === 'dlc' && kinds.includes('estimee')) setKind(ctx, 'estimee');
-  else if (!view.dateTouched && !produce && S.dateKindOf(p) === 'estimee' && kinds.includes('dlc')) setKind(ctx, 'dlc');
+  const kind = S.dateKindOf(p);
+  if (!view.dateTouched && estimated && (kind === 'dlc' || kind === 'aucune') && kinds.includes('estimee')) setKind(ctx, 'estimee');
+  else if (!view.dateTouched && !estimated && kind === 'estimee' && kinds[0] !== 'estimee') setKind(ctx, kinds[0]);
   return changed;
 }
 
 function refreshDate(ctx, changed) {
   const { p, view } = ctx;
   if (S.dateKindOf(p) === 'estimee' && !view.dateTouched) {
-    p.expiry = S.isoInDays(S.estimateFreshDays(p.name, p.location));
+    p.expiry = S.isoInDays(S.estimateFreshDays(p.name, p.location, p.category));
     changed = true;
   }
   if (S.dateKindOf(p) === 'congele') p.expiry = S.freezerLimit(p.category, p.frozenAt);

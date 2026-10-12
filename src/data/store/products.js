@@ -5,7 +5,7 @@ import { isoInDays, toISODate } from '../../services/dates/dates.js';
 import { quantityLabel } from '../../services/quantities/quantities.js';
 import { cleanPrice } from '../../services/stats/money.js';
 import { remainingOf, stockAmount } from '../../services/stock/opened.js';
-import { dateKindOf, estimateFreshDays, freezerLimit } from '../../services/stock/stock-dates.js';
+import { breadDays, dateKindOf, estimateFreshDays, freezerLimit } from '../../services/stock/stock-dates.js';
 import { locationOf } from '../reference/locations.js';
 import { db } from './connection.js';
 import { logChange, productDiff, productSummary } from './history.js';
@@ -107,6 +107,9 @@ export function addReceiptProducts(items, shoppingIdsToRemove = [], { source = '
       dateKind = 'congele';
       frozenAt = today;
       expiry = freezerLimit(item.category, today);
+    } else if (item.category === 'boulangerie' && breadDays(item.name) !== null) {
+      dateKind = 'estimee'; // pain : 2 jours frais, 7 jours emballé
+      expiry = isoInDays(breadDays(item.name));
     } else if (location === 'placard') {
       dateKind = 'aucune';
     } else if (produce) {

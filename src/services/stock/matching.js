@@ -1,7 +1,8 @@
 // Kookia — Rapprochement d'un ingrédient de recette avec un produit du stock.
 
 import { categoryFamily } from '../../data/reference/categories.js';
-import { nameMatchScore, normalizeBarcode } from '../text/text.js';
+import { nameMatchScore, nameTokens, normalizeBarcode } from '../text/text.js';
+import { guessCategory } from './categorization.js';
 
 /**
  * Retrouve le produit du frigo correspondant à un ingrédient :
@@ -35,4 +36,26 @@ export function resolveIngredient(ingredient, products) {
     }
   }
   return best ? { product: best, via: 'nom' } : null;
+}
+
+/**
+ * Article de la liste de courses acheté ? Repli quand Claude n'a pas rapproché le ticket de la liste.
+ * Tous les mots de l'article (« Lait ») doivent figurer dans le produit (« Lait demi-écrémé UHT »),
+ * et la catégorie devinée de l'article doit être celle du produit (en épicerie, la même famille) : « Pommes » ≠ « Pommes de terre »,
+ * « Lait » ≠ « Lait de coco », « Oranges » ≠ « Jus d'orange ». Sans catégorie devinée : ressemblance des noms.
+ * product : { name, receiptText, category }.
+ */
+export function matchesShoppingItem(listName, product) {
+  const wanted = nameTokens(listName);
+  if (!wanted.length) return false;
+  const names = [product.name, product.receiptText].filter(Boolean);
+  const contained = names.some((name) => {
+    const have = new Set(nameTokens(name));
+    return wanted.every((t) => have.has(t));
+  });
+  if (!contained) return false;
+  const guess = guessCategory(listName);
+  if (!guess) return names.some((name) => nameMatchScore(listName, name) > 0);
+  // Épicerie : sous-catégories proches (« Farine » en épicerie ou en pâtisserie). Ailleurs, la même catégorie.
+  return guess === product.category || (categoryFamily(guess) === 'epicerie' && categoryFamily(product.category) === 'epicerie');
 }

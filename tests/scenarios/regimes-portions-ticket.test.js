@@ -143,9 +143,10 @@ test("Régimes, portions, calories, ticket de caisse", async () => {
   const lines = () => [...sheet().querySelectorAll('.receipt-line')];
   log(lines().length === 3, '3 produits reconnus');
   const laitLine = lines().find((l) => l.querySelector('input').value === 'Lait demi-écrémé');
-  log(laitLine.textContent.includes('« LAIT 1/2 ECR 1L »') && laitLine.textContent.includes('sur votre liste') && laitLine.querySelector('output').textContent === '2', 'Lait : libellé du ticket, « sur votre liste », nombre 2');
-  log(lines().find((l) => l.querySelector('input').value === 'Farine de blé').textContent.includes('sur votre liste'), 'Farine reconnue sur la liste de courses');
-  log(sheet().textContent.includes('Retirés de la liste de courses à l\'ajout : Lait, Farine'), 'Annonce : Lait et Farine retirés de la liste');
+  const itemOf = (line) => line.closest('.receipt-item');
+  log(laitLine.textContent.includes('« LAIT 1/2 ECR 1L »') && itemOf(laitLine).querySelector('.list-toggle')?.textContent.includes('Retirer « Lait » de la liste') && laitLine.querySelector('output').textContent === '2', 'Lait : libellé du ticket, « Retirer « Lait » de la liste », nombre 2');
+  log(itemOf(lines().find((l) => l.querySelector('input').value === 'Farine de blé')).querySelector('.list-toggle')?.textContent.includes('« Farine »'), 'Farine reconnue sur la liste de courses');
+  log(sheet().textContent.includes('Retirés de la liste de courses : Lait, Farine'), 'Annonce : Lait et Farine retirés de la liste');
   await click(lines().find((l) => l.querySelector('input').value === 'Tomates').querySelector('[data-action="toggle-line"]'));
   log(lines().find((l) => l.querySelector('input').value === 'Tomates').classList.contains('off') && sheet().textContent.includes('Ajouter 2 produits au stock'), 'Tomates décochées : 2 produits à ajouter');
   await click(lines().find((l) => l.querySelector('input').value === 'Farine de blé').querySelector('[data-action="line-plus"]'));
