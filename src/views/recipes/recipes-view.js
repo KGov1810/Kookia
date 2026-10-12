@@ -1,9 +1,8 @@
-// Kookia — Écran Recettes.
+// Kookia — Écran Recettes : produits prioritaires, filtres rapides et bouton principal, puis « Mes recettes » en onglets.
 
 import { html, raw } from '../../components/html.js';
 import { I } from '../../components/icons.js';
 import { shortExpiry } from '../../components/product-visuals.js';
-import { servingsLabel } from '../../components/recipe-visuals.js';
 import * as R from '../../data/reference/index.js';
 import * as store from '../../data/store/index.js';
 import { hasClaudeKey } from '../../data/store/selectors.js';
@@ -11,8 +10,8 @@ import { state } from '../../data/store/state.js';
 import * as S from '../../services/index.js';
 import { rerenderKeepScroll } from '../app/router.js';
 import { currentFilters, ui } from '../app/ui-state.js';
-import { originSummary } from './origin-picker.js';
 import { recipeCard } from './recipe-card.js';
+import { hasFilters, quickFilters } from './recipe-filters.js';
 
 function applyDefaultPriority() {
   const ids = new Set(state.products.map((p) => p.id));
@@ -23,92 +22,83 @@ function applyDefaultPriority() {
   }
 }
 
-export const recipesView = {
-  render() {
-    applyDefaultPriority();
-    const hasKey = hasClaudeKey();
-    const priority = store.sortedProducts().filter((p) => ui.priority.has(p.id));
-    const canGenerate = hasKey && !ui.generating && (state.products.length > 0 || state.shopping.length > 0);
-    const recipes = [...state.recipes]
-      .sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0))
-      .filter((r) => S.matchesFilters(r, currentFilters()) && (!ui.favoritesOnly || r.favorite));
-    const compatible = store.compatibleRecipes({ priorityIds: ui.priority, filters: currentFilters() });
-    const servings = state.settings.servings || 2;
-    const hiddenOld = state.recipes.filter((r) => S.lacksTagsFor(r, currentFilters())).length;
+/** Recettes de chaque onglet, filtres appliqués. Réalisables : faisables avec le stock, les mieux adaptées d'abord. */
+function recipeTabs(filters) {
+  const fresh = (r) => Number(ui.freshIds.has(r.id));
+  const all = [...state.recipes]
+    .sort((a, b) => (fresh(b) - fresh(a)) || ((b.createdAt ?? 0) - (a.createdAt ?? 0)))
+    .filter((r) => S.matchesFilters(r, filters));
+  const doable = store.compatibleRecipes({ priorityIds: ui.priority, filters, limit: Infinity });
+  return {
+    realisables: { label: 'Réalisables', items: doable.map((c) => [c.recipe, c]), empty: 'Aucune recette enregistrée n\'est réalisable avec le stock actuel : demandez-en à Claude.' },
+    favoris: { label: 'Favoris', items: all.filter((r) => r.favorite).map((r) => [r]), empty: 'Pas encore de favori : touchez l\'étoile dans une recette pour la garder ici.' },
+    toutes: { label: 'Toutes', items: all.map((r) => [r]), empty: 'Aucune recette ne correspond à ces filtres.' }
+  };
+}
 
-    return html`
-      <header class="top">
-        <h1>Recettes</h1>
-        <button class="icon-btn" data-action="toggle-favorites" aria-pressed="${String(ui.favoritesOnly)}" aria-label="Afficher seulement les favoris">${I.star}</button>
-      </header>
+/** Onglet affiché : celui choisi, sinon Réalisables s'il y en a, sinon Toutes. */
+function activeTab(tabs) {
+  if (tabs[ui.recipeTab]) return ui.recipeTab;
+  return tabs.realisables.items.length ? 'realisables' : 'toutes';
+}
 
-      <section class="group">
-        <h2>À utiliser en priorité</h2>
-        ${priority.length
-          ? html`<div class="chips">${priority.map((p) => html`<span class="chip">${R.category(p.category).emoji} ${p.name} <i class="${store.productStatus(p)}">${shortExpiry(p)}</i></span>`)}</div>`
-          : html`<p class="hint inset">${state.products.length
-            ? 'Aucun produit ne périme bientôt. Choisissez-en, ou laissez Claude piocher dans tout le stock.'
-            : 'Le stock est vide : Claude partira de la liste de courses.'}</p>`}
-        <button class="row-button" data-action="pick-products" ${state.products.length ? '' : raw('disabled')}>${I.check}Choisir les produits</button>
-      </section>
+function priorityBlock() {
+  const priority = store.sortedProducts().filter((p) => ui.priority.has(p.id));
+  return html`
+    <div class="group-head">
+      <h2>À utiliser en priorité</h2>
+      <button class="link" data-action="pick-products" ${state.products.length ? '' : raw('disabled')}>${priority.length ? 'Modifier' : 'Choisir'}</button>
+    </div>
+    ${priority.length
+      ? html`<div class="chips">${priority.map((p) => html`<span class="chip">${R.category(p.category).emoji} ${p.name} <i class="${store.productStatus(p)}">${shortExpiry(p)}</i></span>`)}</div>`
+      : html`<p class="hint inset">${state.products.length ? 'Rien d\'urgent : Claude pioche dans tout le stock.' : 'Stock vide : Claude part de la liste de courses.'}</p>`}`;
+}
 
-      <section class="group">
-        <div class="field"><span>Pour</span>
-          <div class="stepper">
-            <button data-action="servings-minus" aria-label="Une personne de moins" ${servings <= 1 ? raw('disabled') : ''}>−</button>
-            <output>${servingsLabel(servings)}</output>
-            <button data-action="servings-plus" aria-label="Une personne de plus" ${servings >= 12 ? raw('disabled') : ''}>+</button>
-          </div>
-        </div>
-        <span class="filter-label">Régime</span>
-        <div class="segmented" role="group" aria-label="Régime">
-          ${R.DIETS.map((d) => html`<button data-action="set-diet" data-value="${d.id}" aria-pressed="${String(ui.filters.diet === d.id)}">${d.label}</button>`)}
-        </div>
-        <button class="field field-button" data-action="pick-origin">
-          <span class="label-stack">Origine<small>${originSummary()}</small></span>
-          <span class="chevron" aria-hidden="true">›</span>
-        </button>
-        <span class="filter-label">Difficulté</span>
-        <div class="segmented" role="group" aria-label="Difficulté">
-          ${[['', 'Toutes'], ...R.DIFFICULTIES.map((d) => [d.id, d.label])].map(([value, label]) => html`<button data-action="set-difficulty" data-value="${value}" aria-pressed="${String(ui.filters.difficulty === value)}">${label}</button>`)}
-        </div>
-        <span class="filter-label">Temps total maximum</span>
-        <div class="segmented" role="group" aria-label="Temps total maximum">
-          ${R.TIME_FILTERS.map((t) => html`<button data-action="set-time" data-value="${t.max}" aria-pressed="${String(ui.filters.maxMinutes === t.max)}">${t.label}</button>`)}
-        </div>
-        <label class="field">
-          <span class="label-stack">Batch cooking<small>Se prépare en avance et se garde plusieurs jours</small></span>
-          <input type="checkbox" class="switch" id="batch-toggle" ${ui.filters.batchOnly ? raw('checked') : ''}>
-        </label>
-        <label class="field">
-          <span class="label-stack">Léger<small>${state.settings.lightMaxKcal || 500} kcal maximum par portion</small></span>
-          <input type="checkbox" class="switch" id="light-toggle" ${ui.filters.light ? raw('checked') : ''}>
-        </label>
-      </section>
-
-      ${compatible.length ? html`
-        <h2 class="section">Déjà dans vos recettes<small>${compatible.length}</small></h2>
-        <p class="hint">Réalisables avec votre stock actuel, sans nouvelle génération (gratuit).</p>
-        <div class="list">${compatible.map((c) => recipeCard(c.recipe, c))}</div>` : ''}
-
-      <button class="${compatible.length ? 'secondary' : 'primary'} generate" data-action="generate" ${canGenerate ? '' : raw('disabled')}>
-        ${ui.generating ? html`<span class="spinner"></span>Claude cuisine… (environ 30 s)` : html`${I.sparkle}${compatible.length ? 'Proposer 5 nouvelles recettes' : 'Proposer 5 recettes'}`}
+function generateBlock() {
+  const hasKey = hasClaudeKey();
+  const canGenerate = hasKey && !ui.generating && (state.products.length > 0 || state.shopping.length > 0);
+  return html`
+    <div class="start-action">
+      <button class="primary generate" data-action="generate" ${canGenerate ? '' : raw('disabled')}>
+        ${ui.generating ? html`<span class="spinner"></span>Claude cuisine… (environ 30 s)` : html`${I.sparkle}Proposer 5 recettes`}
       </button>
       ${ui.recipeNote
         ? html`<p class="note ${ui.recipeNote.kind}">${ui.recipeNote.text}</p>`
-        : !hasKey
-          ? html`<p class="hint">Ajoutez votre clé API Claude dans Réglages pour générer des recettes.</p>`
-          : ''}
+        : !hasKey ? html`<p class="hint">Ajoutez votre clé API Claude dans Réglages pour générer des recettes.</p>` : ''}
+    </div>`;
+}
 
-      <h2 class="section">${ui.favoritesOnly ? 'Recettes favorites' : 'Mes recettes'}<small>${recipes.length || ''}</small></h2>
-      <div class="list">
-        ${!state.recipes.length
-          ? html`<p class="hint">Aucune recette pour l'instant. Les recettes générées sont partagées avec l'autre iPhone.</p>`
-          : !recipes.length
-            ? html`<p class="hint">Aucune recette ne correspond à ces filtres.</p>`
-            : recipes.map((recipe) => recipeCard(recipe))}
+export const recipesView = {
+  render() {
+    applyDefaultPriority();
+    const filters = currentFilters();
+    const tabs = recipeTabs(filters);
+    const current = activeTab(tabs);
+    const { items, empty } = tabs[current];
+    const cards = items.map(([recipe, availability]) => recipeCard(recipe, availability));
+    const hiddenOld = state.recipes.filter((r) => S.lacksTagsFor(r, filters)).length;
+
+    return html`
+      <header class="top"><h1>Recettes</h1></header>
+
+      <section class="group recipe-start">
+        ${priorityBlock()}
+        ${quickFilters()}
+        ${generateBlock()}
+      </section>
+
+      <h2 class="section">Mes recettes</h2>
+      <div class="segmented recipe-tabs" role="tablist" aria-label="Mes recettes">
+        ${Object.entries(tabs).map(([id, tab]) => html`
+          <button role="tab" data-action="recipe-tab" data-value="${id}" aria-selected="${String(id === current)}" aria-pressed="${String(id === current)}">${tab.label}<i>${tab.items.length}</i></button>`)}
       </div>
-      ${hiddenOld ? html`<p class="hint">${S.plural(hiddenOld, 'recette ancienne', 'recettes anciennes')} (sans régime, calories ou origine) ${hiddenOld > 1 ? 'sont masquées' : 'est masquée'} avec ces filtres.</p>` : ''}`;
+      <div class="list">
+        ${cards.length
+          ? cards
+          : html`<p class="hint">${!state.recipes.length ? 'Aucune recette pour l\'instant. Les recettes générées sont partagées avec l\'autre iPhone.' : empty}</p>`}
+      </div>
+      ${hiddenOld ? html`<p class="hint">${S.plural(hiddenOld, 'recette ancienne', 'recettes anciennes')} (sans régime, calories ou origine) ${hiddenOld > 1 ? 'sont masquées' : 'est masquée'} avec ces filtres.</p>` : ''}
+      ${!cards.length && hasFilters() && state.recipes.length ? html`<button class="secondary" data-action="clear-filters">Effacer les filtres</button>` : ''}`;
   },
   update() {
     rerenderKeepScroll();

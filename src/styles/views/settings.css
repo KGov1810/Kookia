@@ -7,3 +7,21 @@
 }
 
 .code-box.long { font-size: 12px; font-weight: 500; text-align: left; max-height: 120px; overflow: auto; }
+
+/* Avancé : replié par défaut */
+.advanced summary {
+  list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  min-height: 56px; padding: 8px 16px; cursor: pointer; font-weight: 600;
+}
+
+.advanced summary::-webkit-details-marker { display: none; }
+
+.advanced summary small { flex: 1; color: var(--muted); font-size: 13px; font-weight: 400; text-align: right; }
+
+.advanced summary::after { content: "›"; color: var(--muted); font-size: 22px; transition: transform .2s; }
+
+.advanced[open] summary::after { transform: rotate(90deg); }
+
+.advanced[open] summary { border-bottom: 1px solid var(--line); }
+
+.advanced > .field:first-of-type { border-top: 0; }

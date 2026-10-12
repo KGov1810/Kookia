@@ -1,34 +1,30 @@
-// Kookia — Carte d'une recette.
+// Kookia — Carte compacte d'une recette : titre, temps, origine, produits en stock et ce qui manque.
 
 import { html } from '../../components/html.js';
 import { I } from '../../components/icons.js';
-import { DIFFICULTY_LABEL, originFact } from '../../components/recipe-visuals.js';
 import * as R from '../../data/reference/index.js';
 import * as store from '../../data/store/index.js';
 import * as S from '../../services/index.js';
 import { ui } from '../app/ui-state.js';
 
+/** « 3 produits en stock · rien à acheter », « 2 produits en stock · manque gruyère râpé… » (rien sans produit du stock). */
+function stockLine(inFridge, missing) {
+  if (!inFridge.length) return '';
+  const names = missing.slice(0, 2).map((i) => i.name.toLowerCase()).join(', ');
+  return html`<span class="fit"><b>${S.plural(inFridge.length, 'produit')} en stock</b> · ${missing.length ? `manque ${names}${missing.length > 2 ? '…' : ''}` : 'rien à acheter'}</span>`;
+}
+
 export function recipeCard(recipe, availability = store.recipeAvailability(recipe, ui.priority)) {
   const { inFridge, missing, urgentUsed } = availability;
-  let fit = '';
-  if (inFridge.length) {
-    const missingText = missing.length === 0
-      ? 'tout est en stock'
-      : `manque ${missing.slice(0, 2).map((i) => i.name.toLowerCase()).join(', ')}${missing.length > 2 ? '…' : ''}`;
-    fit = html`<span class="uses">Utilise ${S.plural(inFridge.length, 'produit')} en stock${urgentUsed ? html`, <b class="urgent">dont ${urgentUsed} à consommer vite</b>` : ''}, ${missingText}</span>`;
-  }
+  const origin = R.originOf(recipe.origin);
   return html`
     <button class="recipe-card" data-action="open-recipe" data-id="${recipe.id}">
-      <h3><span>${recipe.title}</span>${recipe.favorite ? I.star : ''}</h3>
-      ${recipe.summary ? html`<p>${recipe.summary}</p>` : ''}
+      <h3><span>${recipe.title}</span>${ui.freshIds.has(recipe.id) ? html`<b class="badge">Nouvelle</b>` : ''}${recipe.favorite ? I.star : ''}</h3>
       <span class="facts">
         <span>${I.clock}${S.formatMinutes(recipe.totalMinutes)}</span>
-        <span>${I.gauge}${DIFFICULTY_LABEL[recipe.difficulty] ?? recipe.difficulty}</span>
-        ${S.isBatchFriendly(recipe) ? html`<span>${I.box}Se garde ${S.plural(recipe.storageDays, 'jour')}</span>` : ''}
-        ${recipe.kcal > 0 ? html`<span>${I.flame}≈ ${recipe.kcal} kcal</span>` : ''}
-        ${R.DIET_LABEL[recipe.diet] ? html`<span class="diet">${I.leaf}${R.DIET_LABEL[recipe.diet]}</span>` : ''}
-        ${originFact(recipe)}
+        ${origin ? html`<span class="flag" title="${origin.label}" aria-label="Cuisine ${origin.label.toLowerCase()}">${origin.emoji}</span>` : ''}
+        ${urgentUsed ? html`<span class="urgent">${urgentUsed} à consommer vite</span>` : ''}
       </span>
-      ${fit}
+      ${stockLine(inFridge, missing)}
     </button>`;
 }

@@ -8,9 +8,9 @@ import * as store from '../../data/store/index.js';
 import * as S from '../../services/index.js';
 
 const KINDS = {
-  consume: { icon: 'check', label: 'Consommé : retirer du stock', question: 'Combien en consommez-vous ?', verb: 'Consommer', style: 'primary-fill' },
-  freeze: { icon: 'snow', label: 'Congeler (se garde plusieurs mois)', question: 'Combien en congelez-vous ?', verb: 'Congeler', style: 'primary-fill' },
-  discard: { icon: 'trash', label: 'Jeté : retirer du stock', question: 'Combien en jetez-vous ?', verb: 'Jeter', style: 'danger-fill' }
+  consume: { icon: 'check', label: 'Consommé', question: 'Combien en consommez-vous ?', verb: 'Consommer', style: 'primary-fill' },
+  freeze: { icon: 'snow', label: 'Congeler', question: 'Combien en congelez-vous ?', verb: 'Congeler', style: 'primary-fill' },
+  discard: { icon: 'trash', label: 'Jeté', question: 'Combien en jetez-vous ?', verb: 'Jeter', style: 'danger-fill' }
 };
 
 /** Nombre d'unités réellement en stock (pas celui en cours de modification dans la fiche). */
@@ -18,15 +18,20 @@ function inStock(ctx) {
   return store.productById(ctx.p.id)?.count ?? 1;
 }
 
-/** Bouton de la fiche, ou le choix du nombre s'il est ouvert pour ce bouton. */
-export function unitsButton(ctx, kind) {
+/** Gros bouton « Consommé », « Congeler » ou « Jeté » en haut de la fiche. */
+export function unitsTile(ctx, kind) {
   const def = KINDS[kind];
-  const open = ctx.view.take?.kind === kind;
-  const button = html`<button class="row-button ${kind === 'discard' ? 'danger' : ''}" data-action="${kind}" aria-expanded="${String(open)}">${I[def.icon]}${def.label}</button>`;
-  if (!open) return button;
+  return html`<button class="tile tile-${kind}" data-action="${kind}" aria-expanded="${String(ctx.view.take?.kind === kind)}">${I[def.icon]}<span>${def.label}</span></button>`;
+}
+
+/** Choix du nombre (plusieurs exemplaires), sous les gros boutons. */
+export function unitsBox(ctx) {
+  const kind = ctx.view.take?.kind;
+  if (!kind) return '';
+  const def = KINDS[kind];
   const total = inStock(ctx);
   const units = Math.min(ctx.view.take.units, total);
-  return html`${button}
+  return html`
     <div class="units-box units-${kind}" role="group" aria-label="${def.question}">
       <div class="field"><span>${def.question}</span>
         <div class="stepper">
@@ -95,7 +100,6 @@ export function unitsActions(ctx) {
       return;
     }
     view.take = view.take?.kind === kind ? null : { kind, units: 1 };
-    view.opening = false;
     ctx.sheet.update();
   };
   const set = (units) => {

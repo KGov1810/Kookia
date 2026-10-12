@@ -3,23 +3,69 @@
 .filter-label { display: block; font-size: 14px; color: var(--muted); padding: 10px 16px 6px; }
 
 .recipe-card {
-  display: flex; flex-direction: column; gap: 6px; width: 100%; text-align: left;
-  background: var(--surface); border-radius: 18px; padding: 14px 16px; box-shadow: var(--shadow);
+  display: flex; flex-direction: column; gap: 4px; width: 100%; text-align: left;
+  background: var(--surface); border-radius: 16px; padding: 12px 14px; box-shadow: var(--shadow);
 }
 
-.recipe-card h3 { margin: 0; font: 700 18px/1.25 var(--font-round); display: flex; gap: 8px; justify-content: space-between; }
+.recipe-card h3 { margin: 0; font: 700 17px/1.25 var(--font-round); display: flex; gap: 8px; align-items: flex-start; }
 
-.recipe-card h3 svg { width: 18px; height: 18px; color: var(--apricot); fill: currentColor; }
+.recipe-card h3 > span { flex: 1; min-width: 0; }
 
-.recipe-card p { margin: 0; color: var(--muted); font-size: 15px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.recipe-card h3 svg { width: 18px; height: 18px; color: var(--apricot); fill: currentColor; flex: none; margin-top: 1px; }
 
-.facts { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 14px; color: var(--muted); }
+.recipe-card .badge {
+  flex: none; font: 700 12px/1 var(--font); padding: 4px 7px; border-radius: 999px;
+  background: var(--herb-soft); color: var(--herb-strong); margin-top: 1px;
+}
+
+.facts { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; font-size: 14px; color: var(--muted); }
 
 .facts span { display: inline-flex; align-items: center; gap: 4px; }
 
 .facts svg { width: 16px; height: 16px; }
 
-.uses { font-size: 14px; font-weight: 650; color: var(--herb); }
+.facts .flag { font-size: 15px; }
+
+.facts .diet { color: var(--herb-strong); font-weight: 600; }
+
+.facts .urgent { color: var(--apricot); font-weight: 650; }
+
+.fit { font-size: 14px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.fit b { color: var(--herb); font-weight: 650; }
+
+/* Bloc du haut : produits prioritaires, filtres rapides, bouton principal */
+.recipe-start { padding-bottom: 2px; }
+
+.group-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 12px 0 16px; }
+
+.group-head h2 { font: 700 15px var(--font); color: var(--muted); margin: 0; }
+
+.group-head .link { min-height: 40px; }
+
+.recipe-start .chips { padding-bottom: 8px; }
+
+.servings-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 16px 8px; border-top: 1px solid var(--line); }
+
+.servings-row .stepper output { min-width: 92px; }
+
+.quick-filters { display: flex; flex-wrap: wrap; gap: 8px; padding: 2px 16px 10px; }
+
+.quick-filters .chip, .servings-row .chip { padding: 6px 12px; font-size: 14px; min-height: 36px; }
+
+.servings-row .chip svg { width: 16px; height: 16px; }
+
+.servings-row .chip i { background: var(--herb); color: var(--on-accent); border-radius: 999px; padding: 1px 6px; font-size: 12px; }
+
+.start-action { padding: 2px 16px 14px; }
+
+.start-action .note, .start-action .hint { margin: 10px 0 0; }
+
+.recipe-tabs { margin: 0 0 10px; }
+
+.recipe-tabs button { display: inline-flex; align-items: center; justify-content: center; gap: 5px; }
+
+.recipe-tabs i { font-style: normal; font-size: 12px; color: var(--muted); font-weight: 700; }
 
 /* Détail recette */
 .recipe-hero { padding: 16px 4px 4px; }
@@ -86,13 +132,7 @@
   font: 700 16px/30px var(--font-round); text-align: center;
 }
 
-.uses .urgent { color: var(--apricot); font-weight: 700; }
-
 .ingredient small.matched { font-size: 13px; color: var(--herb); }
-
-.generate { margin-top: 18px; }
-
-.facts .diet { color: var(--herb-strong); font-weight: 600; }
 
 .kcal { display: flex; align-items: center; gap: 6px; margin: 10px 0 0; font-weight: 600; }
 

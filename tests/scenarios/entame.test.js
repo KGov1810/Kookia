@@ -34,18 +34,14 @@ test('Produits entamés', async () => {
   const history = () => docs('historique').sort((a, b) => a.clientAt - b.clientAt).at(-1);
   const row = (name, opened) => $$('.product').find((r) => r.querySelector('.product-name').textContent === name && (opened === undefined || r.textContent.includes('Entamé') === opened));
   const openFiche = (name, opened) => click(row(name, opened).querySelector('.product-main'), 400);
-  const choose = async (label) => {
-    await click(sheet().querySelector('[data-action="opening"]'));
-    await click([...sheet().querySelectorAll('[data-action="set-remaining"]')].find((b) => b.textContent === label), 350);
-  };
+  const choose = (label) => click([...sheet().querySelectorAll('[data-action="set-remaining"]')].find((b) => b.textContent === label), 350);
   await tick(80);
 
   console.log('\n— Entamer un produit —');
   await openFiche('Lait UHT');
-  await click(sheet().querySelector('[data-action="opening"]'));
   const choices = [...sheet().querySelectorAll('[data-action="set-remaining"]')];
-  log(choices.map((b) => b.textContent).join(' ') === '¾ ½ ¼' && sheet().textContent.includes('Combien en reste-t-il ?'), 'Choix ¾ · ½ · ¼');
-  log(sheet().textContent.includes('À finir avant le') && sheet().textContent.includes('rangé au frigo'), 'Annonce : date après ouverture et rangement au frigo');
+  log(choices.map((b) => b.textContent).join(' ') === '¾ ½ ¼' && sheet().textContent.includes('Entamé ? Il en reste :'), 'Choix ¾ · ½ · ¼ visibles d\'emblée, en haut de la fiche');
+  log(sheet().textContent.includes('À l\'ouverture : à finir avant le') && sheet().textContent.includes('rangé au frigo'), 'Annonce : date après ouverture et rangement au frigo');
   await click(choices.find((b) => b.textContent === '½'), 350);
   const lait = () => one('Lait UHT');
   log(lait().remaining === 0.5 && lait().location === 'frigo' && lait().dateKind === 'dlc' && lait().expiry === iso(4) && lait().openedAt === iso(0), 'Lait : reste ½, au frigo, à finir dans 4 jours');
@@ -59,9 +55,9 @@ test('Produits entamés', async () => {
   await openFiche('Lait UHT');
   await choose('½');
   await openFiche('Lait UHT');
-  await click(sheet().querySelector('[data-action="opening"]'));
   const disabled = [...sheet().querySelectorAll('[data-action="set-remaining"]')].filter((b) => b.disabled).map((b) => b.textContent);
-  log(disabled.join(' ') === '¾ ½' && sheet().textContent.includes('Entamé : reste ½, ouvert le'), 'Déjà à ½ : seul ¼ est possible');
+  const current = sheet().querySelector('[data-action="set-remaining"][aria-pressed="true"]')?.textContent;
+  log(disabled.join(' ') === '¾ ½' && current === '½' && /Entamé le .+, il en reste ½/.test(sheet().textContent), 'Déjà à ½ (marqué) : seul ¼ est possible');
   await click([...sheet().querySelectorAll('[data-action="set-remaining"]')].find((b) => b.textContent === '¼'), 350);
   log(lait().remaining === 0.25 && lait().expiry === iso(4) && lastMove().count === 0.25, '½ → ¼ : 0,25 de plus consommé, date inchangée');
   await openFiche('Lait UHT');

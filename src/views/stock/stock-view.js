@@ -35,20 +35,18 @@ export const fridgeView = {
   }
 };
 
+/** Bandeau compact : combien sont à consommer vite (le détail est juste en dessous) + idées recettes. */
 function fridgeAlert() {
   const urgent = store.urgentProducts();
   if (!urgent.length) return '';
   const expired = urgent.filter((p) => store.productStatus(p) === 'expired').length;
-  const names = urgent.slice(0, 3).map((p) => p.name);
-  const more = urgent.length > 3 ? ` et ${urgent.length - 3} autre${urgent.length > 4 ? 's' : ''}` : '';
   const title = expired === urgent.length
     ? `${S.plural(urgent.length, 'produit')} périmé${urgent.length > 1 ? 's' : ''}`
     : `${S.plural(urgent.length, 'produit')} à consommer vite`;
   return html`
     <button class="alert-card ${expired === urgent.length ? 'expired' : ''}" data-action="go-recipes">
       <strong>${title}</strong>
-      <span>${names.join(', ')}${more}</span>
-      <em>Idées recettes</em>
+      <em>${I.sparkle}Idées recettes</em>
     </button>`;
 }
 

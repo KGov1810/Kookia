@@ -22,10 +22,10 @@ test("Quantité numérique, réglages et styles", async () => {
 
   console.log('\n— Quantité numérique —');
   await click('.tab[data-tab="courses"]');
-  const qty = $('#new-qty');
-  log(qty.getAttribute('inputmode') === 'numeric' && qty.getAttribute('maxlength') === '3', 'Champ « Qté » : clavier numérique, 3 chiffres max');
-  await type('#new-qty', '12 paquets');
-  log(qty.value === '12', '« 12 paquets » collé → « 12 »');
+  log(!$('#new-qty') && !$('.add-hint') && $('#new-item').placeholder.includes('2 lait'), 'Un seul champ (« 2 lait »), sans « Qté » ni paragraphe d\'aide');
+  const allCss = readAllCss();
+  const addRule = allCss.slice(allCss.lastIndexOf('.add-item input {'), allCss.indexOf('}', allCss.lastIndexOf('.add-item input {')));
+  log(/min-width: 0/.test(addRule), 'Champ réductible : le bouton + n\'est plus coupé sur un petit écran');
   await click($$('.shop-text').find((b) => b.textContent.includes('Sucre')), 350);
   log(sheet().querySelector('[name="name"]').value === 'Sucre (2 kg)' && sheet().querySelector('[name="quantity"]').value === '', 'Ancien article « 2 kg » : poids déplacé dans le nom, nombre vide');
   await click(sheet().querySelector('[data-action="save"]'), 350);
@@ -45,7 +45,7 @@ test("Quantité numérique, réglages et styles", async () => {
   log(/background: var\(--herb\)/.test(rule('.field input.switch:checked')), 'Interrupteur activé : fond vert conservé');
   log(/flex: 1 1 auto/.test(rule('.field > .label-stack')) && /min-width: 0/.test(rule('.field > .label-stack')), 'Libellés longs : passage à la ligne autorisé');
   await click('.tab[data-tab="recettes"]');
-  log($('#batch-toggle').classList.contains('switch') && $('#light-toggle').closest('.field') !== null, 'Batch cooking et Léger utilisent bien ces interrupteurs');
+  log($$('.quick-filters .filter-chip').length === 4 && $('.servings-row [data-action="more-filters"]') && /flex-wrap: wrap/.test(rule('.quick-filters')), 'Recettes : 4 pastilles et un bouton « Filtres », qui passent à la ligne au lieu de déborder');
   console.log('\nErreurs JS :', P.errors.length ? P.errors : 'aucune');
 
 });

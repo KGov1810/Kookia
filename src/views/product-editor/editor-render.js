@@ -9,28 +9,32 @@ import { hasClaudeKey } from '../../data/store/selectors.js';
 import * as S from '../../services/index.js';
 import { dateSection } from './editor-date-section.js';
 import { priceField } from './editor-price.js';
-import { openingSection } from './editor-opening.js';
 import { quantityField } from './editor-quantity.js';
-import { unitsButton } from './editor-units.js';
+import { topActions } from './editor-top-actions.js';
+
+/** Ajout : lire un code-barres, reconnaître le produit ou lire la date en photo. */
+function captureButtons() {
+  return html`
+    <div class="capture">
+      <button data-action="scan">${I.barcode}Code-barres</button>
+      <button data-action="photo">${I.camera}Photo du produit</button>
+      <button data-action="date-photo">${I.calendar}Lire la date</button>
+    </div>
+    ${hasClaudeKey() ? '' : html`<p class="hint">Sans clé Claude (Réglages), la photo sert seulement à lire la date. Le code-barres reste le moyen le plus fiable d'identifier un produit.</p>`}`;
+}
 
 export function renderEditor(ctx) {
   const { p, view, isNew } = ctx;
   return html`
     <header class="sheet-head">
       <button class="link" data-action="close">Annuler</button>
-      <h2>${isNew ? 'Nouveau produit' : 'Modifier le produit'}</h2>
+      <h2>${isNew ? 'Nouveau produit' : (store.productById(p.id) ?? p).name}</h2>
       <button class="link strong" data-action="save" ${p.name.trim() ? '' : raw('disabled')}>${isNew ? 'Ajouter' : 'Enregistrer'}</button>
     </header>
     <div class="sheet-body">
       ${view.info ? html`<p class="note ok">${view.info}</p>` : ''}
       ${view.error ? html`<p class="note warn">${view.error}</p>` : ''}
-      ${sameProductNote(ctx)}
-      <div class="capture">
-        <button data-action="scan">${I.barcode}Code-barres</button>
-        <button data-action="photo">${I.camera}Photo du produit</button>
-        <button data-action="date-photo">${I.calendar}Lire la date</button>
-      </div>
-      ${hasClaudeKey() ? '' : html`<p class="hint">Sans clé Claude (Réglages), la photo sert seulement à lire la date. Le code-barres reste le moyen le plus fiable d'identifier un produit.</p>`}
+      ${isNew ? html`${sameProductNote(ctx)}${captureButtons()}` : topActions(ctx)}
       <section class="group">
         <div class="name-row">${thumb(p)}<input name="name" value="${p.name}" placeholder="Nom (ex. Yaourt nature)" autocomplete="off" enterkeyhint="done" aria-label="Nom du produit"></div>
         <label class="field"><span>Catégorie</span>
@@ -55,15 +59,7 @@ export function renderEditor(ctx) {
         </div>
       </section>
       ${dateSection(ctx)}
-      ${isNew ? '' : html`
-        <section class="group">
-          ${p.addedBy ? html`<div class="field"><span>Ajouté par</span><span class="muted">${p.addedBy}</span></div>` : ''}
-          <button class="row-button" data-action="to-shopping">${I.cart}Ajouter à la liste de courses</button>
-          ${p.location !== 'congelateur' && p.location !== 'placard' ? unitsButton(ctx, 'freeze') : ''}
-          ${openingSection(ctx)}
-          ${unitsButton(ctx, 'consume')}
-          ${unitsButton(ctx, 'discard')}
-        </section>`}
+      ${!isNew && p.addedBy ? html`<p class="hint added-by">Ajouté par ${p.addedBy}</p>` : ''}
     </div>
     ${view.busy ? html`<div class="busy"><span class="spinner"></span><p>${view.busy}</p></div>` : ''}`;
 }

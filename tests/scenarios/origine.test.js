@@ -35,7 +35,11 @@ test("Origine des recettes", async () => {
   };
 
   await click('.tab[data-tab="recettes"]');
-  const originRow = () => $('[data-action="pick-origin"]');
+  // L'origine se règle dans la fiche « Plus de filtres »
+  const openFilters = () => click('[data-action="more-filters"]', 350);
+  const closeFilters = () => click(sheet().querySelector('[data-action="close"]'), 350);
+  const originRow = () => sheet().querySelector('[data-action="pick-origin"]');
+  await openFilters();
   log(originRow()?.textContent.includes('Toutes les cuisines'), 'Ligne « Origine » : toutes les cuisines par défaut');
   await click(originRow(), 350);
   log(sheet().querySelectorAll('.origin-chip').length === 17, 'Sélecteur : 17 choix (dont Tour du monde et Brésilienne)');
@@ -52,30 +56,40 @@ test("Origine des recettes", async () => {
   log(sheet().querySelector('[name="wish"]').value === 'nouilles', 'Le texte « Envie de… » est conservé en cochant');
   await click(sheet().querySelector('[data-action="done"]'), 350);
   log(originRow().textContent.includes('🇮🇹 Italienne, 🇯🇵 Japonaise, « nouilles »'), `Résumé : ${originRow().querySelector('small').textContent}`);
+  await closeFilters();
+  log($('[data-action="more-filters"]').textContent.includes('Filtres2'), 'Bouton « Filtres » : 2 filtres en plus (origine, envie)');
   log(!mine().querySelector('.recipe-card') || ![...mine().querySelectorAll('.recipe-card')].some((c) => c.textContent.includes('Couscous')), 'Recettes enregistrées filtrées (couscous maghrébin masqué)');
   log(text().includes('1 recette ancienne (sans régime, calories ou origine) est masquée'), 'Ancienne recette sans origine : masquée, avec explication');
   await click('[data-action="generate"]', 80);
   log(prompt.includes('Cuisines demandées : italienne, japonaise') && prompt.includes('« nouilles »') && prompt.includes("jusqu'à 6 ingrédients à acheter"), 'Demande à Claude : 2 cuisines, envie « nouilles », jusqu\'à 6 achats');
   const cards = [...mine().querySelectorAll('.recipe-card')];
-  log(cards.length === 2 && cards.some((c) => c.textContent.includes('🇯🇵 Japonaise')) && cards.some((c) => c.textContent.includes('🇮🇹 Italienne')), 'Cartes : origine affichée (🇯🇵, 🇮🇹)');
-  const compat = $$('h2.section')[0];
-  log(compat.textContent.includes('Déjà dans vos recettes') && compat.nextElementSibling.nextElementSibling.textContent.includes('Ramen au poulet'), 'Ramen (3 achats) proposé dans « Déjà dans vos recettes » grâce à la limite de 6');
+  const flags = cards.map((c) => c.querySelector('.flag')?.textContent);
+  log(cards.length === 2 && flags.includes('🇯🇵') && flags.includes('🇮🇹') && cards.every((c) => c.querySelector('.badge')), 'Nouvelles recettes en tête, avec leur drapeau (🇯🇵, 🇮🇹)');
   await click(cards.find((c) => c.textContent.includes('Ramen')), 400);
   log(sheet().textContent.includes('🇯🇵 Japonaise'), 'Fiche recette : origine affichée');
   w.navigator.share = async (data) => { globalThis.__shared = data.text; };
   await click(sheet().querySelector('[data-action="share"]'), 20);
   log(globalThis.__shared.includes('cuisine japonaise'), 'Partage : « cuisine japonaise »');
   await click(sheet().querySelector('[data-action="close"]'), 350);
+  await click('[data-action="recipe-tab"][data-value="realisables"]');
+  log(mine().textContent.includes('Ramen au poulet'), 'Ramen (3 achats) dans « Réalisables » grâce à la limite de 6');
+  await click('[data-action="recipe-tab"][data-value="toutes"]');
   // Envie « couscous » seule : retrouve le couscous enregistré sans générer
+  await openFilters();
   await click(originRow(), 350);
   await click(sheet().querySelector('[data-action="clear"]'));
   await type(sheet().querySelector('[name="wish"]'), 'couscous');
   await click(sheet().querySelector('[data-action="done"]'), 350);
+  await closeFilters();
   log([...mine().querySelectorAll('.recipe-card')].map((c) => c.querySelector('h3').textContent.trim()).join() === 'Couscous au poulet', 'Envie « couscous » : le couscous enregistré est retrouvé');
+  log(!JSON.parse(w.localStorage.getItem('frigo.settings.v1')).recipeFilters.wish, 'L\'envie n\'est pas mémorisée sur l\'iPhone');
+  await openFilters();
   await click(originRow(), 350);
   await click(sheet().querySelector('[data-action="clear"]'));
   await click(sheet().querySelector('[data-action="done"]'), 350);
-  log(originRow().textContent.includes('Toutes les cuisines') && mine().querySelectorAll('.recipe-card').length === 4, 'Effacer : toutes les recettes de nouveau visibles');
+  log(originRow().textContent.includes('Toutes les cuisines'), 'Effacer : toutes les cuisines');
+  await closeFilters();
+  log(mine().querySelectorAll('.recipe-card').length === 4, 'Effacer : toutes les recettes de nouveau visibles');
   console.log('\nErreurs JS :', P.errors.length ? P.errors : 'aucune');
 
 });

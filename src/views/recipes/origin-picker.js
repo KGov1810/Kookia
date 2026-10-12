@@ -3,7 +3,6 @@
 import { html } from '../../components/html.js';
 import { openSheet } from '../../components/sheet.js';
 import * as R from '../../data/reference/index.js';
-import { rerenderIf } from '../app/router.js';
 import { ui } from '../app/ui-state.js';
 
 /** « Toutes », « 🇮🇹 Italienne, 🇯🇵 Japonaise », « « nouilles » »… */
@@ -16,8 +15,11 @@ export function originSummary() {
   return parts.length ? parts.join(', ') : 'Toutes les cuisines';
 }
 
-/** Cuisines à cocher (plusieurs possibles) + envie libre. « Tour du monde » exclut les autres. */
-export function openOriginPicker() {
+/**
+ * Cuisines à cocher (plusieurs possibles) + envie libre. « Tour du monde » exclut les autres.
+ * onDone({ origins, wish }) reçoit le choix validé par « OK ».
+ */
+export function openOriginPicker(onDone) {
   const draft = { origins: new Set(ui.filters.origins), wish: ui.filters.wish };
   const sheet = openSheet({
     tall: true,
@@ -57,11 +59,8 @@ export function openOriginPicker() {
         sheet.update();
       },
       done: () => {
-        ui.filters.origins = [...draft.origins];
-        ui.filters.wish = draft.wish.trim().slice(0, 80);
-        ui.recipeNote = null;
         sheet.close();
-        rerenderIf('recettes');
+        onDone({ origins: [...draft.origins], wish: draft.wish.trim().slice(0, 80) });
       }
     },
     onInput: (event) => {

@@ -2,7 +2,7 @@
 
 import { html, raw } from '../../components/html.js';
 import { I } from '../../components/icons.js';
-import { dayCounter, thumb } from '../../components/product-visuals.js';
+import { LOCATION_ICON, dayCounter, thumb } from '../../components/product-visuals.js';
 import { toast } from '../../components/toast.js';
 import * as R from '../../data/reference/index.js';
 import * as store from '../../data/store/index.js';
@@ -45,23 +45,31 @@ export function fridgeList() {
   });
 }
 
+/** Ligne d'un produit : l'essentiel seulement (entamé, lieu en vue « Tout », quantité) ; la date est dans le compteur. */
 function productRow(product) {
-  const status = store.productStatus(product);
+  const opened = S.isOpened(product);
   const meta = [
-    S.isOpened(product) ? `Entamé, reste ${S.remainingLabel(S.remainingOf(product))}` : '', // en tête : ne pas le couper
-    ui.location ? '' : R.locationOf(product.location).label,
-    S.quantityLabel(product),
-    S.stockShort(product),
-    product.addedBy ? `par ${product.addedBy}` : ''
-  ].filter(Boolean).join(', ');
+    opened ? `Entamé, reste ${S.remainingLabel(S.remainingOf(product))}` : '', // en tête : ne pas le couper
+    S.quantityLabel(product)
+  ].filter(Boolean).join(' · ');
+  const where = ui.location ? '' : html`<span class="where" title="${R.locationOf(product.location).label}">${LOCATION_ICON[product.location]?.() ?? ''}</span>`;
   return html`
     <div class="product" data-id="${product.id}">
-      <button class="consume" data-action="consume" data-id="${product.id}" aria-label="${(product.count ?? 1) > 1 ? `Consommé : un ${product.name} de moins (il en reste ${product.count - 1})` : `Consommé : ${S.isOpened(product) ? 'finir' : 'retirer'} ${product.name} du stock`}"></button>
-      <button class="product-main" data-action="edit" data-id="${product.id}">
-        ${thumb(product)}
-        <span class="product-text"><span class="product-name">${product.name}</span><span class="product-meta">${S.isOpened(product) ? openedGauge(product) : ''}${meta}</span></span>
-        ${dayCounter(product)}
-      </button>
+      <div class="swipe-under" aria-hidden="true">
+        <span class="swipe-consume">${I.check}Consommé</span>
+        <span class="swipe-buttons">
+          <button class="swipe-open" data-action="swipe-open" data-id="${product.id}" tabindex="-1">${I.gauge}Entamé</button>
+          <button class="swipe-discard" data-action="swipe-discard" data-id="${product.id}" tabindex="-1">${I.trash}Jeté</button>
+        </span>
+      </div>
+      <div class="product-front">
+        <button class="consume" data-action="consume" data-id="${product.id}" aria-label="${(product.count ?? 1) > 1 ? `Consommé : un ${product.name} de moins (il en reste ${product.count - 1})` : `Consommé : ${opened ? 'finir' : 'retirer'} ${product.name} du stock`}"></button>
+        <button class="product-main" data-action="edit" data-id="${product.id}">
+          ${thumb(product)}
+          <span class="product-text"><span class="product-name">${product.name}</span>${meta || where ? html`<span class="product-meta">${where}${opened ? openedGauge(product) : ''}${meta}</span>` : ''}</span>
+          ${dayCounter(product)}
+        </button>
+      </div>
     </div>`;
 }
 
@@ -88,4 +96,14 @@ export function consume(id) {
       : `${product.name} : il en reste ${product.count - 1}`;
     toast(message, 'Annuler', () => store.undoTake(done));
   }, last ? 180 : 0);
+}
+
+/** Jeté (glisser vers la gauche) : une unité, ou la part qui reste d'un produit entamé. */
+export function discard(id) {
+  const product = store.productById(id);
+  if (!product) return;
+  const done = store.discardUnits(id, 1);
+  if (!done.before.length) return;
+  const rest = (product.count ?? 1) - 1;
+  toast(rest > 0 ? `${product.name} : 1 jeté, il en reste ${rest}` : `${product.name} : jeté, retiré du stock`, 'Annuler', () => store.undoTake(done));
 }

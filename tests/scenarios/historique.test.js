@@ -67,7 +67,7 @@ test("Historique des changements", async () => {
   const before = count();
   await click($$('.tick').find((b) => b.getAttribute('aria-label').endsWith('Sucre')), 30);
   log(count() === before, 'Cocher un article : rien de noté');
-  await type('#new-item', 'Riz'); await type('#new-qty', '3');
+  await type('#new-item', '3 riz');
   $('#add-item').dispatchEvent(new w.Event('submit', { bubbles: true, cancelable: true })); await tick();
   log(last().scope === 'courses' && last().action === 'ajout' && last().details[0] === 'quantité : 3', 'Ajout aux courses avec quantité');
   await click($$('.shop-text').find((b) => b.textContent.includes('Lait')), 350);

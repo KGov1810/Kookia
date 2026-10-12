@@ -66,3 +66,31 @@ export function fromShoppingEntry(item) {
   const legacy = splitCount(q); // anciennes quantités libres (« 2 kg », « 2 paquets de 1 kg »)
   return { name: base, quantity: legacy.quantity || size, count: legacy.count };
 }
+
+const WEIGHT_UNIT = '(?:mg|g|kg|ml|cl|dl|l)\\b';
+
+/**
+ * Saisie libre de la liste de courses, en un seul champ : le nombre à acheter est repéré,
+ * un poids reste dans le nom. « 2 lait » ou « lait x2 » → { name: 'Lait', quantity: '2' } ;
+ * « Farine 1 kg » → { name: 'Farine 1 kg', quantity: '' } ; « 2 paquets de pâtes » → { 'Pâtes', '2' }.
+ */
+export function parseShoppingInput(text) {
+  let rest = String(text ?? '').replace(/\s+/g, ' ').trim();
+  if (/^\d*$/.test(rest)) return { name: '', quantity: '' }; // un nombre seul : pas d'article
+  let count = '';
+  let m = new RegExp(`^(\\d{1,3})\\s*[x×*]?\\s+(?!${WEIGHT_UNIT})(?:(?:${UNIT_WORDS})\\s+(?:de\\s+|d'))?(.+)$`, 'i').exec(rest);
+  if (!m) m = /^(\d{1,3})\s*[x×*]\s*(.+)$/i.exec(rest); // « 2x lait »
+  if (m) {
+    count = m[1];
+    rest = m[2];
+  } else {
+    m = /^(.+?)\s*[x×*]\s?(\d{1,3})$/i.exec(rest); // « lait x2 », « lait ×2 »
+    if (m) {
+      rest = m[1];
+      count = m[2];
+    }
+  }
+  const name = rest.trim();
+  const quantity = sanitizeCount(count);
+  return { name: name ? name.charAt(0).toUpperCase() + name.slice(1) : '', quantity: quantity === '1' ? '' : quantity };
+}

@@ -111,7 +111,7 @@ test("Second iPhone : invitation, code-barres, photo, erreurs Claude, synchronis
   const { setDoc, doc } = await import('firebase/firestore');
   await setDoc(doc(null, 'foyers', code, 'produits', 'x-remote'), { name: 'Salade verte', expiry: new Date().toISOString().slice(0, 10), category: 'fruits_legumes', quantity: '', barcode: '', addedBy: 'Marie', createdAt: 1, image: '', imageUrl: '' });
   await tick();
-  log(text().includes('Salade verte') && text().includes('par Marie'), 'Produit ajouté par l\'autre iPhone affiché en direct');
+  log(text().includes('Salade verte') && !text().includes('par Marie'), 'Produit ajouté par l\'autre iPhone affiché en direct (sans « par Marie » : ligne courte)');
   log($$('.product').find((p) => p.textContent.includes('Salade'))?.querySelector('.days small').textContent === 'dernier jour', 'Compteur « dernier jour »');
 
   // ---- Quitter le foyer → retour à l'accueil

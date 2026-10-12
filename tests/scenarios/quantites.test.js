@@ -68,20 +68,20 @@ test("Nombre d'unités et quantités des courses", async () => {
 
   console.log('\n— Quantités dans les courses —');
   await click('.tab[data-tab="courses"]');
-  await type('#new-item', 'Farine 1 kg'); await type('#new-qty', '2 kg');
-  log($('#new-qty').value === '2', 'Qté : « 2 kg » tapé → seul « 2 » est gardé');
+  await type('#new-item', '2 farine 1 kg');
   $('#add-item').dispatchEvent(new w.Event('submit', { bubbles: true, cancelable: true })); await tick();
-  log(docs(C0).find((d) => d.name === 'Farine 1 kg')?.quantity === '2', 'Ajout « Farine 1 kg », nombre 2');
-  log($('#new-item').value === '' && $('#new-qty').value === '', 'Champs vidés après ajout');
+  log(docs(C0).find((d) => d.name === 'Farine 1 kg')?.quantity === '2', '« 2 farine 1 kg » : « Farine 1 kg », nombre 2 (le poids reste dans le nom)');
+  log($('#new-item').value === '', 'Champ vidé après ajout');
   log($('.qty-pill')?.textContent === '2', 'Nombre affiché en pastille');
-  await type('#new-qty', 'abc');
-  log($('#new-qty').value === '', 'Lettres refusées dans « Qté »');
+  await type('#new-item', '6');
+  $('#add-item').dispatchEvent(new w.Event('submit', { bubbles: true, cancelable: true })); await tick();
+  log(text().includes('Indiquez l\'article') && !docs(C0).some((d) => d.name === '6'), 'Un nombre seul n\'ajoute rien');
   await type('#new-item', 'Oeufs');
   $('#add-item').dispatchEvent(new w.Event('submit', { bubbles: true, cancelable: true })); await tick();
   log(docs(C0).find((d) => d.name === 'Oeufs')?.quantity === '', 'Ajout sans quantité toujours possible');
-  await type('#new-item', 'farine'); await type('#new-qty', '3');
+  await type('#new-item', 'farine x3');
   $('#add-item').dispatchEvent(new w.Event('submit', { bubbles: true, cancelable: true })); await tick();
-  log(docs(C0).filter((d) => d.name.toLowerCase().startsWith('farine')).length === 1 && docs(C0).find((d) => d.name === 'Farine 1 kg').quantity === '3' && text().includes('quantité mise à jour'), 'Même article (« farine » = « Farine 1 kg ») : quantité mise à jour, pas de doublon');
+  log(docs(C0).filter((d) => d.name.toLowerCase().startsWith('farine')).length === 1 && docs(C0).find((d) => d.name === 'Farine 1 kg').quantity === '3' && text().includes('quantité mise à jour'), 'Même article (« farine x3 » = « Farine 1 kg ») : quantité mise à jour, pas de doublon');
   // Modifier la quantité en touchant l'article
   await click($$('.shop-text').find((b) => b.textContent.includes('Oeufs')), 350);
   log(sheet()?.textContent.includes('Article'), 'Toucher l\'article ouvre sa fiche');

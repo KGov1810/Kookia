@@ -60,6 +60,7 @@ test("Recettes compatibles, codes-barres, caméra, reconnexion", async () => {
   await click($$('.consume').find((b) => b.getAttribute('aria-label').includes('Yaourt')), 250);
   log(!globalThis.__db.docs.has(P0 + 'yaourt-1'), 'Yaourt consommé');
   await click('.tab[data-tab="recettes"]');
+  await click('[data-action="recipe-tab"][data-value="toutes"]'); // le taboulé n'est plus réalisable
   await click($$('.recipe-card').find((c) => c.textContent.includes('Taboulé')), 400);
   log(sheet().textContent.includes('Plus en stock'), 'Recette : yaourt « Plus en stock »');
   await click(sheet().querySelector('[data-action="close"]'), 350);
@@ -84,16 +85,18 @@ test("Recettes compatibles, codes-barres, caméra, reconnexion", async () => {
 
   // =========================== Recettes compatibles d'abord ===========================
   console.log('\n— Recettes enregistrées proposées d\'abord —');
-  const sectionTitles = $$('h2.section').map((h) => h.childNodes[0].textContent.trim());
-  log(sectionTitles[0] === 'Déjà dans vos recettes', `Section « Déjà dans vos recettes » en premier (${sectionTitles.join(' | ')})`);
-  const compatSection = $$('h2.section')[0].nextElementSibling.nextElementSibling;
+  await click('.tab[data-tab="frigo"]');
+  await click('.tab[data-tab="recettes"]');
+  const activeTab = $('[data-action="recipe-tab"][aria-selected="true"]');
+  log(activeTab?.dataset.value === 'realisables' && activeTab.textContent.includes('2'), `Onglet « Réalisables » ouvert d'office (${activeTab?.textContent})`);
+  const compatSection = $$('.list').at(-1);
   const compat = [...compatSection.querySelectorAll('.recipe-card h3')].map((h) => h.textContent.trim());
-  log(compat.length === 2 && !compat.includes('Soupe de potiron'), `Compatibles : ${compat.join(', ')} (la soupe, sans produit du frigo, est exclue)`);
+  log(compat.length === 2 && !compat.includes('Soupe de potiron'), `Réalisables : ${compat.join(', ')} (la soupe, sans produit du frigo, est exclue)`);
+  log($('[data-action="recipe-tab"][data-value="toutes"]').textContent.includes('3'), 'Onglet « Toutes » : 3 recettes, sans doublon à l\'écran');
   const generateButton = $('[data-action="generate"]');
   const order = [...$('#screen').querySelectorAll('.recipe-card, [data-action="generate"]')].map((e) => e.dataset.action === 'generate' ? 'BOUTON' : 'carte');
-  log(order.indexOf('BOUTON') === compat.length, 'Les recettes compatibles sont affichées avant le bouton de génération');
-  log(generateButton.textContent.includes('Proposer 5 nouvelles recettes') && generateButton.classList.contains('secondary'), 'Bouton : « Proposer 5 nouvelles recettes » (en second plan)');
-  log(compatSection.textContent.includes('tout est en stock'), 'Carte : « tout est en stock »');
+  log(order[0] === 'BOUTON' && generateButton.textContent.includes('Proposer 5 recettes') && generateButton.classList.contains('primary'), 'Bouton principal en haut, avant les recettes');
+  log(compatSection.textContent.includes('produit en stock · rien à acheter'), 'Carte : « 1 produit en stock · rien à acheter »');
   log(compatSection.textContent.includes('manque gruyère râpé'), 'Carte : « manque gruyère râpé »');
   // J'ai cuisiné : retire le nouveau yaourt (retrouvé par code-barres)
   await click($$('.recipe-card').find((c) => c.textContent.includes('Taboulé')), 400);

@@ -76,7 +76,11 @@ test("Premier iPhone : connexion, foyer, stock, courses, recettes", async () => 
 
   // ---- Modifier un produit
   await click($$('.product-main').find((b) => b.textContent.includes('Pâtes')), 400);
-  log(sheet().textContent.includes('Modifier le produit') && sheet().textContent.includes('Ajouté par'), 'Fiche de modification');
+  const body = sheet().querySelector('.sheet-body');
+  const tiles = [...sheet().querySelectorAll('.action-tiles .tile')].map((t) => t.textContent.trim());
+  log(sheet().querySelector('.sheet-head h2').textContent.includes('Pâtes') && body.firstElementChild.classList.contains('product-actions'), 'Fiche d\'un produit en stock : son nom en titre, les actions en premier');
+  log(tiles.join(' | ') === 'Consommé | Congeler | Jeté' && sheet().querySelectorAll('[data-action="set-remaining"]').length === 3, `Gros boutons (${tiles.join(', ')}) et ¾ ½ ¼ directement`);
+  log(!sheet().querySelector('[data-action="scan"]') && !sheet().querySelector('[data-action="photo"]') && sheet().textContent.includes('Ajouté par'), 'Pas de code-barres ni de photo pour un produit déjà en stock ; « Ajouté par » en bas');
   await click(sheet().querySelector('[data-action="to-shopping"]'));
   log(sheet().textContent.includes('Ajouté à la liste de courses'), 'Produit ajouté aux courses depuis la fiche');
   await click(sheet().querySelector('[data-action="close"]'), 350);
@@ -130,18 +134,24 @@ test("Premier iPhone : connexion, foyer, stock, courses, recettes", async () => 
   };
   await click('.tab[data-tab="recettes"]');
   log(text().includes('Yaourt nature') && $('.chip'), 'Recettes : produits prioritaires présélectionnés');
-  await click('[data-action="set-difficulty"][data-value="facile"]');
-  log($('[data-action="set-difficulty"][data-value="facile"]').getAttribute('aria-pressed') === 'true', 'Filtre difficulté « Facile »');
+  log($('[data-action="generate"]').classList.contains('primary') && $('[data-action="generate"]').textContent.includes('Proposer 5 recettes'), 'Bouton principal « Proposer 5 recettes »');
+  await click('[data-action="more-filters"]', 350);
+  await click(sheet().querySelector('[data-action="set-difficulty"][data-value="facile"]'));
+  log(sheet().querySelector('[data-action="set-difficulty"][data-value="facile"]').getAttribute('aria-pressed') === 'true', 'Filtre difficulté « Facile »');
+  await click(sheet().querySelector('[data-action="close"]'), 350);
+  log($('[data-action="more-filters"]').textContent.includes('Filtres1'), 'Bouton « Filtres » : 1 filtre en plus');
   await click('[data-action="generate"]', 80);
   log(globalThis.__prompt.includes('[P1] Yaourt nature') && globalThis.__prompt.includes('difficulté « facile »'), 'Prompt : produit prioritaire + filtre transmis');
   log(!globalThis.__prompt.includes('Poulet'), 'Produit périmé non proposé comme ingrédient secondaire');
   log(myCards() === 1 && text().includes('Gratin de pâtes'), 'Filtre local : seule la recette facile affichée');
-  log(text().includes('Utilise 2 produits en stock'), 'Carte : « Utilise 2 produits en stock »');
-  await click('[data-action="set-difficulty"][data-value=""]');
+  log(text().includes('2 produits en stock · manque gruyère râpé'), 'Carte : « 2 produits en stock · manque gruyère râpé »');
+  await click('[data-action="more-filters"]', 350);
+  await click(sheet().querySelector('[data-action="set-difficulty"][data-value=""]'));
+  await click(sheet().querySelector('[data-action="close"]'), 350);
   log(myCards() === 2, 'Filtre « Toutes » : 2 recettes');
-  await click('[data-action="set-time"][data-value="30"]');
-  log(myCards() === 1, 'Filtre 30 min : 1 recette');
-  const batch = $('#batch-toggle'); batch.checked = true; batch.dispatchEvent(new w.Event('change', { bubbles: true })); await tick();
+  await click('[data-action="quick-time"]');
+  log(myCards() === 1 && $('[data-action="quick-time"]').textContent.includes('≤ 30 min'), 'Pastille « Rapide » : 30 min, 1 recette');
+  await click('[data-action="quick-batch"]');
   log(myCards() === 1, 'Filtre batch cooking : 1 recette');
   await click('.recipe-card', 400);
   log(sheet().textContent.includes('Cuire les pâtes') && sheet().querySelectorAll('.ingredient').length === 3, 'Détail recette : étapes et ingrédients');

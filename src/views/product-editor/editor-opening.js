@@ -1,4 +1,4 @@
-// Kookia — Fiche produit : « Entamé » — combien en reste-t-il ? ¾ · ½ · ¼, en un toucher.
+// Kookia — Fiche produit : « Entamé, il en reste ¾ · ½ · ¼ », en un toucher, en haut de la fiche.
 
 import { html, raw } from '../../components/html.js';
 import { I } from '../../components/icons.js';
@@ -22,41 +22,35 @@ function changesText(product) {
   ].filter(Boolean).join(' · ');
 }
 
-export function openingSection(ctx) {
+/** Ligne « Entamé, il en reste » + ¾ ½ ¼ (les parts déjà dépassées sont grisées), et ce que l'ouverture change. */
+export function openingRow(ctx) {
   const product = stored(ctx);
   const remaining = S.remainingOf(product);
   const opened = remaining < 1;
+  const count = product.count ?? 1;
   const label = opened
-    ? `Entamé : reste ${S.remainingLabel(remaining)}${product.openedAt ? `, ouvert le ${S.formatDate(product.openedAt, { day: 'numeric', month: 'short' })}` : ''}`
-    : 'Entamé : il en reste une partie';
-  const button = html`<button class="row-button" data-action="opening" aria-expanded="${String(Boolean(ctx.view.opening))}">${I.gauge}${label}</button>`;
-  if (!ctx.view.opening) return button;
+    ? `Entamé${product.openedAt ? ` le ${S.formatDate(product.openedAt, { day: 'numeric', month: 'short' })}` : ''}, il en reste ${S.remainingLabel(remaining)}`
+    : 'Entamé ? Il en reste :';
   const effect = changesText(product);
-  return html`${button}
-    <div class="units-box units-opening" role="group" aria-label="Combien en reste-t-il ?">
-      <div class="field"><span>Combien en reste-t-il ?${(product.count ?? 1) > 1 ? ' (1 sur ' + product.count + ', mis à part)' : ''}</span>
-        <span class="opening-choices">
-          ${R.REMAINING_CHOICES.map((value) => html`<button class="chip" data-action="set-remaining" data-value="${value}" ${value >= remaining ? raw('disabled') : ''} aria-label="Il en reste ${S.remainingLabel(value)}">${S.remainingLabel(value)}</button>`)}
-        </span>
-      </div>
-      <p class="hint inset">${effect ? `${effect.charAt(0).toUpperCase()}${effect.slice(1)}. ` : ''}La part en moins compte comme consommée dans les statistiques.</p>
+  const note = [count > 1 && !opened ? `1 sur ${count}, mis à part` : '', effect ? `à l'ouverture : ${effect}` : ''].filter(Boolean).join(' · ');
+  return html`
+    <div class="opening-row" role="group" aria-label="Combien en reste-t-il ?">
+      <span class="opening-label">${I.gauge}${label}</span>
+      <span class="opening-choices">
+        ${R.REMAINING_CHOICES.map((value) => html`<button class="chip" data-action="set-remaining" data-value="${value}" ${value >= remaining ? raw('disabled') : ''} aria-pressed="${String(opened && Math.abs(value - remaining) < 0.02)}" aria-label="Il en reste ${S.remainingLabel(value)}">${S.remainingLabel(value)}</button>`)}
+      </span>
+      ${note ? html`<small class="opening-effect">${note.charAt(0).toUpperCase()}${note.slice(1)}.</small>` : ''}
     </div>`;
 }
 
 export function openingActions(ctx) {
-  const { view } = ctx;
   return {
-    opening: () => {
-      view.opening = !view.opening;
-      view.take = null;
-      ctx.sheet.update();
-    },
     'set-remaining': (el) => {
       const product = stored(ctx);
       const remaining = Number(el.dataset.value);
       const effect = changesText(product);
       const done = store.openProduct(product.id, remaining, price(ctx));
-      view.opening = false;
+      ctx.view.take = null;
       ctx.sheet.close();
       if (!done.before.length) return;
       toast(`${product.name} : entamé, reste ${S.remainingLabel(remaining)}${effect ? ` · ${effect}` : ''}`, 'Annuler', () => store.undoTake(done));

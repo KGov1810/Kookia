@@ -1,6 +1,7 @@
 // Kookia — Fiche produit : section « Date » selon le lieu et le type de date.
 
 import { html } from '../../components/html.js';
+import { I } from '../../components/icons.js';
 import * as R from '../../data/reference/index.js';
 import { state } from '../../data/store/state.js';
 import * as S from '../../services/index.js';
@@ -31,6 +32,7 @@ export function dateSection(ctx) {
       </div>` : ''}
       ${fields}
       <p class="expiry-status ${status}">${S.stockLabel(p)}</p>
+      ${!isNew && ['dlc', 'ddm'].includes(kind) ? html`<button class="row-button" data-action="date-photo">${I.camera}Lire la date sur l'emballage</button>` : ''}
       ${isNew && kind === 'dlc' && !view.dateTouched ? html`<p class="hint inset default-date">Date proposée par défaut : dans 7 jours. Vérifiez-la.</p>` : ''}
       ${kind === 'estimee' && !view.dateTouched ? html`<p class="hint inset default-date">Estimation selon le produit ; ajustez-la si besoin.</p>` : ''}
     </section>`;

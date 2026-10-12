@@ -8,12 +8,14 @@ import { needsOnboarding } from '../onboarding/onboarding.js';
 import { stockNote } from '../shopping/shopping-view.js';
 import { setStatsFilter } from '../stats/stats-actions.js';
 import { fridgeList } from '../stock/stock-list.js';
+import { wireSwipe } from '../stock/stock-swipe.js';
 import { getAction } from './actions.js';
 import { updateChrome } from './chrome.js';
-import { onStoreChange, rerenderKeepScroll, showTab, viewFor } from './router.js';
+import { onStoreChange, showTab, viewFor } from './router.js';
 import { screen, ui } from './ui-state.js';
 
 export function wireEvents() {
+  wireSwipe(); // avant le toucher des actions : un geste de glisser ne doit pas ouvrir la fiche
   screen.addEventListener('click', (event) => {
     const target = event.target.closest('[data-action]');
     if (!target || !screen.contains(target)) return;
@@ -25,11 +27,6 @@ export function wireEvents() {
 
   screen.addEventListener('input', (event) => {
     const t = event.target;
-    if (t.id === 'new-qty') {
-      const clean = S.sanitizeCount(t.value);
-      if (t.value !== clean) t.value = clean;
-      return;
-    }
     if (t.id === 'search') {
       ui.search = t.value;
       setHTML('#fridge-list', fridgeList());
@@ -47,32 +44,24 @@ export function wireEvents() {
     if (t.dataset.setting === 'userName') store.updateSettings({ userName: t.value.trim() });
     else if (t.id === 'model') store.updateSettings({ model: t.value });
     else if (t.dataset.statsFilter) setStatsFilter(t.dataset.statsFilter, t.value);
-    else if (t.id === 'batch-toggle' || t.id === 'light-toggle') {
-      if (t.id === 'batch-toggle') ui.filters.batchOnly = t.checked;
-      else ui.filters.light = t.checked;
-      ui.recipeNote = null;
-      rerenderKeepScroll();
-    }
   });
 
   screen.addEventListener('submit', (event) => {
     if (event.target.id !== 'add-item') return;
     event.preventDefault();
     const nameInput = document.getElementById('new-item');
-    const qtyInput = document.getElementById('new-qty');
-    const name = nameInput.value.trim();
-    const qty = S.sanitizeCount(qtyInput.value);
+    // Un seul champ : « 2 lait » ou « lait x2 » → 2 × Lait ; un poids reste dans le nom (« Farine 1 kg »).
+    const { name, quantity } = S.parseShoppingInput(nameInput.value);
     if (!name) {
-      if (qty) toast("Indiquez l'article à acheter");
+      if (nameInput.value.trim()) toast("Indiquez l'article à acheter (ex. 2 lait)");
       nameInput.focus();
       return;
     }
-    const result = store.addShoppingItem(name, qty, { updateQuantity: true });
+    const result = store.addShoppingItem(name, quantity, { updateQuantity: true });
     if (result) {
       nameInput.value = '';
-      qtyInput.value = '';
       const inStock = stockNote({ name });
-      if (result === 'updated') toast(`${name} : quantité mise à jour (${qty})`);
+      if (result === 'updated') toast(`${name} : quantité mise à jour (${quantity})`);
       else if (inStock) toast(`${name} : ajouté. ${inStock}, à vérifier avant d'acheter.`);
     } else {
       toast('Déjà dans la liste');

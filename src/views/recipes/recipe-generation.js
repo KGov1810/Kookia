@@ -26,12 +26,15 @@ export async function startRecipeGeneration() {
       servings: state.settings.servings || 2
     });
     store.saveRecipes(recipes);
+    // Les nouvelles recettes passent en tête de « Toutes », marquées « Nouvelle ».
+    ui.freshIds = new Set(recipes.map((r) => r.id));
+    if (recipes.length) ui.recipeTab = 'toutes';
     if (!recipes.length) {
       ui.recipeNote = { kind: 'warn', text: 'Aucune recette reçue, réessayez.' };
     } else if (!recipes.some((r) => S.matchesFilters(r, filters))) {
       ui.recipeNote = { kind: 'warn', text: 'Les recettes reçues ne respectent pas tous les filtres : assouplissez-les pour les voir, ou réessayez.' };
     } else {
-      ui.recipeNote = { kind: 'ok', text: `${S.plural(recipes.length, 'nouvelle recette', 'nouvelles recettes')} ci-dessous.` };
+      ui.recipeNote = { kind: 'ok', text: `${S.plural(recipes.length, 'nouvelle recette', 'nouvelles recettes')} en tête de « Mes recettes ».` };
     }
   } catch (error) {
     ui.recipeNote = { kind: 'error', text: error?.message || String(error) };

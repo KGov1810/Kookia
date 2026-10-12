@@ -34,19 +34,11 @@ export const settingsView = {
         </div>
         <div id="badge-row"></div>
       </section>
-      <p class="hint">Les produits à consommer vite sont mis en avant à chaque ouverture. Une application web ne peut pas envoyer de rappel quand elle est fermée : programmez un rappel quotidien « Vérifier le stock » dans l'app Rappels (voir README).</p>
+      <p class="hint">Une app web ne peut pas envoyer de rappel une fois fermée : programmez « Vérifier le stock » chaque jour dans l'app Rappels.</p>
 
       <section class="group">
         <h2>Recettes et photos (Claude)</h2>
         <div id="claude-key"></div>
-        <label class="field"><span>Modèle</span>
-          <select id="model">${R.MODELS.map((m) => html`<option value="${m.id}" ${m.id === s.model ? raw('selected') : ''}>${m.label}</option>`)}</select>
-        </label>
-      </section>
-      <p class="hint">Sert à générer les recettes et à reconnaître un produit en photo. Créez une clé sur console.anthropic.com (payée à l'usage : quelques centimes par génération). Elle reste sur cet iPhone.</p>
-
-      <section class="group">
-        <h2>Recettes</h2>
         <div class="field"><span class="label-stack">Recette légère<small>Maximum par portion (filtre « Léger »)</small></span>
           <div class="stepper">
             <button data-action="kcal-minus" aria-label="50 kcal de moins">−</button>
@@ -55,20 +47,20 @@ export const settingsView = {
           </div>
         </div>
       </section>
+      <p class="hint">La clé sert aux recettes, au ticket de caisse et à la reconnaissance en photo. Créez-la sur console.anthropic.com (quelques centimes par usage) ; elle reste sur cet iPhone.</p>
 
       <section class="group"><h2>Foyer partagé</h2><div id="household"></div></section>
 
-      <section class="group">
-        <h2>Synchronisation</h2>
+      <details class="group advanced" ${state.error ? raw('open') : ''}>
+        <summary>Avancé<small>Modèle, synchronisation, à propos</small></summary>
+        <label class="field"><span>Modèle Claude</span>
+          <select id="model">${R.MODELS.map((m) => html`<option value="${m.id}" ${m.id === s.model ? raw('selected') : ''}>${m.label}</option>`)}</select>
+        </label>
         <div id="sync-details"></div>
         <button class="row-button" data-action="reconnect">${I.refresh}Se reconnecter</button>
-      </section>
-
-      <section class="group">
-        <h2>À propos</h2>
         <div class="field"><span>Données produits</span><a href="https://world.openfoodfacts.org" target="_blank" rel="noopener">Open Food Facts</a></div>
         <p class="plain hint">Base collaborative sous licence ODbL.</p>
-      </section>`;
+      </details>`;
   },
   mounted() {
     this.update('settings');
@@ -109,7 +101,7 @@ function badgeRow() {
     return html`<div class="field"><span>Pastille sur l'icône</span><span class="muted">activée</span></div>`;
   }
   if (Notification.permission === 'denied') {
-    return html`<p class="plain hint">Pastille refusée : Réglages de l'iPhone > Notifications > Frigo.</p>`;
+    return html`<p class="plain hint">Pastille refusée : Réglages de l'iPhone > Notifications > Kookia.</p>`;
   }
   return html`<button class="row-button" data-action="enable-badge">${I.bell}Afficher sur l'icône le nombre de produits à consommer</button>`;
 }

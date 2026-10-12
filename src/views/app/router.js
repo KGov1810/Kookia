@@ -46,7 +46,11 @@ export function rerenderIf(tab) {
 export function showTab(name) {
   if (!viewFor(name)) return;
   ui.tab = name;
-  if (name === 'recettes') ui.recipeNote = null;
+  if (name === 'recettes') { // à chaque visite : Réalisables d'abord, sans badge « Nouvelle »
+    ui.recipeNote = null;
+    ui.freshIds = new Set();
+    ui.recipeTab = '';
+  }
   render();
   window.scrollTo(0, 0);
 }

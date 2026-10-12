@@ -1,10 +1,38 @@
-/* Kookia — Ligne d'un produit : vignette, compteur de jours façon magnet. */
+/* Kookia — Ligne d'un produit : vignette, compteur de jours façon magnet, glisser pour consommer ou jeter. */
 
-.product {
-  display: flex; align-items: center; gap: 4px;
-  background: var(--surface); border-radius: 18px; padding: 6px 10px 6px 6px;
-  box-shadow: var(--shadow);
+.product { position: relative; border-radius: 18px; box-shadow: var(--shadow); overflow: hidden; background: var(--surface); }
+
+.product-front {
+  position: relative; z-index: 1; display: flex; align-items: center; gap: 4px;
+  padding: 6px 10px 6px 6px; background: var(--surface); border-radius: inherit;
+  touch-action: pan-y; transition: transform .22s cubic-bezier(.2, .8, .2, 1);
 }
+
+.swipe-under { position: absolute; inset: 0; display: flex; justify-content: flex-end; }
+
+.swipe-consume {
+  position: absolute; inset: 0; display: none; align-items: center; gap: 8px; padding-left: 20px;
+  background: var(--herb); color: var(--on-accent); font-weight: 700;
+}
+
+.swipe-consume svg, .swipe-buttons svg { width: 22px; height: 22px; }
+
+.product.swipe-right .swipe-consume { display: flex; }
+
+.swipe-buttons { display: flex; visibility: hidden; }
+
+.product.swipe-left .swipe-buttons, .product.open .swipe-buttons { visibility: visible; }
+
+.swipe-buttons button {
+  width: 84px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  font-weight: 650; font-size: 14px; color: var(--on-accent);
+}
+
+.swipe-open { background: var(--apricot); }
+
+.swipe-discard { background: var(--tomato); }
+
+.product-meta .where svg { width: 15px; height: 15px; vertical-align: -2px; margin-right: 5px; }
 
 .product.leaving { opacity: 0; transform: translateX(24px); transition: opacity .2s, transform .2s; }
 

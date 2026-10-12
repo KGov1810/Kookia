@@ -15,11 +15,9 @@ export const shoppingView = {
       <header class="top"><div><h1>Courses</h1><p class="sync" id="sync-line"></p></div>
         <button class="link" data-action="clear-checked" id="clear-checked" hidden>Vider le panier</button></header>
       <form class="add-item" id="add-item">
-        <input id="new-item" placeholder="Article à acheter" autocomplete="off" enterkeyhint="done" aria-label="Article à acheter">
-        <input id="new-qty" class="qty" placeholder="Qté" inputmode="numeric" pattern="[0-9]*" maxlength="3" autocomplete="off" enterkeyhint="done" aria-label="Nombre à acheter (facultatif)">
+        <input id="new-item" placeholder="Ajouter (ex. 2 lait, farine 1 kg)" autocomplete="off" enterkeyhint="done" aria-label="Article à acheter, avec le nombre devant si besoin">
         <button type="submit" aria-label="Ajouter">${I.plus}</button>
       </form>
-      <p class="hint add-hint">Qté : un nombre, facultatif. Pour un poids, écrivez-le avec l'article (« Farine 1 kg »). Touchez un article pour le modifier.</p>
       <div id="shopping-list"></div>`;
   },
   mounted() {
@@ -43,7 +41,8 @@ export const shoppingView = {
       inCart.length ? html`
         <h2 class="section">Dans le panier<small>${inCart.length}</small></h2>
         <div class="list">${inCart.map(shoppingRow)}</div>
-        <p class="hint">Touchez l'icône de rangement d'un article pour l'ajouter au stock.</p>` : ''
+        <button class="primary put-away" data-action="put-away-all">${I.jar}${inCart.length > 1 ? `Tout ranger dans le stock (${inCart.length})` : 'Ranger dans le stock'}</button>
+        <p class="hint">Ou touchez le bocal d'un article pour le ranger seul, avec sa fiche.</p>` : ''
     ]);
   }
 };
@@ -59,11 +58,12 @@ export function stockNote(item) {
 
 function shoppingRow(item) {
   const inStock = item.checked ? '' : stockNote(item);
+  const byOther = item.addedBy && item.addedBy !== state.settings.userName; // « par Marie » : seulement l'autre personne
   return html`
     <div class="shop-item ${item.checked ? 'checked' : ''}">
       <button class="tick" data-action="toggle-item" data-id="${item.id}" aria-pressed="${String(item.checked)}" aria-label="${item.checked ? 'Décocher' : 'Cocher'} ${item.name}"><span>${I.check}</span></button>
       <button class="shop-text" data-action="edit-item" data-id="${item.id}" aria-label="Modifier ${item.name}${item.quantity ? `, ${item.quantity}` : ''}">
-        <span>${item.name}</span>${item.addedBy ? html`<small>par ${item.addedBy}</small>` : ''}${inStock ? html`<small class="in-stock">${inStock}</small>` : ''}
+        <span>${item.name}</span>${byOther ? html`<small>par ${item.addedBy}</small>` : ''}${inStock ? html`<small class="in-stock">${inStock}</small>` : ''}
       </button>
       ${item.quantity ? html`<button class="qty-pill" data-action="edit-item" data-id="${item.id}" tabindex="-1">${item.quantity}</button>` : ''}
       ${item.checked

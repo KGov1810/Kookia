@@ -58,26 +58,33 @@ test("Régimes, portions, calories, ticket de caisse", async () => {
   await click('[data-action="servings-plus"]');
   log(servingsOut().textContent === '3 personnes' && JSON.parse(w.localStorage.getItem('frigo.settings.v1')).servings === 3, '3 personnes, choix mémorisé');
   log(mine().textContent.includes('Omelette'), 'Ancienne recette visible sans filtre');
-  await click('[data-action="set-diet"][data-value="vegetarien"]');
+  // Régime détaillé : fiche « Plus de filtres », appliqué tout de suite
+  const setDiet = async (value) => {
+    await click('[data-action="more-filters"]', 350);
+    await click(sheet().querySelector(`[data-action="set-diet"][data-value="${value}"]`));
+    await click(sheet().querySelector('[data-action="close"]'), 350);
+  };
+  await click('[data-action="quick-diet"]');
+  log($('[data-action="quick-diet"]').getAttribute('aria-pressed') === 'true' && $('[data-action="quick-diet"]').textContent.includes('Végétarien'), 'Pastille « Végé » : végétarien');
   log(!mine().textContent.includes('Omelette') && text().includes('1 recette ancienne (sans régime, calories ou origine) est masquée'), 'Végétarien : ancienne recette masquée, avec explication');
-  const light = $('#light-toggle'); light.checked = true; light.dispatchEvent(new w.Event('change', { bubbles: true })); await tick();
-  log(text().includes('500 kcal maximum par portion'), 'Léger : 500 kcal maximum par portion');
+  await click('[data-action="quick-light"]');
+  log($('[data-action="quick-light"]').textContent.includes('Léger ≤ 500 kcal'), 'Pastille « Léger ≤ 500 kcal »');
+  log(JSON.parse(w.localStorage.getItem('frigo.settings.v1')).recipeFilters?.diet === 'vegetarien' && JSON.parse(w.localStorage.getItem('frigo.settings.v1')).recipeFilters.light === true, 'Filtres mémorisés sur l\'iPhone');
   await click('[data-action="generate"]', 80);
   log(lastPrompt.includes('Pour 3 personnes') && lastPrompt.includes('végétariennes') && lastPrompt.includes('au plus 500 kcal'), 'Demande à Claude : 3 personnes, végétarien, 500 kcal max');
   const cards = [...mine().querySelectorAll('.recipe-card')];
   log(cards.length === 1 && cards[0].textContent.includes('Gratin de courgettes'), 'Filtres appliqués : seul le gratin végétarien et léger est affiché');
-  log(cards[0].textContent.includes('≈ 420 kcal') && cards[0].textContent.includes('Végétarien'), 'Carte : « ≈ 420 kcal » et « Végétarien »');
-  await click('[data-action="set-diet"][data-value="vegan"]');
-  log(!mine().querySelector('.recipe-card'), 'Vegan : le gratin végétarien (avec crème) disparaît');
-  await click('[data-action="set-diet"][data-value=""]');
-  light.checked = false; $('#light-toggle').checked = false; $('#light-toggle').dispatchEvent(new w.Event('change', { bubbles: true })); await tick();
-  log([...mine().querySelectorAll('.recipe-card')].length === 3, 'Sans filtre : les 3 recettes');
-  await click('[data-action="set-diet"][data-value="omnivore"]');
+  log(cards[0].querySelector('.badge')?.textContent === 'Nouvelle' && cards[0].textContent.includes('35 min') && cards[0].textContent.includes('1 produit en stock'), 'Carte compacte : « Nouvelle », 35 min, « 1 produit en stock »');
+  await setDiet('vegan');
+  log(!mine().querySelector('.recipe-card') && $('[data-action="clear-filters"]'), 'Vegan : le gratin végétarien (avec crème) disparaît ; bouton « Effacer les filtres »');
+  await click('[data-action="clear-filters"]');
+  log([...mine().querySelectorAll('.recipe-card')].length === 3 && $('[data-action="quick-light"]').getAttribute('aria-pressed') === 'false', 'Sans filtre : les 3 recettes');
+  await setDiet('omnivore');
   const meat = [...mine().querySelectorAll('.recipe-card')];
-  log($('[data-action="set-diet"][data-value="omnivore"]').textContent === 'Viande, poisson' && meat.length === 1 && meat[0].textContent.includes('Poulet rôti'), '« Viande, poisson » : seul le poulet rôti est affiché');
+  log($('[data-action="quick-diet"]').textContent === 'Viande, poisson' && meat.length === 1 && meat[0].textContent.includes('Poulet rôti'), '« Viande, poisson » : seul le poulet rôti est affiché');
   await click('[data-action="generate"]', 80);
   log(lastPrompt.includes('Toutes les recettes doivent contenir de la viande') && !lastPrompt.includes('Équilibre'), 'Demande à Claude : viande ou poisson dans toutes les recettes');
-  await click('[data-action="set-diet"][data-value=""]');
+  await click('[data-action="quick-diet"]');
   await click('[data-action="generate"]', 80);
   log(lastPrompt.includes('Équilibre : au moins 2 des recettes contiennent de la viande') && lastPrompt.includes('ingrédients à acheter'), 'Sans filtre : au moins 2 recettes avec viande ou poisson demandées');
 
@@ -106,7 +113,9 @@ test("Régimes, portions, calories, ticket de caisse", async () => {
   await click('[data-action="kcal-minus"]');
   log($('#kcal-max').textContent === '450 kcal', 'Réglages : seuil léger « 450 kcal »');
   await click('.tab[data-tab="recettes"]');
-  log(text().includes('450 kcal maximum par portion'), 'Écran Recettes : « 450 kcal maximum »');
+  await click('[data-action="quick-light"]');
+  log(text().includes('Léger ≤ 450 kcal'), 'Écran Recettes : « Léger ≤ 450 kcal »');
+  await click('[data-action="quick-light"]');
 
   console.log('\n— Ticket de caisse —');
   w.HTMLCanvasElement.prototype.getContext = () => ({ fillRect() {}, drawImage() {}, set fillStyle(v) {} });
@@ -152,7 +161,7 @@ test("Régimes, portions, calories, ticket de caisse", async () => {
   const titles = $$('h2.section').map((h) => h.childNodes[0].textContent.trim());
   log(titles[0] === 'Date à compléter', `Section « Date à compléter » en premier (${titles.join(' | ')})`);
   const laitRow = $$('.product').find((r) => r.textContent.includes('Lait'));
-  log(laitRow.querySelector('.days.pending b').textContent === '?' && laitRow.textContent.includes('date à compléter'), 'Compteur « ? » et mention « date à compléter »');
+  log(laitRow.querySelector('.days.pending b').textContent === '?' && laitRow.querySelector('.product-meta').textContent === '2 × 1 L', 'Compteur « ? », ligne courte « 2 × 1 L » (la section dit « Date à compléter »)');
   log($('[data-badge="frigo"]').textContent === '1' && text().includes('1 produit à consommer vite'), 'Pastille et bannière ne comptent pas les produits sans date');
   await click(laitRow.querySelector('.product-main'), 400);
   log(sheet().textContent.includes('Date à compléter : saisissez-la') && sheet().querySelector('[name="expiry"]').value === '', 'Fiche : date vide et invitation à la compléter');

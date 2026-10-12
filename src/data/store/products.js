@@ -88,10 +88,10 @@ export function restoreProducts(products, { movements = true } = {}) {
 }
 
 /**
- * Ajoute d'un coup les produits d'un ticket de caisse (date à compléter)
- * et retire de la liste de courses les articles achetés.
+ * Ajoute d'un coup les produits d'un ticket de caisse, ou du panier (« Tout ranger », source « courses »),
+ * avec la date adaptée au lieu (frigo : à compléter), et retire de la liste de courses les articles achetés.
  */
-export function addReceiptProducts(items, shoppingIdsToRemove = []) {
+export function addReceiptProducts(items, shoppingIdsToRemove = [], { source = 'ticket' } = {}) {
   if (!canWrite() || !items.length) return 0;
   const batch = writeBatch(db);
   const now = Date.now();
@@ -140,9 +140,9 @@ export function addReceiptProducts(items, shoppingIdsToRemove = []) {
   added.forEach((product) => recordMovement('achat', product, product.count));
   rememberPrices(added);
   const bought = state.shopping.filter((i) => shoppingIdsToRemove.includes(i.id)).map((i) => i.name);
-  logChange({
-    scope: 'stock', action: 'ticket', name: `${items.length} produit${items.length > 1 ? 's' : ''}`,
-    details: [items.map((i) => (i.count > 1 ? `${i.name} ×${i.count}` : i.name)).join(', '), bought.length ? `retirés des courses : ${bought.join(', ')}` : '']
-  });
+  const names = items.map((i) => (i.count > 1 ? `${i.name} ×${i.count}` : i.name)).join(', ');
+  logChange(source === 'courses'
+    ? { scope: 'courses', action: 'rangement', name: `${items.length} produit${items.length > 1 ? 's' : ''}`, details: [names] }
+    : { scope: 'stock', action: 'ticket', name: `${items.length} produit${items.length > 1 ? 's' : ''}`, details: [names, bought.length ? `retirés des courses : ${bought.join(', ')}` : ''] });
   return items.length;
 }

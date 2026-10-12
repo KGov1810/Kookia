@@ -34,7 +34,7 @@ test("Stock de toute la maison : lieux, dates, congélation, ticket", async () =
   log($('.tab[data-tab="frigo"] span').textContent === 'Stock' && $('h1').textContent === 'Stock', 'Onglet et écran « Stock »');
   const chips = $$('.filter-chip').map((c) => c.textContent.replace(/\s+/g, ' ').trim());
   log(chips.join(' | ') === 'Tout4 | Frigo2 | Congélateur0 | Placard2 | Fruits & légumes0', `Filtre par lieu : ${chips.join(' | ')}`);
-  log(row('Filet de poulet').textContent.includes('Frigo'), 'Ancien produit (sans lieu) rangé au frigo');
+  log(row('Filet de poulet').querySelector('.where')?.title === 'Frigo', 'Ancien produit (sans lieu) rangé au frigo (icône du lieu en vue « Tout »)');
 
   console.log('\n— Types de date —');
   log(sections().join(' | ') === 'Périmés | À consommer vite | Oubliés depuis longtemps', `Sections : ${sections().join(' | ')}`);

@@ -1,19 +1,20 @@
-/* Kookia — Encart « à consommer vite ». */
+/* Kookia — Bandeau « à consommer vite » (compact : le détail est dans la liste). */
 
 .alert-card {
-  display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; align-items: center;
-  width: 100%; text-align: left; margin: 4px 0 16px; padding: 16px;
-  border-radius: 20px; background: var(--apricot-soft);
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  width: 100%; text-align: left; margin: 0 0 12px; padding: 8px 8px 8px 14px; min-height: 52px;
+  border-radius: 16px; background: var(--apricot-soft);
   border: 1.5px solid color-mix(in srgb, var(--apricot) 35%, transparent);
 }
 
 .alert-card.expired { background: var(--tomato-soft); border-color: color-mix(in srgb, var(--tomato) 35%, transparent); }
 
-.alert-card strong { font: 700 19px/1.25 var(--font-round); }
-
-.alert-card span { color: var(--muted); font-size: 15px; grid-column: 1; }
+.alert-card strong { font: 700 16px/1.25 var(--font-round); }
 
 .alert-card em {
-  grid-column: 2; grid-row: 1 / span 2; font-style: normal; font-weight: 650; font-size: 15px;
-  background: var(--surface); color: var(--ink); padding: 9px 12px; border-radius: 12px; white-space: nowrap;
+  display: inline-flex; align-items: center; gap: 6px; flex: none;
+  font-style: normal; font-weight: 650; font-size: 15px;
+  background: var(--surface); color: var(--ink); padding: 8px 12px; border-radius: 12px; white-space: nowrap;
 }
+
+.alert-card em svg { width: 16px; height: 16px; color: var(--apricot); }
