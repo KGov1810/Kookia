@@ -31,6 +31,16 @@ function filtersSummary() {
 /** Un midi suit-il un soir coché (restes possibles) ? */
 const leftoversPossible = (slots) => DAYS.some((d) => d > 0 && slots.has(`${d}-midi`) && slots.has(`${d - 1}-soir`));
 
+/** Midis du lendemain de chaque soir coché (le dernier soir n'a pas de lendemain dans la semaine). */
+const lunchesAfterDinners = (slots) => DAYS.filter((d) => d > 0 && slots.has(`${d - 1}-soir`)).map((d) => `${d}-midi`);
+
+/** Texte sous l'interrupteur des restes. */
+function leftoversHint(draft) {
+  if (!draft.leftovers) return 'Coche le midi du lendemain de chaque soir : le dîner est cuisiné en double';
+  const count = DAYS.filter((d) => d > 0 && draft.slots.has(`${d}-midi`) && draft.slots.has(`${d - 1}-soir`)).length;
+  return count ? `${S.plural(count, 'midi', 'midis')} avec les restes de la veille, si le plat s'y prête` : 'Cochez un soir : son lendemain midi aura les restes';
+}
+
 export function openWeekSetup() {
   const saved = state.settings.weekSetup ?? {};
   const draft = {
@@ -38,9 +48,11 @@ export function openWeekSetup() {
     slots: new Set(saved.slots?.length ? saved.slots : ALL_DINNERS),
     servings: state.settings.servings || 2,
     leftovers: Boolean(saved.leftovers),
+    autoLunches: new Set(), // midis cochés par l'interrupteur des restes (décochés s'il est désactivé)
     batch: Boolean(saved.batch),
     batchDay: 0
   };
+  if (draft.leftovers) draft.autoLunches = new Set(lunchesAfterDinners(draft.slots).filter((k) => draft.slots.has(k)));
   const dayName = (d) => S.weekDayLabel(S.isoInDays(draft.start), d, { weekday: 'short', day: 'numeric' });
   const count = () => draft.slots.size;
   const sheet = openSheet({
@@ -78,8 +90,8 @@ export function openWeekSetup() {
             </div>
           </div>
           <label class="field">
-            <span class="label-stack">Restes du soir le lendemain midi<small>${leftoversPossible(draft.slots) ? 'Le dîner est cuisiné en double quand le plat s\'y prête' : 'Cochez un midi après un soir pour en profiter'}</small></span>
-            <input type="checkbox" class="switch" name="leftovers" ${draft.leftovers ? raw('checked') : ''} ${leftoversPossible(draft.slots) ? '' : raw('disabled')}>
+            <span class="label-stack">Restes du soir le lendemain midi<small>${leftoversHint(draft)}</small></span>
+            <input type="checkbox" class="switch" name="leftovers" ${draft.leftovers ? raw('checked') : ''}>
           </label>
           <label class="field">
             <span class="label-stack">Batch cooking<small>Une séance pour avancer plusieurs repas</small></span>
@@ -98,6 +110,7 @@ export function openWeekSetup() {
         const key = el.dataset.value;
         if (draft.slots.has(key)) draft.slots.delete(key);
         else draft.slots.add(key);
+        draft.autoLunches.delete(key); // choisi à la main : l'interrupteur n'y touche plus
         sheet.update();
       },
       preset: (el) => {
@@ -122,6 +135,16 @@ export function openWeekSetup() {
       const { name, checked } = event.target;
       if (event.type !== 'change' || !['leftovers', 'batch'].includes(name)) return;
       draft[name] = checked;
+      if (name === 'leftovers' && checked) {
+        // Restes : le midi du lendemain de chaque soir coché est ajouté.
+        lunchesAfterDinners(draft.slots).filter((k) => !draft.slots.has(k)).forEach((k) => {
+          draft.slots.add(k);
+          draft.autoLunches.add(k);
+        });
+      } else if (name === 'leftovers') {
+        draft.autoLunches.forEach((k) => draft.slots.delete(k));
+        draft.autoLunches.clear();
+      }
       sheet.update();
     }
   });

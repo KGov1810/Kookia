@@ -57,6 +57,8 @@
 
 .switch:checked::after { transform: translateX(20px); }
 
+.switch:disabled { opacity: .4; }
+
 .label-stack { display: flex; flex-direction: column; }
 
 .label-stack small { color: var(--muted); font-size: 13px; }

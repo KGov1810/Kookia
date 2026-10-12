@@ -68,13 +68,21 @@ test('Planning de la semaine', async () => {
   await click('.week-empty [data-action="week-setup"]', 350);
   const pressed = () => [...sheet().querySelectorAll('[data-action="toggle-slot"][aria-pressed="true"]')].map((b) => b.dataset.value);
   log(pressed().length === 7 && pressed().every((k) => k.endsWith('-soir')), 'Par défaut : les 7 soirs');
-  log(sheet().querySelector('[name="leftovers"]').disabled, 'Restes impossibles sans midi après un soir');
+  const leftovers = async (on) => {
+    const el = sheet().querySelector('[name="leftovers"]');
+    el.checked = on; el.dispatchEvent(new w.Event('change', { bubbles: true })); await tick();
+  };
+  log(!sheet().querySelector('[name="leftovers"]').disabled, 'Restes activables dès le départ (7 soirs)');
+  await leftovers(true);
+  log(pressed().length === 13 && pressed().includes('1-midi') && pressed().includes('6-midi') && !pressed().includes('0-midi') && sheet().textContent.includes('6 midis avec les restes de la veille'), 'Restes activés : le midi du lendemain de chaque soir est coché (6 midis)');
+  await leftovers(false);
+  log(pressed().length === 7 && pressed().every((k) => k.endsWith('-soir')), 'Restes désactivés : les midis ajoutés sont décochés');
   await click(sheet().querySelector('[data-action="toggle-slot"][data-value="1-midi"]'));
   await click(sheet().querySelector('[data-action="toggle-slot"][data-value="4-soir"]'));
   await click(sheet().querySelector('[data-action="toggle-slot"][data-value="4-soir"]'));
-  const leftovers = sheet().querySelector('[name="leftovers"]');
-  log(!leftovers.disabled, 'Midi de J2 après le soir de J1 : restes possibles');
-  leftovers.checked = true; leftovers.dispatchEvent(new w.Event('change', { bubbles: true })); await tick();
+  await leftovers(true);
+  for (const d of [2, 3, 4, 5, 6]) await click(sheet().querySelector(`[data-action="toggle-slot"][data-value="${d}-midi"]`));
+  log(pressed().length === 8 && sheet().querySelector('[name="leftovers"]').checked, 'Midis décochés à la main ; restes toujours actifs (mardi midi)');
   const batch = sheet().querySelector('[name="batch"]');
   batch.checked = true; batch.dispatchEvent(new w.Event('change', { bubbles: true })); await tick();
   await click(sheet().querySelector('[data-action="servings-up"]'));
