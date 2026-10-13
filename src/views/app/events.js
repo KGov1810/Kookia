@@ -78,6 +78,7 @@ export function wireEvents() {
     if (document.visibilityState !== 'visible') return;
     store.resume();
     if (!needsOnboarding()) {
+      store.expireWeekPlan(); // planning de la semaine terminé : effacé
       viewFor(ui.tab).update?.('time'); // les jours restants changent après minuit
       updateChrome();
     }

@@ -3,6 +3,7 @@
 // { start, servings, slots: [{ day, meal, recipeId, leftovers, done }], batch, shopping: [{ name, quantity, added }], strategy }
 
 import { deleteDoc, setDoc } from 'firebase/firestore';
+import { planDayIndex } from '../../services/claude/week-plan.js';
 import { logChange } from './history.js';
 import { saveRecipes } from './recipes.js';
 import { addShoppingItem } from './shopping.js';
@@ -79,4 +80,16 @@ export function clearWeekPlan() {
   state.plan = null;
   write(deleteDoc(planRef()));
   emit('plan');
+}
+
+/**
+ * Semaine terminée : le lendemain du dernier jour, le planning est effacé sur les deux iPhone
+ * (ses recettes restent dans « Mes recettes »). Appelé à la réception du planning et au retour dans l'app.
+ */
+export function expireWeekPlan(today = new Date()) {
+  const plan = state.plan;
+  if (!plan?.start || planDayIndex(plan.start, today) < 7 || !canWrite()) return null;
+  state.endedPlan = { start: plan.start };
+  clearWeekPlan();
+  return plan;
 }

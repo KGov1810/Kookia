@@ -12,14 +12,6 @@ export const MEAL_LABEL = { midi: 'Midi', soir: 'Soir' };
 
 const capitalize = (text) => text.charAt(0).toUpperCase() + text.slice(1);
 
-/** Jour du planning correspondant à aujourd'hui (0 = premier jour ; négatif avant, 7 et plus après). */
-export function todayIndex(plan, today = new Date()) {
-  const [y, m, d] = plan.start.split('-').map(Number);
-  const start = new Date(y, m - 1, d);
-  const now = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  return Math.round((now - start) / 86_400_000);
-}
-
 export function slotTitle(plan, slot) {
   return `${capitalize(S.weekDayLabel(plan.start, slot.day, { weekday: 'long' }))} ${slot.meal}`;
 }
@@ -69,11 +61,14 @@ function emptyWeek() {
 }
 
 function planView(plan) {
-  const today = todayIndex(plan);
+  const today = S.planDayIndex(plan.start);
   const cooked = plan.slots.filter((s) => s.done).length;
   const toBuy = plan.shopping.filter((i) => !i.added).length;
   const short = { weekday: 'short', day: 'numeric', month: 'short' };
   const days = [...new Set([...plan.slots.map((s) => s.day), ...(plan.batch ? [plan.batch.day] : [])])].sort((a, b) => a - b);
+  // Jours passés repliés pendant la semaine (sauf si on demande à les voir).
+  const past = today <= 6 ? days.filter((d) => d < today) : [];
+  const shown = ui.week.showPast ? days : days.filter((d) => !past.includes(d));
   return html`
     <section class="group week-head">
       <div class="week-title"><b>Du ${S.weekDayLabel(plan.start, 0, short)} au ${S.weekDayLabel(plan.start, 6, short)}</b>
@@ -85,7 +80,8 @@ function planView(plan) {
     </section>
     ${today > 6 ? html`<p class="note warn">Cette semaine est terminée : préparez la suivante.</p>
       <button class="primary" data-action="week-setup">${I.calendar}Préparer la semaine suivante</button>` : ''}
-    ${days.map((day) => html`
+    ${past.length ? html`<button class="link week-past" data-action="week-past" aria-expanded="${String(ui.week.showPast)}">${ui.week.showPast ? 'Masquer les jours passés' : `Voir ${past.length > 1 ? `les ${past.length} jours passés` : 'le jour passé'}`}</button>` : ''}
+    ${shown.map((day) => html`
       <h2 class="section ${day === today ? 'today' : ''}">${capitalize(S.weekDayLabel(plan.start, day, { weekday: 'long', day: 'numeric', month: 'short' }))}${day === today ? html`<small>Aujourd'hui</small>` : ''}</h2>
       <div class="list week-day">
         ${plan.batch?.day === day ? batchCard(plan) : ''}
@@ -99,5 +95,6 @@ export function weekView() {
   return html`
     ${ui.week.busy ? html`<section class="group week-busy"><span class="spinner"></span><p>${ui.week.busy}</p></section>` : ''}
     ${ui.week.note ? html`<p class="note ${ui.week.note.kind}">${ui.week.note.text}</p>` : ''}
+    ${!plan && state.endedPlan && !ui.week.busy ? html`<p class="note ok">La semaine du ${S.weekDayLabel(state.endedPlan.start, 0, { weekday: 'long', day: 'numeric', month: 'long' })} est terminée : son planning a été effacé, ses recettes restent dans « Mes recettes ».</p>` : ''}
     ${plan ? planView(plan) : ui.week.busy ? '' : emptyWeek()}`;
 }

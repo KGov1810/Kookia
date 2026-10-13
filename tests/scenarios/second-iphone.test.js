@@ -4,6 +4,8 @@ import { createPhone } from '../helpers/phone.js';
 import { readAllCss, readProjectFile } from '../helpers/files.js';
 
 test("Second iPhone : invitation, code-barres, photo, erreurs Claude, synchronisation", async () => {
+  // Date du jour en heure locale (toISOString donnerait la date UTC : la veille entre minuit et 2 h à Paris).
+  const localIso = (days) => { const d = new Date(); d.setDate(d.getDate() + days); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
   const log = (ok, msg) => expect.soft(Boolean(ok), msg).toBe(true);
 
   // Base partagée héritée du premier iPhone
@@ -90,7 +92,7 @@ test("Second iPhone : invitation, code-barres, photo, erreurs Claude, synchronis
   log(sheet().querySelector('[name="name"]').value === 'Jambon blanc Herta', `Claude : produit reconnu (${sheet().querySelector('[name="name"]').value})`);
   log(sheet().textContent.includes('Date illisible'), 'Date hors plage (2099) ignorée → message');
   log(sheet().querySelector('.thumb img')?.getAttribute('src').startsWith('data:image/jpeg'), 'Vignette de la photo enregistrée');
-  globalThis.fetch = async () => ({ ok: true, status: 200, json: async () => ({ stop_reason: 'tool_use', content: [{ type: 'tool_use', input: { est_alimentaire: true, nom: '', categorie: 'viande', quantite: '', date_peremption: new Date(Date.now() + 5 * 864e5).toISOString().slice(0, 10) } }] }) });
+  globalThis.fetch = async () => ({ ok: true, status: 200, json: async () => ({ stop_reason: 'tool_use', content: [{ type: 'tool_use', input: { est_alimentaire: true, nom: '', categorie: 'viande', quantite: '', date_peremption: localIso(5) } }] }) });
   await click(sheet().querySelector('[data-action="date-photo"]'), 300);
   log(sheet().textContent.includes('Date lue par Claude') && sheet().querySelector('.expiry-status').textContent.includes('Expire dans 5 jours'), 'Lecture de la date par Claude');
   await click(sheet().querySelector('[data-action="save"]'), 350);
@@ -109,7 +111,7 @@ test("Second iPhone : invitation, code-barres, photo, erreurs Claude, synchronis
   await click('.tab[data-tab="frigo"]');
   const code = JSON.parse(w.localStorage.getItem('frigo.settings.v1')).householdCode;
   const { setDoc, doc } = await import('firebase/firestore');
-  await setDoc(doc(null, 'foyers', code, 'produits', 'x-remote'), { name: 'Salade verte', expiry: new Date().toISOString().slice(0, 10), category: 'fruits_legumes', quantity: '', barcode: '', addedBy: 'Marie', createdAt: 1, image: '', imageUrl: '' });
+  await setDoc(doc(null, 'foyers', code, 'produits', 'x-remote'), { name: 'Salade verte', expiry: localIso(0), category: 'fruits_legumes', quantity: '', barcode: '', addedBy: 'Marie', createdAt: 1, image: '', imageUrl: '' });
   await tick();
   log(text().includes('Salade verte') && !text().includes('par Marie'), 'Produit ajouté par l\'autre iPhone affiché en direct (sans « par Marie » : ligne courte)');
   log($$('.product').find((p) => p.textContent.includes('Salade'))?.querySelector('.days small').textContent === 'dernier jour', 'Compteur « dernier jour »');

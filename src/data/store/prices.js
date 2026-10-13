@@ -7,6 +7,7 @@ import { nameTokens, simplify } from '../../services/text/text.js';
 import { db } from './connection.js';
 import { reportStatsDenied } from './movements.js';
 import { emit, state } from './state.js';
+import { expireWeekPlan } from './week-plan.js';
 import { canWrite, ref } from './writes.js';
 
 /**
@@ -60,6 +61,7 @@ export function listenPrices(code) {
     if (JSON.stringify(plan) !== JSON.stringify(state.plan)) {
       state.plan = plan;
       emit('plan');
+      expireWeekPlan(); // semaine terminée : effacée
     }
   }, (error) => {
     reportStatsDenied(error);

@@ -61,6 +61,13 @@ export function weekDayLabel(start, day, options = { weekday: 'long', day: 'nume
   return new Date(y, m - 1, d + day).toLocaleDateString('fr-FR', options);
 }
 
+/** Jour du planning correspondant à aujourd'hui (0 = premier jour ; négatif avant, 7 et plus après la semaine). */
+export function planDayIndex(start, today = new Date()) {
+  const [y, m, d] = start.split('-').map(Number);
+  const now = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  return Math.round((now - new Date(y, m - 1, d)) / 86_400_000);
+}
+
 function strategyLines({ leftovers, batchDay, start, servings }) {
   const lines = [
     "Ce qui périme d'abord : place les recettes qui utilisent les produits les plus proches de leur date (et les produits entamés) dans les premiers jours ; garde pour la fin de semaine ce qui se conserve (placard, congélateur, légumes qui se gardent). Un produit du congélateur se sort la veille : indique-le dans les étapes de la recette.",

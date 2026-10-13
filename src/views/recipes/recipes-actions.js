@@ -31,5 +31,9 @@ export const recipesActions = {
   'week-setup': () => openWeekSetup(),
   'week-slot': (el) => openSlotSheet(Number(el.dataset.index)),
   'week-batch': () => openBatchSheet(),
-  'week-shopping': () => openWeekShopping()
+  'week-shopping': () => openWeekShopping(),
+  'week-past': () => {
+    ui.week.showPast = !ui.week.showPast;
+    rerenderKeepScroll();
+  }
 };

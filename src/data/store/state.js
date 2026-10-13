@@ -19,6 +19,7 @@ export const state = {
   prices: {},           // dernier prix payé, par code-barres ou par nom
   placements: {},       // catégorie et rangement corrigés à la main, par code-barres ou par nom
   plan: null,           // planning de la semaine (foyers/{code}/prix/semaine), partagé entre les iPhone
+  endedPlan: null,      // planning terminé, effacé automatiquement pendant cette session ({ start })
   lastSync: null
 };
 

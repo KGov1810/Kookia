@@ -22,6 +22,8 @@
 
 .week-head .row-actions { padding-top: 6px; }
 
+.week-past { display: block; margin: 14px auto 0; }
+
 .week-new { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; margin-top: 16px; }
 
 .week-new svg { width: 18px; height: 18px; }
