@@ -14,11 +14,24 @@ function onList(item) {
   return state.shopping.some((s) => !s.checked && S.splitItemName(s.name).base.localeCompare(base, 'fr', { sensitivity: 'base' }) === 0);
 }
 
+/** Articles de la semaine à ajouter : ni déjà ajoutés, ni déjà dans la liste (indices dans plan.shopping). */
+export function missingWeekItems(plan = state.plan) {
+  return (plan?.shopping ?? []).map((item, i) => (!item.added && !onList(item) ? i : -1)).filter((i) => i >= 0);
+}
+
+/** « Ajouter les 4 manquants aux courses » : sans passer par la liste détaillée. */
+export function addWeekShopping() {
+  const missing = missingWeekItems();
+  if (!missing.length) return;
+  const added = store.addPlanShopping(missing);
+  toast(added ? `${S.plural(added, 'article ajouté', 'articles ajoutés')} aux courses` : 'Déjà dans la liste de courses');
+}
+
 export function openWeekShopping() {
   const plan = state.plan;
   if (!plan) return null;
   // Coché d'office : ce qui n'est ni déjà ajouté ni déjà dans la liste.
-  const picked = new Set(plan.shopping.map((item, i) => (!item.added && !onList(item) ? i : -1)).filter((i) => i >= 0));
+  const picked = new Set(missingWeekItems(plan));
   const sheet = openSheet({
     tall: true,
     render: () => {

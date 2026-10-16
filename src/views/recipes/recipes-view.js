@@ -11,6 +11,7 @@ import * as S from '../../services/index.js';
 import { rerenderKeepScroll } from '../app/router.js';
 import { currentFilters, ui } from '../app/ui-state.js';
 import { recipeCard } from './recipe-card.js';
+import { tonightCard } from './tonight-card.js';
 import { hasFilters, quickFilters } from './recipe-filters.js';
 import { weekView } from './week-view.js';
 
@@ -95,6 +96,7 @@ export const recipesView = {
 
     return html`
       ${recipesHeader()}
+      ${tonightCard()}
 
       <section class="group recipe-start">
         ${priorityBlock()}

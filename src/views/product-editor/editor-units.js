@@ -6,6 +6,7 @@ import { I } from '../../components/icons.js';
 import { toast } from '../../components/toast.js';
 import * as store from '../../data/store/index.js';
 import * as S from '../../services/index.js';
+import { flushEdits } from './editor-save.js';
 
 const KINDS = {
   consume: { icon: 'check', label: 'Consommé', question: 'Combien en consommez-vous ?', verb: 'Consommer', style: 'primary-fill' },
@@ -87,6 +88,7 @@ const RUN = {
 
 function run(ctx, kind, units) {
   ctx.view.take = null;
+  flushEdits(ctx); // modifications de la fiche gardées avant le geste
   ctx.sheet.close();
   RUN[kind](ctx, units);
 }

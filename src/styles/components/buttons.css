@@ -49,3 +49,21 @@
 .row-button:first-child { border-top: 0; }
 
 .primary .spinner { width: 20px; height: 20px; border-width: 2.5px; border-color: rgba(255, 255, 255, .35); border-top-color: var(--on-accent); }
+
+/* Petit bouton pilule à côté d'un titre (« Lire les dates », « Je l'ai cuisiné »). */
+.pill-btn {
+  display: inline-flex; align-items: center; gap: 6px; flex: none; min-height: 44px; padding: 0 14px;
+  border-radius: 22px; background: var(--herb-soft); color: var(--herb); font-size: 14px; font-weight: 800;
+  transition: transform 160ms var(--ease-out);
+}
+
+.pill-btn svg { width: 18px; height: 18px; }
+
+.pill-btn.strong { background: var(--herb-fill); color: var(--on-accent); }
+
+.pill-btn:active { transform: scale(.97); }
+
+/* Titre de section avec un bouton à droite. */
+.section-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 18px 4px 8px; }
+
+.section-row h2.section { margin: 0; justify-content: flex-start; gap: 6px; }

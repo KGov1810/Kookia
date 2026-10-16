@@ -98,3 +98,8 @@ h2.section.today { color: var(--herb-strong); }
 .week-grid-row > span { font-weight: 600; text-transform: capitalize; }
 
 .week-grid-row .chip { justify-content: center; min-height: 38px; }
+
+/* Repas du jour : « Je l'ai cuisiné » directement sur la ligne. */
+.week-slot:has(.slot-cooked) { flex-wrap: wrap; }
+
+.week-slot .slot-cooked { flex: 1 0 calc(100% - 64px); justify-content: center; margin: 2px 8px 4px 52px; }

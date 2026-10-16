@@ -15,6 +15,11 @@ export function scanThenEdit() {
   openScanner((code) => openEditor({ barcode: code }));
 }
 
+/** Ticket de caisse : photo choisie dans le geste (règle d'iOS) ; sans clé, la fiche explique quoi faire. */
+export function openTicket() {
+  openReceipt(hasClaudeKey() ? pickImage({ camera: false }) : null);
+}
+
 export function openAddMenu() {
   const hasKey = hasClaudeKey();
   const sheet = openSheet({
@@ -46,10 +51,8 @@ export function openAddMenu() {
         openProduceSheet();
       },
       ticket: () => {
-        // Photo choisie dans le geste (règle d'iOS) ; sans clé, la fiche explique quoi faire.
-        const filePromise = hasKey ? pickImage({ camera: false }) : null;
         sheet.close();
-        openReceipt(filePromise);
+        openTicket();
       }
     }
   });

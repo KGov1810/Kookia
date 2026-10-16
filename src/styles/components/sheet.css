@@ -64,3 +64,8 @@
 .busy p { margin: 0; max-width: 28ch; font-weight: 600; }
 
 .sheet-body { overscroll-behavior: contain; }
+
+/* Titre de fiche avec une ligne d'aide (« Enregistré automatiquement »). */
+.sheet-title { min-width: 0; text-align: center; display: flex; flex-direction: column; }
+
+.sheet-title small { font-size: 12px; color: var(--muted); white-space: nowrap; }

@@ -34,7 +34,6 @@ export function createEditorContext({ product = null, draft = null, mode = 'manu
   const ctx = { p, view, isNew, shoppingItemId, draft, mode, filePromise, barcode, sheet: null };
   applyKnownPrice(ctx); // nom déjà connu (article de courses rangé) : dernier prix payé
   if (!p.dateKind) setKind(ctx, R.KINDS_BY_LOCATION[p.location][0]);
-  if (!isNew && S.dateKindOf(p) !== 'aucune' && !S.hasDate(p.expiry)) view.info = 'Date à compléter : saisissez-la, ou touchez « Lire la date » pour la photographier.';
   return ctx;
 }
 

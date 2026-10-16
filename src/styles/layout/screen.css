@@ -98,3 +98,11 @@
 .empty.small { padding: 18px 8px; }
 
 .boot.small { min-height: 80px; }
+
+/* Bouton dans le bandeau vert (« Scanner le ticket »). */
+.head-pill {
+  display: inline-flex; align-items: center; gap: 6px; flex: none; min-height: 44px; padding: 0 14px;
+  border-radius: 22px; background: var(--head-btn); color: var(--head-ink); font-size: 14px; font-weight: 700;
+}
+
+.head-pill svg { width: 18px; height: 18px; }

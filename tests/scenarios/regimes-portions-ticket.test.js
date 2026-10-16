@@ -165,7 +165,7 @@ test("Régimes, portions, calories, ticket de caisse", async () => {
   log(laitRow.querySelector('.days.pending b').textContent === '?' && laitRow.querySelector('.product-meta').textContent === '2 × 1 L', 'Compteur « ? », ligne courte « 2 × 1 L » (la section dit « Date à compléter »)');
   log($('[data-badge="frigo"]').textContent === '1' && text().includes('1 produit à consommer vite'), 'Pastille et bannière ne comptent pas les produits sans date');
   await click(laitRow.querySelector('.product-main'), 400);
-  log(sheet().textContent.includes('Date à compléter : saisissez-la') && sheet().querySelector('[name="expiry"]').value === '', 'Fiche : date vide et invitation à la compléter');
+  log(sheet().textContent.includes('Pas encore de date') && sheet().querySelector('.read-date [data-action="date-photo"]') && sheet().querySelector('[name="expiry"]').value === '', 'Fiche : date vide et invitation à la compléter');
   await click(sheet().querySelector('[data-action="quick"][data-days="7"]'));
   await click(sheet().querySelector('[data-action="save"]'), 350);
   log(docs(P0).find((d) => d.name === 'Lait').expiry === iso(7) && $$('.product').find((r) => r.textContent.includes('Lait')).querySelector('.days b').textContent === '7', 'Date complétée : le lait rejoint le frigo (7 jours)');

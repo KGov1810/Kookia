@@ -101,3 +101,9 @@
 .opening-effect { flex: 1 0 100%; color: var(--muted); font-size: 13px; }
 
 .added-by { text-align: center; }
+
+/* Produit sans date : « Lire la date » tout en haut de la fiche. */
+.read-date {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  margin: 0 16px 12px; padding: 10px 10px 10px 14px; border-radius: 16px; background: var(--surface-2); font-size: 14px;
+}

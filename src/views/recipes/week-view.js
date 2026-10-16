@@ -7,6 +7,7 @@ import { hasClaudeKey } from '../../data/store/selectors.js';
 import { state } from '../../data/store/state.js';
 import * as S from '../../services/index.js';
 import { ui } from '../app/ui-state.js';
+import { missingWeekItems } from './week-shopping-sheet.js';
 
 export const MEAL_LABEL = { midi: 'Midi', soir: 'Soir' };
 
@@ -34,12 +35,14 @@ function slotRow(plan, slot, index) {
       <div class="week-slot missing"><span class="meal">${MEAL_LABEL[slot.meal]}</span>
         <button class="week-recipe" data-action="week-slot" data-index="${index}"><b>Pas de recette</b><small>Touchez pour en choisir une</small></button>${change}</div>`;
   }
+  const today = slot.day === S.planDayIndex(plan.start) && !slot.done && !slot.leftovers;
   return html`
     <div class="week-slot ${slot.done ? 'done' : ''} ${slot.leftovers ? 'leftovers' : ''}"><span class="meal">${MEAL_LABEL[slot.meal]}</span>
       <button class="week-recipe" data-action="open-recipe" data-id="${recipe.id}">
         <b>${slot.done ? html`<span class="cooked">${I.check}</span>` : ''}${slot.leftovers ? 'Restes : ' : ''}${recipe.title}</b>
         <small>${slot.done ? 'Cuisiné · ' : ''}${slot.leftovers ? 'Cuisiné la veille au soir, à réchauffer' : recipeFacts(recipe)}</small>
-      </button>${change}</div>`;
+      </button>${change}
+      ${today ? html`<button class="pill-btn strong slot-cooked" data-action="slot-cooked" data-id="${recipe.id}">${I.check}Je l'ai cuisiné</button>` : ''}</div>`;
 }
 
 function batchCard(plan) {
@@ -64,6 +67,7 @@ function planView(plan) {
   const today = S.planDayIndex(plan.start);
   const cooked = plan.slots.filter((s) => s.done).length;
   const toBuy = plan.shopping.filter((i) => !i.added).length;
+  const missing = missingWeekItems(plan).length;
   const short = { weekday: 'short', day: 'numeric', month: 'short' };
   const days = [...new Set([...plan.slots.map((s) => s.day), ...(plan.batch ? [plan.batch.day] : [])])].sort((a, b) => a - b);
   // Jours passés repliés pendant la semaine (sauf si on demande à les voir).
@@ -75,7 +79,10 @@ function planView(plan) {
         <small>${S.plural(plan.slots.length, 'repas', 'repas')} · pour ${plan.servings} · ${cooked}/${plan.slots.length} cuisiné${cooked > 1 ? 's' : ''}</small></div>
       ${plan.strategy ? html`<p class="hint inset">${plan.strategy}</p>` : ''}
       <div class="row-actions">
-        <button class="secondary" data-action="week-shopping">${I.cart}Courses de la semaine${toBuy ? html` <i>${toBuy}</i>` : ''}</button>
+        ${missing
+          ? html`<button class="primary" data-action="week-shopping-add">${I.cart}Ajouter ${S.plural(missing, 'article')} aux courses</button>
+            <button class="link" data-action="week-shopping">Voir la liste de la semaine</button>`
+          : html`<button class="secondary" data-action="week-shopping">${I.cart}Courses de la semaine${toBuy ? html` <i>${toBuy}</i>` : ''}</button>`}
       </div>
     </section>
     ${today > 6 ? html`<p class="note warn">Cette semaine est terminée : préparez la suivante.</p>

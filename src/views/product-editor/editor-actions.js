@@ -2,14 +2,13 @@
 
 import { pickImage } from '../../components/platform.js';
 import { toast } from '../../components/toast.js';
-import * as R from '../../data/reference/index.js';
 import * as store from '../../data/store/index.js';
 import * as S from '../../services/index.js';
 import { openScanner } from '../scanner/scanner.js';
 import { openingActions } from './editor-opening.js';
-import { priceIsInvalid } from './editor-price.js';
 import { setQuantityUnit } from './editor-quantity.js';
 import { handleBarcode, handleDatePhoto, handleProductPhoto } from './editor-recognition.js';
+import { persist } from './editor-save.js';
 import { setKind, setLocation } from './editor-state.js';
 import { unitsActions } from './editor-units.js';
 
@@ -75,33 +74,7 @@ export function editorActions(ctx) {
   };
 }
 
+/** « OK » ou « Ajouter » : enregistre puis ferme (rien ne se ferme si la fiche est incomplète). */
 export function save(ctx) {
-  const { p, view, isNew, shoppingItemId } = ctx;
-  if (!p.name.trim() || view.busy) return;
-  if (S.dateKindOf(p) === 'congele' && !S.hasDate(p.frozenAt)) p.frozenAt = S.isoInDays(0);
-  if (p.expiry && !S.parseISODate(p.expiry)) {
-    view.error = 'Indiquez une date de péremption valide.';
-    ctx.sheet.update();
-    return;
-  }
-  if (priceIsInvalid(ctx)) {
-    view.error = 'Indiquez un prix valide, par exemple 2,49 (ou laissez le champ vide).';
-    ctx.sheet.update();
-    return;
-  }
-  store.saveProduct(p);
-  rememberChoices(ctx);
-  if (shoppingItemId) store.deleteShoppingItems([shoppingItemId], { reason: 'rangement' });
-  toast(isNew ? `${p.name.trim()} : ajouté ${R.locationOf(p.location).at}` : 'Modifications enregistrées');
-  ctx.sheet.close();
-}
-
-/**
- * Catégorie ou lieu choisis à la main : retenus pour la prochaine fois (les deux iPhone).
- * Déplacer un produit existant au congélateur, c'est le congeler, pas changer son rangement habituel.
- */
-function rememberChoices(ctx) {
-  const { p, view, isNew } = ctx;
-  const location = view.userLocation && (isNew || p.location !== 'congelateur') ? p.location : '';
-  store.rememberPlacement(p, { category: view.userCategory ? p.category : '', location });
+  if (persist(ctx)) ctx.sheet.close();
 }

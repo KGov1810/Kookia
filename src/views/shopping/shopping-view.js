@@ -14,7 +14,7 @@ export const shoppingView = {
     return html`
       <header class="top">
         <div class="top-row"><div><h1>Courses</h1><p class="sync" id="sync-line"></p></div>
-          <button class="link" data-action="clear-checked" id="clear-checked" hidden>Vider le panier</button></div>
+          <button class="head-pill" data-action="scan-ticket">${I.receipt}Scanner le ticket</button></div>
         <form class="add-item" id="add-item">
           <input id="new-item" placeholder="Ajouter (ex. 2 lait, farine 1 kg)" autocomplete="off" enterkeyhint="done" aria-label="Article à acheter, avec le nombre devant si besoin">
           <button type="submit" aria-label="Ajouter">${I.plus}</button>
@@ -29,8 +29,6 @@ export const shoppingView = {
     syncLine();
     const toBuy = state.shopping.filter((i) => !i.checked).sort((a, b) => a.createdAt - b.createdAt);
     const inCart = state.shopping.filter((i) => i.checked).sort((a, b) => a.name.localeCompare(b.name, 'fr'));
-    const clear = document.getElementById('clear-checked');
-    if (clear) clear.hidden = inCart.length === 0;
     setHTML('#shopping-list', [
       errorNote(),
       state.shopping.length ? '' : html`
@@ -41,7 +39,8 @@ export const shoppingView = {
         </div>`,
       toBuy.length ? html`<h2 class="section">À acheter<small>${toBuy.length}</small></h2><div class="list">${toBuy.map(shoppingRow)}</div>` : '',
       inCart.length ? html`
-        <h2 class="section">Dans le panier<small>${inCart.length}</small></h2>
+        <div class="section-row"><h2 class="section">Dans le panier<small>${inCart.length}</small></h2>
+          <button class="link" data-action="clear-checked" id="clear-checked">Vider le panier</button></div>
         <div class="list">${inCart.map(shoppingRow)}</div>
         <button class="primary put-away" data-action="put-away-all">${I.jar}${inCart.length > 1 ? `Tout ranger dans le stock (${inCart.length})` : 'Ranger dans le stock'}</button>
         <p class="hint">Ou touchez le bocal d'un article pour le ranger seul, avec sa fiche.</p>` : ''

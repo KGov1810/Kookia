@@ -6,6 +6,7 @@ import { toast } from '../../components/toast.js';
 import * as R from '../../data/reference/index.js';
 import * as store from '../../data/store/index.js';
 import * as S from '../../services/index.js';
+import { flushEdits } from './editor-save.js';
 import { price } from './editor-units.js';
 
 function stored(ctx) {
@@ -46,6 +47,7 @@ export function openingRow(ctx) {
 export function openingActions(ctx) {
   return {
     'set-remaining': (el) => {
+      flushEdits(ctx); // modifications de la fiche gardées avant le geste
       const product = stored(ctx);
       const remaining = Number(el.dataset.value);
       const effect = changesText(product);

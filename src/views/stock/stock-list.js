@@ -38,10 +38,12 @@ export function fridgeList() {
   return groups.map(([status, title]) => {
     const list = items.filter((p) => store.productStatus(p) === status);
     if (!list.length) return '';
-    const hint = status === 'pending'
-      ? html`<p class="hint">Touchez un produit pour indiquer sa date (ou « Lire la date » pour la photographier).</p>`
-      : status === 'old' ? html`<p class="hint">Au placard depuis plus de 6 mois : pensez-y pour vos prochaines recettes.</p>` : '';
-    return html`<h2 class="section ${status}">${title}<small>${list.length}</small></h2>${hint}<div class="list">${list.map(productRow)}</div>`;
+    const hint = status === 'old' ? html`<p class="hint">Au placard depuis plus de 6 mois : pensez-y pour vos prochaines recettes.</p>` : '';
+    const head = status === 'pending'
+      ? html`<div class="section-row"><h2 class="section ${status}">${title}<small>${list.length}</small></h2>
+          <button class="pill-btn" data-action="read-dates" data-id="${list[0].id}">${I.camera}Lire les dates</button></div>`
+      : html`<h2 class="section ${status}">${title}<small>${list.length}</small></h2>`;
+    return html`${head}${hint}<div class="list">${list.map(productRow)}</div>`;
   });
 }
 

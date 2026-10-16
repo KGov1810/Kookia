@@ -5,12 +5,18 @@ import { state } from '../../data/store/state.js';
 import { rerenderKeepScroll } from '../app/router.js';
 import { ui } from '../app/ui-state.js';
 import { openProductPicker } from './product-picker.js';
+import { cookRecipe } from './recipe-cooking.js';
 import { openRecipe } from './recipe-detail.js';
 import { quickFilterActions } from './recipe-filters.js';
 import { startRecipeGeneration } from './recipe-generation.js';
 import { openWeekSetup } from './week-setup.js';
-import { openWeekShopping } from './week-shopping-sheet.js';
+import { addWeekShopping, openWeekShopping } from './week-shopping-sheet.js';
 import { openBatchSheet, openSlotSheet } from './week-slot-sheet.js';
+
+function cook(id) {
+  const recipe = state.recipes.find((r) => r.id === id);
+  if (recipe) cookRecipe(recipe);
+}
 
 /** Actions des boutons (attribut data-action). */
 export const recipesActions = {
@@ -32,6 +38,10 @@ export const recipesActions = {
   'week-slot': (el) => openSlotSheet(Number(el.dataset.index)),
   'week-batch': () => openBatchSheet(),
   'week-shopping': () => openWeekShopping(),
+  'week-shopping-add': () => addWeekShopping(),
+  // « Je l'ai cuisiné » en un toucher (Recettes et Semaine), avec « Annuler ».
+  'tonight-cooked': (el) => cook(el.dataset.id),
+  'slot-cooked': (el) => cook(el.dataset.id),
   'week-past': () => {
     ui.week.showPast = !ui.week.showPast;
     rerenderKeepScroll();

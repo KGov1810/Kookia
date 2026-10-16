@@ -15,6 +15,8 @@ export function topActions(ctx) {
   return html`
     <section class="group product-actions">
       <p class="action-status expiry-status ${status}">${[S.quantityLabel(product), S.stockLabel(product)].filter(Boolean).join(' · ')}</p>
+      ${status === 'pending' ? html`<div class="read-date"><span>Pas encore de date : elle est sur l'emballage.</span>
+        <button class="pill-btn strong" data-action="date-photo">${I.camera}Lire la date</button></div>` : ''}
       <div class="action-tiles">
         ${unitsTile(ctx, 'consume')}
         ${canFreeze ? unitsTile(ctx, 'freeze') : ''}

@@ -5,6 +5,7 @@ import { editorActions } from './editor-actions.js';
 import { handleEditorInput } from './editor-input.js';
 import { handleBarcode, handleProductPhoto } from './editor-recognition.js';
 import { renderEditor } from './editor-render.js';
+import { autoSave, markClean } from './editor-save.js';
 import { createEditorContext } from './editor-state.js';
 
 /**
@@ -14,11 +15,13 @@ import { createEditorContext } from './editor-state.js';
 export function openEditor(options = {}) {
   const ctx = createEditorContext(options);
   const { p, isNew, mode, filePromise, barcode } = ctx;
+  markClean(ctx);
   ctx.sheet = openSheet({
     tall: true,
     render: () => renderEditor(ctx),
     actions: editorActions(ctx),
-    onInput: (event) => handleEditorInput(ctx, event)
+    onInput: (event) => handleEditorInput(ctx, event),
+    onClose: () => autoSave(ctx) // produit en stock : enregistré tout seul à la fermeture
   });
 
   // Lancement automatique selon le choix fait dans le menu « + ».

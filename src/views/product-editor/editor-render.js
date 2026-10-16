@@ -27,9 +27,9 @@ export function renderEditor(ctx) {
   const { p, view, isNew } = ctx;
   return html`
     <header class="sheet-head">
-      <button class="link" data-action="close">Annuler</button>
-      <h2>${isNew ? 'Nouveau produit' : (store.productById(p.id) ?? p).name}</h2>
-      <button class="link strong" data-action="save" ${p.name.trim() ? '' : raw('disabled')}>${isNew ? 'Ajouter' : 'Enregistrer'}</button>
+      <button class="link" data-action="close">${isNew ? 'Annuler' : 'Fermer'}</button>
+      ${isNew ? html`<h2>Nouveau produit</h2>` : html`<div class="sheet-title"><h2>${(store.productById(p.id) ?? p).name}</h2><small>Enregistré automatiquement</small></div>`}
+      <button class="link strong" data-action="save" ${p.name.trim() ? '' : raw('disabled')}>${isNew ? 'Ajouter' : 'OK'}</button>
     </header>
     <div class="sheet-body">
       ${view.info ? html`<p class="note ok">${view.info}</p>` : ''}

@@ -10,6 +10,7 @@ import * as R from '../../data/reference/index.js';
 import * as store from '../../data/store/index.js';
 import { state } from '../../data/store/state.js';
 import * as S from '../../services/index.js';
+import { cookRecipe } from './recipe-cooking.js';
 
 function recipeShareText(recipe, servings = recipe.servings) {
   const factor = servings / (recipe.servings || servings);
@@ -68,23 +69,7 @@ export function openRecipe(id) {
       },
       cooked: () => {
         const recipe = findRecipe();
-        if (!recipe) return;
-        // Quantités de la recette (portions affichées) : 200 g d'un paquet de 500 g → le paquet est entamé.
-        const uses = store.recipeUses(recipe, factorFor(recipe));
-        if (!uses.length) {
-          // Recette du planning sans produit du stock : on note seulement le repas comme cuisiné.
-          store.markPlanCooked(recipe.id);
-          toast('Repas noté comme cuisiné', 'Annuler', () => store.markPlanCooked(recipe.id, false));
-          return;
-        }
-        const list = uses.map((u) => `• ${u.product.name} : ${u.computed && u.quantity ? u.quantity : '1 unité'} → ${store.restText(S.splitAfter(u.product, u.amount))}`).join('\n');
-        if (!window.confirm(`Retirer du stock ?\n${list}`)) return;
-        const done = store.consumeAmounts(uses.map((u) => ({ id: u.product.id, amount: u.amount })), { reason: `recette « ${recipe.title} »` });
-        store.markPlanCooked(recipe.id); // repas coché dans le planning de la semaine
-        toast(`${S.plural(done.before.length, 'produit')} mis à jour dans le stock`, 'Annuler', () => {
-          store.undoTake(done);
-          store.markPlanCooked(recipe.id, false);
-        });
+        if (recipe) cookRecipe(recipe, { factor: factorFor(recipe), confirm: true });
       },
       share: () => {
         const recipe = findRecipe();

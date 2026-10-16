@@ -35,5 +35,10 @@ export const stockActions = {
     const product = store.productById(el.dataset.id);
     if (product) openEditor({ product });
   },
+  // Date à compléter : la fiche du premier produit, avec « Lire la date » en haut.
+  'read-dates': (el) => {
+    const product = store.productById(el.dataset.id);
+    if (product) openEditor({ product });
+  },
   'go-recipes': () => showTab('recettes')
 };
