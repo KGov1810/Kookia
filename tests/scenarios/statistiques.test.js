@@ -203,6 +203,11 @@ test('Prix, produits jetés et statistiques', async () => {
   log($('.month-detail').textContent === `${monthLabel(monthKey(now), { long: true })} : 9,77 € dépensés et 4,50 € jetés.`, `Détail du mois : ${$('.month-detail').textContent}`);
   await click($$('.month-col').at(-2));
   log($('.month-detail').textContent.includes('20,00 € dépensés et 0,00 € jetés'), 'Toucher le mois dernier : 20,00 € dépensés');
+  await click('[data-action="stats-table"]');
+  const tableRows = $$('.month-table tbody tr');
+  log(!$('.month-chart') && tableRows.length === 12 && tableRows[1].textContent.includes('20,00 €'), 'Tableau : les 12 mois en chiffres, le plus récent en premier');
+  await click('[data-action="stats-table"]');
+  log($$('.month-col').length === 12 && $('[data-action="stats-table"]').textContent === 'Tableau', 'Retour au graphique');
   const cats = () => $$('.cat-row').map((r) => r.querySelector('.cat-head span').textContent);
   log(cats()[0].includes('Produits laitiers') && cats()[1].includes('Fruits'), `Catégories, de la plus grosse dépense : ${cats().join(' | ')}`);
   log($$('.cat-row').find((r) => r.textContent.includes('Viande')).textContent.includes('Jeté : 3,50 €'), 'Viande : « Jeté : 3,50 € »');
@@ -224,7 +229,7 @@ test('Prix, produits jetés et statistiques', async () => {
   await click('[data-action="stats-period"][data-value="tout"]', 60);
   log(spent() === '39,77 €' && $$('.month-col').length === 15, 'Tout : le riz d\'il y a 14 mois compté (39,77 €), 15 mois');
   await click('[data-action="stats-period"][data-value="mois"]', 60);
-  log(spent() === '9,77 €' && !text().includes('Mois par mois'), 'Ce mois : 9,77 €, pas de graphique sur un seul mois');
+  log(spent() === '9,77 €' && !text().includes('Dépensé par mois'), 'Ce mois : 9,77 €, pas de graphique sur un seul mois');
 
   await click('[data-action="stats-soon"]');
   log($('h1').textContent === 'Stock', 'Toucher « à consommer vite » ouvre le stock');

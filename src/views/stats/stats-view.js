@@ -17,8 +17,7 @@ const REDRAW = ['movements', 'filters', 'sync', 'time', 'settings'];
 export const statsView = {
   render() {
     return html`
-      <header class="top"><div class="top-row"><h1>Statistiques</h1></div></header>
-      <div id="stats-stock"></div>
+      <header class="top"><div class="top-row"><h1>Statistiques</h1></div><div id="stats-stock"></div></header>
       <h2 class="section stats-period-title">Sur la période</h2>
       <div class="segmented stats-period" id="stats-period" role="group" aria-label="Période"></div>
       <div id="stats-body"></div>`;

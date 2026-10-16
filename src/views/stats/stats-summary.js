@@ -18,12 +18,12 @@ export function summaryCard(summary) {
     <section class="stats-summary" aria-label="Résumé de la période">
       <p class="stats-spent"><span>Dépensé</span><strong>${S.formatEuro(summary.spent)}</strong></p>
       <div class="stats-split">
-        <p class="stats-out consumed"><span>Consommé</span><b>${S.formatEuro(summary.consumed)}</b></p>
-        <p class="stats-out wasted"><span>Jeté</span><b>${S.formatEuro(summary.wasted)}</b></p>
+        <p class="stats-out consumed"><span><i class="swatch" aria-hidden="true"></i>Consommé</span><b>${S.formatEuro(summary.consumed)}</b></p>
+        <p class="stats-out wasted"><span><i class="swatch" aria-hidden="true"></i>Jeté</span><b>${S.formatEuro(summary.wasted)}</b></p>
       </div>
       ${share === null ? '' : html`
         <div class="split-bar" aria-hidden="true">
-          <i style="${raw(`width: ${100 - wastedWidth}%`)}"></i><i class="waste" style="${raw(`width: ${wastedWidth}%`)}"></i>
+          ${wastedWidth < 100 ? html`<i style="${raw(`width: ${100 - wastedWidth}%`)}"></i>` : ''}${wastedWidth > 0 ? html`<i class="waste" style="${raw(`width: ${wastedWidth}%`)}"></i>` : ''}
         </div>`}
       <p class="stats-share">${wasteSentence(share)}</p>
     </section>`;

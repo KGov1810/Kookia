@@ -27,7 +27,7 @@ export const ui = {
   recipeNote: null,
   recipeMode: 'idees',  // écran Recettes : « idees » (5 recettes) ou « semaine » (planning)
   week: { busy: '', note: null, slotBusy: -1, showPast: false }, // génération du planning, repas remplacé, jours passés affichés
-  stats: { period: DEFAULT_STATS_PERIOD, month: '', what: '', location: '', person: '' }, // écran Statistiques
+  stats: { period: DEFAULT_STATS_PERIOD, month: '', what: '', location: '', person: '', table: false }, // écran Statistiques
   onboarding: { text: '', joinText: '', name: '', invite: '', message: null, busy: false }
 };
 

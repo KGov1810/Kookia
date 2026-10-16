@@ -1,6 +1,7 @@
 /* Kookia — Couleurs, polices, rayons et ombres : thème Potager (vert sapin et mangue), clair et sombre.
    Le thème suit l'iPhone, sauf si Réglages → Apparence le force (attribut data-theme sur <html>).
-   --herb : textes et icônes verts ; --herb-fill : fonds verts (boutons, cases cochées). */
+   --herb : textes et icônes verts ; --herb-fill : fonds verts (boutons, cases cochées).
+   --chart-a / --chart-b : consommé et jeté dans les graphiques (vérifiés pour les daltoniens, en clair et en sombre). */
 
 :root {
   --herb: #12463E;
@@ -46,6 +47,10 @@
   --tint-pink: #F8E3DC;
   --tint-blue: #E9F1F7;
   --tint-cream: #FBF0D6;
+  --chart-a: #0E8A68;
+  --chart-b: #C8432B;
+  --chart-idle: #D3DBD7;
+  --chart-grid: #EFEAE0;
 
   --font: 'Figtree Variable', -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "Segoe UI", Roboto, sans-serif;
   --font-round: 'Bricolage Grotesque Variable', 'Figtree Variable', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
@@ -102,6 +107,10 @@
     --tint-pink: #3A2A27;
     --tint-blue: #232E35;
     --tint-cream: #35301F;
+    --chart-a: #22A47E;
+    --chart-b: #E8604A;
+    --chart-idle: #3A3F3D;
+    --chart-grid: #2A2E2C;
     --shadow: none;
     color-scheme: dark;
   }
@@ -147,6 +156,10 @@
   --tint-pink: #3A2A27;
   --tint-blue: #232E35;
   --tint-cream: #35301F;
+  --chart-a: #22A47E;
+  --chart-b: #E8604A;
+  --chart-idle: #3A3F3D;
+  --chart-grid: #2A2E2C;
   --shadow: none;
   color-scheme: dark;
 }

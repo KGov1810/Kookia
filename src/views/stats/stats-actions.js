@@ -25,6 +25,10 @@ export const statsActions = {
     window.scrollTo(0, 0);
   },
   'stats-soon': () => showTab('frigo'),
+  'stats-table': () => {
+    ui.stats.table = !ui.stats.table;
+    redraw();
+  },
   'stats-reset': () => {
     Object.assign(ui.stats, { what: '', location: '', person: '' });
     redraw();

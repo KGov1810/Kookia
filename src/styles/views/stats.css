@@ -2,38 +2,41 @@
 
 .stats-period { margin: 0 0 4px; }
 
-/* Valeur du stock en ce moment : total, détail par lieu, montant à consommer vite. */
-.stats-stock { background: var(--surface); border-radius: 18px; box-shadow: var(--shadow); padding: 14px 16px; margin: 4px 0 8px; }
-
+/* Valeur du stock en ce moment, dans le bandeau vert : le montant en grand, le détail par lieu, ce qui est à consommer vite. */
 .stats-stock p { margin: 0; }
 
-.stock-total { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.stock-total { display: flex; flex-direction: column; gap: 2px; }
 
-.stock-total span { font-size: 15px; font-weight: 600; color: var(--muted); }
+.stock-total span { font-size: 13.5px; font-weight: 600; color: var(--head-sub); }
 
-.stock-total strong { font: 800 28px/1.1 var(--font-round); font-variant-numeric: tabular-nums; }
+.stock-total strong { font: 800 52px/1.05 var(--font); letter-spacing: -1.5px; font-variant-numeric: tabular-nums; }
 
-.stock-places { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; margin-top: 12px; }
+.stock-places { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
 
-.stock-place { display: grid; grid-template-columns: auto 1fr; align-items: center; column-gap: 8px; min-width: 0; }
-
-.stock-place svg { grid-row: span 2; width: 20px; height: 20px; color: var(--muted); }
-
-.stock-place span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; color: var(--muted); }
-
-.stock-place b { font-size: 16px; font-weight: 650; font-variant-numeric: tabular-nums; }
-
-.stock-soon {
-  display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%;
-  margin-top: 12px; padding: 10px 12px; border-radius: 12px;
-  background: var(--apricot-soft); color: var(--ink); font-size: 15px; text-align: left;
+.stock-place {
+  display: grid; grid-template-columns: 20px minmax(0, 1fr); align-items: center; column-gap: 8px; min-width: 0;
+  padding: 8px 12px; border-radius: 14px; background: var(--head-card);
 }
 
-.stock-soon b { color: var(--apricot); font-variant-numeric: tabular-nums; }
+.stock-place svg { grid-row: span 2; width: 18px; height: 18px; color: var(--head-sub); }
 
-.stock-soon svg { flex: none; width: 18px; height: 18px; color: var(--muted); }
+.stock-place span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12.5px; color: var(--head-sub); }
 
-.stats-stock .stock-unpriced { margin-top: 10px; padding: 0; }
+.stock-place b { font-size: 16px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+.stock-soon {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; min-height: 48px;
+  margin-top: 12px; padding: 0 14px 0 16px; border-radius: 16px;
+  background: var(--cta); color: var(--on-cta); font-size: 14.5px; font-weight: 600; text-align: left;
+}
+
+.stock-soon b { font-weight: 800; font-variant-numeric: tabular-nums; }
+
+.stock-soon svg { flex: none; width: 18px; height: 18px; }
+
+.stats-stock { margin-top: 14px; }
+
+.stats-stock .hint { margin: 10px 0 0; padding: 0; color: var(--head-sub); }
 
 .stats-period-title { margin-top: 18px; }
 
@@ -68,52 +71,66 @@
 
 .stats-out b { font: 700 22px/1.2 var(--font-round); font-variant-numeric: tabular-nums; }
 
-.stats-out.consumed b { color: var(--herb); }
-
 .stats-out.wasted { text-align: right; }
 
-.stats-out.wasted b { color: var(--tomato); }
+.stats-out span { display: inline-flex; align-items: center; gap: 6px; }
 
-.split-bar { display: flex; gap: 2px; height: 12px; border-radius: 6px; overflow: hidden; background: var(--surface-2); }
+.swatch { width: 10px; height: 10px; border-radius: 3px; background: var(--chart-a); }
 
-.split-bar i { display: block; min-width: 0; background: var(--herb-fill); }
+.stats-out.wasted .swatch { background: var(--chart-b); }
 
-.split-bar i.waste { background: var(--tomato-fill); }
+.split-bar { display: flex; gap: 2px; height: 14px; }
+
+.split-bar i { display: block; min-width: 0; background: var(--chart-a); }
+
+.split-bar i:first-child { border-radius: 4px 0 0 4px; }
+
+.split-bar i:last-child { border-radius: 0 4px 4px 0; }
+
+.split-bar i:only-child { border-radius: 4px; }
+
+.split-bar i.waste { background: var(--chart-b); }
 
 .stats-summary .stats-share { margin-top: 10px; font-size: 15px; color: var(--muted); }
 
-/* Mois par mois : une colonne par mois, défilement horizontal au-delà de l'écran. */
+/* Dépensé par mois : axe gradué (filets fins), une barre par mois, le mois choisi en vert, les autres en gris. */
+.month-plot { position: relative; height: 172px; margin: 4px 12px 10px 4px; }
+
+.month-tick { position: absolute; left: 40px; right: 0; height: 0; border-top: 1px solid var(--chart-grid); }
+
+.month-tick i {
+  position: absolute; left: -40px; top: -8px; width: 36px; text-align: right;
+  font: 500 11px/16px var(--font); font-style: normal; color: var(--muted); font-variant-numeric: tabular-nums;
+}
+
 .month-chart {
-  display: grid; grid-auto-flow: column; grid-auto-columns: minmax(25px, 1fr); gap: 2px; align-items: end;
-  position: relative; padding: 14px 8px 4px; overflow-x: auto; scrollbar-width: none;
+  position: absolute; inset: 0 0 0 44px; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(24px, 1fr);
+  align-items: end; overflow-x: auto; scrollbar-width: none;
 }
 
 .month-chart::-webkit-scrollbar { display: none; }
 
-.month-col { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 6px 0 4px; border-radius: 10px; }
+.month-col { height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; }
 
-.month-col .bars { display: flex; align-items: flex-end; justify-content: center; gap: 2px; height: 120px; width: 100%; }
+.month-col .bars { display: flex; align-items: flex-end; justify-content: center; width: 100%; height: calc(100% - 26px); }
 
-.month-col .bars i { display: block; width: 8px; border-radius: 4px 4px 1px 1px; background: var(--herb-fill); }
+.month-col .bars i { display: block; width: 16px; border-radius: 4px 4px 0 0; background: var(--chart-idle); transition: background-color 150ms ease; }
 
-.month-col .bars i.waste { background: var(--tomato-fill); }
+.month-col[aria-pressed="true"] .bars i { background: var(--chart-a); }
 
-.month-col small { font-size: 11px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+.month-col small { height: 26px; line-height: 26px; font-size: 11px; font-weight: 600; color: var(--muted); white-space: nowrap; }
 
-.month-col[aria-pressed="true"] { background: var(--herb-soft); }
+.month-col[aria-pressed="true"] small { color: var(--ink); font-weight: 800; }
 
-.month-col[aria-pressed="true"] small { color: var(--herb-strong); }
+.month-detail { margin: 0; padding: 12px 16px 4px; font-size: 15px; font-weight: 600; }
 
-.month-detail { margin: 0; padding: 8px 16px 2px; font-size: 15px; }
+.month-table { width: calc(100% - 32px); margin: 8px 16px 12px; border-collapse: collapse; font-size: 14px; }
 
-.stats-legend { display: flex; gap: 16px; margin: 0; padding: 4px 16px 14px; font-size: 13px; color: var(--muted); }
+.month-table th, .month-table td { padding: 8px 0; border-top: 1px solid var(--line); text-align: right; font-variant-numeric: tabular-nums; }
 
-.stats-legend span::before {
-  content: ""; display: inline-block; width: 10px; height: 10px; margin-right: 6px; border-radius: 3px;
-  background: var(--herb-fill); vertical-align: -1px;
-}
+.month-table th:first-child { text-align: left; font-weight: 600; }
 
-.stats-legend .waste::before { background: var(--tomato-fill); }
+.month-table thead th { border-top: 0; color: var(--muted); font-weight: 600; }
 
 /* Par catégorie : une barre par catégorie, proportionnelle à la plus grosse dépense. */
 .cat-row { display: block; width: 100%; text-align: left; padding: 12px 16px; border-top: 1px solid var(--line); }
@@ -126,7 +143,7 @@
 
 .cat-bar { display: block; height: 8px; margin-top: 8px; border-radius: 4px; background: var(--surface-2); overflow: hidden; }
 
-.cat-bar i { display: block; height: 100%; border-radius: 4px; background: var(--herb-fill); }
+.cat-bar i { display: block; height: 100%; border-radius: 4px; background: var(--chart-a); }
 
 .cat-waste { display: block; margin-top: 4px; font-size: 13px; color: var(--tomato); }
 
