@@ -33,6 +33,7 @@ export const settingsActions = {
     }
   },
   reconnect: () => store.reconnect(),
+  'set-theme': (el) => store.updateSettings({ theme: el.dataset.value }),
   'enable-badge': async () => {
     try {
       await Notification.requestPermission();

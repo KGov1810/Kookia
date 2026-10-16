@@ -49,10 +49,10 @@
 .primary-fill, .danger-fill {
   display: flex; align-items: center; justify-content: center; gap: 8px;
   min-height: 48px; padding: 10px 16px; border-radius: 14px;
-  background: var(--herb); color: var(--on-accent); font-weight: 650; white-space: nowrap;
+  background: var(--herb-fill); color: var(--on-accent); font-weight: 650; white-space: nowrap;
 }
 
-.danger-fill { background: var(--tomato); }
+.danger-fill { background: var(--tomato-fill); }
 
 .primary-fill svg, .danger-fill svg { width: 20px; height: 20px; }
 

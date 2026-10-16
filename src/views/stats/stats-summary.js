@@ -66,6 +66,6 @@ export function emptyState(hasFilters) {
       <span class="emoji" aria-hidden="true">🧾</span>
       <h2>Pas encore de chiffres</h2>
       <p>Chaque produit ajouté, consommé ou jeté est noté à partir de maintenant, avec son prix s'il est connu.</p>
-      <p>Le plus simple pour les prix : scannez vos tickets de caisse (bouton + de l'écran Stock).</p>
+      <p>Le plus simple pour les prix : scannez vos tickets de caisse (bouton + au centre de la barre du bas).</p>
     </div>`;
 }

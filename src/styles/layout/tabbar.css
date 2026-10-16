@@ -1,28 +1,41 @@
-/* Kookia — Barre d'onglets. */
+/* Kookia — Barre d'onglets flottante : Stock, Recettes, le + au centre, Courses, Stats.
+   Réglages s'ouvre depuis l'initiale en haut du Stock. */
 
 .tabbar {
-  position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
-  display: grid; grid-template-columns: repeat(5, 1fr);
-  padding: 4px max(8px, calc(50vw - 320px)) calc(var(--safe-bottom) + 2px);
-  background: color-mix(in srgb, var(--bg) 82%, transparent);
-  backdrop-filter: saturate(1.6) blur(18px); -webkit-backdrop-filter: saturate(1.6) blur(18px);
-  border-top: 1px solid var(--line);
+  position: fixed; z-index: 30;
+  left: max(16px, calc(50vw - 320px)); right: max(16px, calc(50vw - 320px));
+  bottom: max(14px, calc(var(--safe-bottom) - 10px));
+  height: var(--tabbar-h); border-radius: 34px; padding: 0 6px;
+  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); align-items: center;
+  background: var(--nav); border: 1px solid var(--nav-edge); box-shadow: var(--nav-shadow);
 }
 
 .tab {
-  position: relative; height: var(--tabbar-h);
+  position: relative; height: 54px; margin: 0 2px; border-radius: 27px;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
-  color: var(--muted); font-size: 11px; font-weight: 600;
+  color: rgba(255, 255, 255, .74); font-size: 11px; font-weight: 700;
 }
 
-.tab svg { width: 26px; height: 26px; }
+.tab svg { width: 22px; height: 22px; stroke-width: 1.9; }
 
-.tab[aria-current="page"] { color: var(--herb); }
+.tab[aria-current="page"] { background: rgba(255, 255, 255, .14); color: #FFFFFF; font-weight: 800; }
 
 .tab-badge {
-  position: absolute; top: 5px; left: calc(50% + 6px);
-  min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px;
-  background: var(--tomato); color: #fff; font-size: 12px; line-height: 18px; text-align: center;
+  position: absolute; top: 3px; right: 8px;
+  min-width: 17px; height: 17px; padding: 0 4px; border-radius: 9px;
+  background: var(--mango); color: #12463E; font-size: 10.5px; font-weight: 800; line-height: 17px; text-align: center;
 }
 
-.tab-badge.calm { background: var(--herb); }
+.tab-badge.calm { background: #FFFFFF; }
+
+/* Le + mangue, au centre, qui dépasse de la barre. */
+.nav-add {
+  justify-self: center; width: 60px; height: 60px; margin-top: -26px; border-radius: 30px;
+  border: 4px solid var(--bg); background: var(--mango); color: var(--on-mango);
+  display: grid; place-items: center; box-shadow: 0 6px 16px rgba(245, 168, 59, .40);
+  transition: transform 160ms var(--ease-out);
+}
+
+.nav-add svg { width: 26px; height: 26px; stroke-width: 2.6; }
+
+.nav-add:active { transform: scale(.94); }

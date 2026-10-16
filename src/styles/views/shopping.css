@@ -1,15 +1,13 @@
 /* Kookia — Écran Courses. */
 
-.add-item { display: flex; gap: 8px; margin-bottom: 8px; }
-
-.add-item input {
-  flex: 1; min-width: 0; min-height: 50px; border-radius: 14px; border: 1.5px solid var(--line);
-  background: var(--surface); padding: 0 14px; font-size: 17px; outline: none;
+.add-item {
+  display: flex; align-items: center; gap: 8px; margin: 0; height: 52px; padding: 0 4px 0 16px;
+  border-radius: 26px; background: var(--head-field);
 }
 
-.add-item input:focus { border-color: var(--herb); }
+.add-item input { flex: 1; min-width: 0; min-height: 48px; border: 0; background: none; font-size: 16px; outline: none; color: var(--ink); }
 
-.add-item button { flex: none; width: 50px; height: 50px; border-radius: 14px; background: var(--herb); color: var(--on-accent); display: grid; place-items: center; }
+.add-item button { flex: none; width: 44px; height: 44px; border-radius: 22px; background: var(--mango); color: var(--on-mango); display: grid; place-items: center; }
 
 .add-item button svg { stroke-width: 2.4; }
 
@@ -27,7 +25,7 @@
 
 .tick span svg { width: 16px; height: 16px; stroke-width: 3; }
 
-.shop-item.checked .tick span { background: var(--herb); border-color: var(--herb); color: var(--on-accent); }
+.shop-item.checked .tick span { background: var(--herb-fill); border-color: var(--herb-fill); color: var(--on-accent); }
 
 .shop-text { flex: 1; min-width: 0; text-align: left; display: flex; flex-direction: column; padding: 8px 0; min-height: 48px; justify-content: center; }
 

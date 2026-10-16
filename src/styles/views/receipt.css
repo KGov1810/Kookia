@@ -31,7 +31,7 @@
 
 .list-toggle[aria-pressed="true"] { color: var(--herb-strong); }
 
-.list-toggle[aria-pressed="true"] .box { background: var(--herb); border-color: var(--herb); color: var(--on-accent); }
+.list-toggle[aria-pressed="true"] .box { background: var(--herb-fill); border-color: var(--herb-fill); color: var(--on-accent); }
 
 .receipt-line.off { opacity: .45; }
 

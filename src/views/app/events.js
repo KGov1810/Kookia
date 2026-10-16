@@ -6,6 +6,7 @@ import * as store from '../../data/store/index.js';
 import * as S from '../../services/index.js';
 import { needsOnboarding } from '../onboarding/onboarding.js';
 import { stockNote } from '../shopping/shopping-view.js';
+import { openAddMenu } from '../stock/add-menu.js';
 import { setStatsFilter } from '../stats/stats-actions.js';
 import { fridgeList } from '../stock/stock-list.js';
 import { wireSwipe } from '../stock/stock-swipe.js';
@@ -70,6 +71,10 @@ export function wireEvents() {
   });
 
   document.querySelector('.tabbar').addEventListener('click', (event) => {
+    if (event.target.closest('.nav-add')) {
+      openAddMenu();
+      return;
+    }
     const tab = event.target.closest('.tab');
     if (tab) showTab(tab.dataset.tab);
   });

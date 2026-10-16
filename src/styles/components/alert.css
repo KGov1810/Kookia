@@ -1,20 +1,21 @@
-/* Kookia — Bandeau « à consommer vite » (compact : le détail est dans la liste). */
+/* Kookia — Bandeau « à consommer vite », dans le bandeau vert du Stock (le détail est dans la liste). */
 
 .alert-card {
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  width: 100%; text-align: left; margin: 0 0 12px; padding: 8px 8px 8px 14px; min-height: 52px;
-  border-radius: 16px; background: var(--apricot-soft);
-  border: 1.5px solid color-mix(in srgb, var(--apricot) 35%, transparent);
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 12px;
+  width: 100%; text-align: left; padding: 12px 12px 12px 16px; min-height: 64px;
+  border-radius: 20px; background: var(--head-card); color: var(--head-ink);
 }
 
-.alert-card.expired { background: var(--tomato-soft); border-color: color-mix(in srgb, var(--tomato) 35%, transparent); }
+.alert-card > span { flex: 1 1 150px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 
-.alert-card strong { font: 700 16px/1.25 var(--font-round); }
+.alert-card strong { font: 700 18px/1.2 var(--font-round); }
+
+.alert-card small { font-size: 13px; color: var(--head-sub); }
 
 .alert-card em {
-  display: inline-flex; align-items: center; gap: 6px; flex: none;
-  font-style: normal; font-weight: 650; font-size: 15px;
-  background: var(--surface); color: var(--ink); padding: 8px 12px; border-radius: 12px; white-space: nowrap;
+  display: inline-flex; align-items: center; gap: 6px; flex: none; min-height: 44px; padding: 0 16px;
+  font-style: normal; font-weight: 800; font-size: 14px; border-radius: 22px; white-space: nowrap;
+  background: var(--cta); color: var(--on-cta);
 }
 
-.alert-card em svg { width: 16px; height: 16px; color: var(--apricot); }
+.alert-card em svg { width: 17px; height: 17px; }

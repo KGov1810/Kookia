@@ -12,12 +12,14 @@ import { openEditor } from '../product-editor/product-editor.js';
 export const shoppingView = {
   render() {
     return html`
-      <header class="top"><div><h1>Courses</h1><p class="sync" id="sync-line"></p></div>
-        <button class="link" data-action="clear-checked" id="clear-checked" hidden>Vider le panier</button></header>
-      <form class="add-item" id="add-item">
-        <input id="new-item" placeholder="Ajouter (ex. 2 lait, farine 1 kg)" autocomplete="off" enterkeyhint="done" aria-label="Article à acheter, avec le nombre devant si besoin">
-        <button type="submit" aria-label="Ajouter">${I.plus}</button>
-      </form>
+      <header class="top">
+        <div class="top-row"><div><h1>Courses</h1><p class="sync" id="sync-line"></p></div>
+          <button class="link" data-action="clear-checked" id="clear-checked" hidden>Vider le panier</button></div>
+        <form class="add-item" id="add-item">
+          <input id="new-item" placeholder="Ajouter (ex. 2 lait, farine 1 kg)" autocomplete="off" enterkeyhint="done" aria-label="Article à acheter, avec le nombre devant si besoin">
+          <button type="submit" aria-label="Ajouter">${I.plus}</button>
+        </form>
+      </header>
       <div id="shopping-list"></div>`;
   },
   mounted() {

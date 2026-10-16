@@ -76,9 +76,9 @@
 
 .split-bar { display: flex; gap: 2px; height: 12px; border-radius: 6px; overflow: hidden; background: var(--surface-2); }
 
-.split-bar i { display: block; min-width: 0; background: var(--herb); }
+.split-bar i { display: block; min-width: 0; background: var(--herb-fill); }
 
-.split-bar i.waste { background: var(--tomato); }
+.split-bar i.waste { background: var(--tomato-fill); }
 
 .stats-summary .stats-share { margin-top: 10px; font-size: 15px; color: var(--muted); }
 
@@ -94,9 +94,9 @@
 
 .month-col .bars { display: flex; align-items: flex-end; justify-content: center; gap: 2px; height: 120px; width: 100%; }
 
-.month-col .bars i { display: block; width: 8px; border-radius: 4px 4px 1px 1px; background: var(--herb); }
+.month-col .bars i { display: block; width: 8px; border-radius: 4px 4px 1px 1px; background: var(--herb-fill); }
 
-.month-col .bars i.waste { background: var(--tomato); }
+.month-col .bars i.waste { background: var(--tomato-fill); }
 
 .month-col small { font-size: 11px; font-weight: 600; color: var(--muted); white-space: nowrap; }
 
@@ -110,10 +110,10 @@
 
 .stats-legend span::before {
   content: ""; display: inline-block; width: 10px; height: 10px; margin-right: 6px; border-radius: 3px;
-  background: var(--herb); vertical-align: -1px;
+  background: var(--herb-fill); vertical-align: -1px;
 }
 
-.stats-legend .waste::before { background: var(--tomato); }
+.stats-legend .waste::before { background: var(--tomato-fill); }
 
 /* Par catégorie : une barre par catégorie, proportionnelle à la plus grosse dépense. */
 .cat-row { display: block; width: 100%; text-align: left; padding: 12px 16px; border-top: 1px solid var(--line); }
@@ -126,7 +126,7 @@
 
 .cat-bar { display: block; height: 8px; margin-top: 8px; border-radius: 4px; background: var(--surface-2); overflow: hidden; }
 
-.cat-bar i { display: block; height: 100%; border-radius: 4px; background: var(--herb); }
+.cat-bar i { display: block; height: 100%; border-radius: 4px; background: var(--herb-fill); }
 
 .cat-waste { display: block; margin-top: 4px; font-size: 13px; color: var(--tomato); }
 

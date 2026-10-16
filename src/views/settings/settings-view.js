@@ -16,11 +16,17 @@ export const settingsView = {
   render() {
     const s = state.settings;
     return html`
-      <header class="top"><h1>Réglages</h1></header>
+      <header class="top"><button class="back" data-action="open-stock">${I.chevron}Stock</button><div class="top-row"><h1>Réglages</h1></div></header>
 
       <section class="group">
         <h2>Profil</h2>
         <label class="field"><span>Votre prénom</span><input data-setting="userName" value="${s.userName}" placeholder="Prénom" autocomplete="given-name"></label>
+      </section>
+
+      <section class="group">
+        <h2>Apparence</h2>
+        <div class="segmented theme-switch" id="theme-switch" role="group" aria-label="Thème"></div>
+        <div class="field"><span class="label-stack">Animations<small>Plus douces si l'iPhone le demande</small></span><span class="muted">Automatique</span></div>
       </section>
 
       <section class="group">
@@ -72,6 +78,7 @@ export const settingsView = {
     const kcal = document.getElementById('kcal-max');
     if (kcal) kcal.textContent = `${s.lightMaxKcal || 500} kcal`;
     setHTML('#badge-row', badgeRow());
+    setHTML('#theme-switch', themeSwitch(s.theme));
     const time = state.lastSync ? state.lastSync.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '—';
     setHTML('#sync-details', html`
       <div class="field"><span>État</span><span class="muted">${store.syncLabel()}</span></div>
@@ -94,6 +101,12 @@ export const settingsView = {
       : html`<p class="plain hint">Aucun foyer.</p>`);
   }
 };
+
+/** Clair, Sombre ou Automatique (comme l'iPhone) : choix propre à cet iPhone. */
+function themeSwitch(theme = 'auto') {
+  return [['light', 'Clair'], ['dark', 'Sombre'], ['auto', 'Automatique']].map(([id, label]) =>
+    html`<button data-action="set-theme" data-value="${id}" aria-pressed="${String(theme === id)}">${label}</button>`);
+}
 
 function badgeRow() {
   if (!isStandalone() || !('setAppBadge' in navigator) || !('Notification' in window)) return '';

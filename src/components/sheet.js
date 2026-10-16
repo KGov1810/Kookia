@@ -34,6 +34,7 @@ export function openSheet({ render, actions = {}, onInput = null, onData = null,
       backdrop.classList.remove('open');
       backdrop.classList.add('closing');
       setTimeout(() => backdrop.remove(), 300);
+      pushPageBack();
       onClose?.();
     }
   };
@@ -58,6 +59,15 @@ export function openSheet({ render, actions = {}, onInput = null, onData = null,
   document.body.append(backdrop);
   sheet.update();
   openSheets.add(sheet);
+  pushPageBack();
   requestAnimationFrame(() => requestAnimationFrame(() => backdrop.classList.add('open')));
   return sheet;
+}
+
+/** Fiche ouverte : la page recule un peu derrière (à partir du haut de ce qui est visible). */
+function pushPageBack() {
+  const open = openSheets.size > 0;
+  const page = document.getElementById('screen');
+  if (open && page && !document.body.classList.contains('sheet-open')) page.style.transformOrigin = `50% ${window.scrollY}px`;
+  document.body.classList.toggle('sheet-open', open);
 }

@@ -67,7 +67,7 @@ test("Second iPhone : invitation, code-barres, photo, erreurs Claude, synchronis
   globalThis.Image = class { set src(v) { this.naturalWidth = 4000; this.naturalHeight = 3000; setTimeout(() => this.onload(), 1); } };
   const settings = JSON.parse(w.localStorage.getItem('frigo.settings.v1'));
   w.localStorage.setItem('frigo.settings.v1', JSON.stringify(settings));
-  await click('.tab[data-tab="reglages"]');
+  await click('.tab[data-tab="frigo"]'); await click('[data-action="open-settings"]');
   await type('#key-input', 'sk-ant-paul-9999'); await click('[data-action="save-key"]');
   let claudeCalls = 0;
   globalThis.fetch = async (url, opts) => {
@@ -117,7 +117,7 @@ test("Second iPhone : invitation, code-barres, photo, erreurs Claude, synchronis
   log($$('.product').find((p) => p.textContent.includes('Salade'))?.querySelector('.days small').textContent === 'dernier jour', 'Compteur « dernier jour »');
 
   // ---- Quitter le foyer → retour à l'accueil
-  await click('.tab[data-tab="reglages"]');
+  await click('.tab[data-tab="frigo"]'); await click('[data-action="open-settings"]');
   await click('[data-action="leave"]', 50);
   log(w.document.body.classList.contains('onboarding') && text().includes('Votre foyer'), 'Quitter le foyer → accueil');
 

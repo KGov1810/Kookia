@@ -12,7 +12,8 @@ const DEFAULT_SETTINGS = {
   onboardingDone: false,
   installHintDismissed: false,
   servings: 2,          // nombre de personnes proposé pour les recettes
-  lightMaxKcal: 500     // seuil d'une recette « légère » (kcal par portion)
+  lightMaxKcal: 500,    // seuil d'une recette « légère » (kcal par portion)
+  theme: 'auto'         // apparence : 'auto' (comme l'iPhone), 'light' ou 'dark'
 };
 
 export function loadSettings() {

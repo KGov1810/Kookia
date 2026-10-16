@@ -7,6 +7,7 @@ import { settingsActions } from '../settings/settings-actions.js';
 import { shoppingActions } from '../shopping/shopping-actions.js';
 import { statsActions } from '../stats/stats-actions.js';
 import { stockActions } from '../stock/stock-actions.js';
+import { showTab } from './router.js';
 
 let actions = null;
 
@@ -19,7 +20,9 @@ export function getAction(name) {
     ...statsActions,
     ...settingsActions,
     ...onboardingActions,
-    'open-history': () => openHistory()
+    'open-history': () => openHistory(),
+    'open-settings': () => showTab('reglages'),
+    'open-stock': () => showTab('frigo')
   };
   return actions[name];
 }

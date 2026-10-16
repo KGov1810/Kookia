@@ -1,10 +1,10 @@
 /* Kookia — Groupes de formulaire : champs, interrupteurs, compteurs. */
 
 .group {
-  background: var(--surface); border-radius: 18px; margin: 12px 0; overflow: hidden; box-shadow: var(--shadow);
+  background: var(--surface); border-radius: 20px; margin: 12px 0; overflow: hidden; box-shadow: var(--shadow);
 }
 
-.group > h2 { font: 700 15px var(--font); color: var(--muted); margin: 0; padding: 14px 16px 4px; }
+.group > h2 { font: 700 17px var(--font-round); color: var(--ink); margin: 0; padding: 14px 16px 4px; }
 
 .field {
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
@@ -37,7 +37,7 @@
 .stepper { display: flex; align-items: center; gap: 4px; }
 
 .stepper button {
-  width: 40px; height: 36px; border-radius: 10px; background: var(--surface-2); font-size: 22px; line-height: 1;
+  width: 44px; height: 44px; border-radius: 22px; background: var(--surface-2); color: var(--herb); font-size: 22px; line-height: 1;
 }
 
 .stepper output { min-width: 108px; text-align: center; font-weight: 600; font-size: 15px; }
@@ -53,7 +53,7 @@
   background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,.2); transition: transform .2s;
 }
 
-.switch:checked { background: var(--herb); }
+.switch:checked { background: var(--herb-fill); }
 
 .switch:checked::after { transform: translateX(20px); }
 
@@ -65,12 +65,12 @@
 
 .segmented {
   display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 2px;
-  background: var(--surface-2); border-radius: 11px; padding: 2px; margin: 0 16px 12px;
+  background: var(--surface-2); border-radius: 22px; padding: 2px; margin: 0 16px 12px;
 }
 
-.segmented button { min-height: 34px; padding: 3px 4px; border-radius: 9px; font-size: 14px; font-weight: 600; line-height: 1.15; color: var(--muted); }
+.segmented button { min-height: 40px; padding: 3px 4px; border-radius: 20px; font-size: 14px; font-weight: 700; line-height: 1.15; color: var(--muted); }
 
-.segmented button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+.segmented button[aria-pressed="true"] { background: var(--surface); color: var(--herb); font-weight: 800; box-shadow: 0 1px 3px rgba(0,0,0,.12); }
 
 .quick { display: flex; gap: 6px; padding: 0 16px 12px; flex-wrap: wrap; }
 
@@ -88,7 +88,7 @@
 
 .stepper output { min-width: 96px; }
 
-.stepper.small button { width: 34px; height: 32px; font-size: 19px; }
+.stepper.small button { width: 40px; height: 40px; font-size: 19px; }
 
 .stepper.small output { min-width: 28px; font-size: 16px; }
 
@@ -99,7 +99,7 @@
   background: var(--surface-2); text-align: left;
 }
 
-.field input.switch:checked { background: var(--herb); }
+.field input.switch:checked { background: var(--herb-fill); }
 
 /* Libellés sur deux lignes : ils passent à la ligne au lieu de pousser
    l'interrupteur ou le compteur hors de l'écran. */

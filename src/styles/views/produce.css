@@ -13,7 +13,7 @@
 
 .produce-chip b {
   min-width: 22px; height: 22px; border-radius: 11px; padding: 0 6px; margin-left: 2px;
-  background: var(--herb); color: var(--on-accent); font-size: 13px; line-height: 22px; text-align: center;
+  background: var(--herb-fill); color: var(--on-accent); font-size: 13px; line-height: 22px; text-align: center;
 }
 
 .produce-chip.custom { border-style: dashed; color: var(--herb); }

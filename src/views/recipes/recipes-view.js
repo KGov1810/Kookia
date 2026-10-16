@@ -14,6 +14,10 @@ import { recipeCard } from './recipe-card.js';
 import { hasFilters, quickFilters } from './recipe-filters.js';
 import { weekView } from './week-view.js';
 
+function recipesHeader() {
+  return html`<header class="top"><div class="top-row"><h1>Recettes</h1></div>${modeSwitch()}</header>`;
+}
+
 /** Idées (5 recettes) ou Semaine (planning des repas). */
 function modeSwitch() {
   return html`
@@ -80,7 +84,7 @@ function generateBlock() {
 
 export const recipesView = {
   render() {
-    if (ui.recipeMode === 'semaine') return html`<header class="top"><h1>Recettes</h1></header>${modeSwitch()}${weekView()}`;
+    if (ui.recipeMode === 'semaine') return html`${recipesHeader()}${weekView()}`;
     applyDefaultPriority();
     const filters = currentFilters();
     const tabs = recipeTabs(filters);
@@ -90,8 +94,7 @@ export const recipesView = {
     const hiddenOld = state.recipes.filter((r) => S.lacksTagsFor(r, filters)).length;
 
     return html`
-      <header class="top"><h1>Recettes</h1></header>
-      ${modeSwitch()}
+      ${recipesHeader()}
 
       <section class="group recipe-start">
         ${priorityBlock()}

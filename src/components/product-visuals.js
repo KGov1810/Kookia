@@ -9,12 +9,20 @@ import { I } from './icons.js';
 
 export const LOCATION_ICON = { frigo: () => I.fridge, congelateur: () => I.snow, placard: () => I.cabinet, fruits: () => I.apple };
 
+/** Teinte de la vignette selon le rayon : vert (fruits, légumes), rose (viandes, poissons), bleu (frais, froid). */
+const TINT = {
+  fruits: 'green', legumes: 'green', legumineuses: 'green', fruits_legumes: 'green',
+  viande: 'pink', volaille: 'pink', charcuterie: 'pink', poisson: 'pink',
+  laitier: 'blue', boisson: 'blue', surgele: 'blue'
+};
+
 export function thumb(product) {
   const src = product.image || product.imageUrl;
   const count = (product.count ?? 1) > 1 ? html`<b class="count" aria-hidden="true">×${product.count}</b>` : '';
+  const tint = TINT[product.category] ? `tint-${TINT[product.category]}` : '';
   return src
     ? html`<span class="thumb"><img src="${src}" alt="" loading="lazy">${count}</span>`
-    : html`<span class="thumb">${R.category(product.category).emoji}${count}</span>`;
+    : html`<span class="thumb ${tint}">${R.category(product.category).emoji}${count}</span>`;
 }
 
 /** Catégories regroupées par rayon (une ancienne catégorie reste affichée si le produit l'a encore). */

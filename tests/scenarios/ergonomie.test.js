@@ -101,7 +101,7 @@ test('Ergonomie : recettes, glisser, courses, réglages', async () => {
   log($('h1').textContent === 'Stock', 'Retour au stock pour voir les produits rangés');
 
   console.log('\n— Réglages : Avancé replié —');
-  await click('.tab[data-tab="reglages"]');
+  await click('.tab[data-tab="frigo"]'); await click('[data-action="open-settings"]');
   const advanced = $('details.advanced');
   log(advanced && !advanced.open && advanced.querySelector('#model') && advanced.querySelector('[data-action="reconnect"]'), 'Modèle, synchronisation et à propos dans « Avancé », replié');
   log(!P.errors.length, `Aucune erreur JS ${P.errors.join(' ')}`);

@@ -81,7 +81,7 @@ test("Stock de toute la maison : lieux, dates, congélation, ticket", async () =
 
   console.log('\n— Saisie : lieu et type de date —');
   await click('[data-action="set-location"][data-value="placard"]');
-  await click('.fab', 0); await click(sheet().querySelector('[data-action="manual"]'), 400);
+  await click('.nav-add', 0); await click(sheet().querySelector('[data-action="manual"]'), 400);
   log(sheet().querySelector('[data-action="set-loc"][data-value="placard"]').getAttribute('aria-pressed') === 'true', 'Ajout depuis le filtre Placard : lieu Placard présélectionné');
   log(!sheet().querySelector('[name="expiry"]') && sheet().textContent.includes("l'app suit depuis combien de temps"), 'Placard : sans date par défaut (ancienneté)');
   await type(sheet().querySelector('[name="name"]'), 'Lentilles');
@@ -91,7 +91,7 @@ test("Stock de toute la maison : lieux, dates, congélation, ticket", async () =
   await click(sheet().querySelector('[data-action="save"]'), 350);
   log(docs(P0).find((d) => d.name === 'Lentilles')?.dateKind === 'aucune' && text().includes('Lentilles : ajouté au placard'), 'Lentilles enregistrées au placard, sans date');
   await click('[data-action="set-location"][data-value=""]');
-  await click('.fab', 0); await click(sheet().querySelector('[data-action="manual"]'), 400);
+  await click('.nav-add', 0); await click(sheet().querySelector('[data-action="manual"]'), 400);
   await click(sheet().querySelector('[data-action="set-loc"][data-value="fruits"]'));
   await type(sheet().querySelector('[name="name"]'), 'Avocat');
   await type(sheet().querySelector('[name="name"]'), 'Avocat', 'change');

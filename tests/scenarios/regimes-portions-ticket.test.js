@@ -109,7 +109,7 @@ test("Régimes, portions, calories, ticket de caisse", async () => {
   await click(sheet().querySelector('[data-action="portions-plus"]'));
   log(ing('Oignon').startsWith('1 oignon'), 'Ancienne recette recalculée : « 1/2 oignon » pour 3 au lieu de 2 → ¾ arrondi à « 1 oignon »');
   await click(sheet().querySelector('[data-action="close"]'), 350);
-  await click('.tab[data-tab="reglages"]');
+  await click('.tab[data-tab="frigo"]'); await click('[data-action="open-settings"]');
   await click('[data-action="kcal-minus"]');
   log($('#kcal-max').textContent === '450 kcal', 'Réglages : seuil léger « 450 kcal »');
   await click('.tab[data-tab="recettes"]');
@@ -171,7 +171,7 @@ test("Régimes, portions, calories, ticket de caisse", async () => {
   log(docs(P0).find((d) => d.name === 'Lait').expiry === iso(7) && $$('.product').find((r) => r.textContent.includes('Lait')).querySelector('.days b').textContent === '7', 'Date complétée : le lait rejoint le frigo (7 jours)');
 
   console.log('\n— Sans clé Claude —');
-  await click('.tab[data-tab="reglages"]');
+  await click('.tab[data-tab="frigo"]'); await click('[data-action="open-settings"]');
   await click('[data-action="delete-key"]');
   await click('.tab[data-tab="frigo"]');
   await click('[data-action="add-menu"]');

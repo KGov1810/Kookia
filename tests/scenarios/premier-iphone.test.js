@@ -108,7 +108,7 @@ test("Premier iPhone : connexion, foyer, stock, courses, recettes", async () => 
   log(!text().includes('Dans le panier'), 'Article retiré des courses après rangement');
 
   // ---- Réglages
-  await click('.tab[data-tab="reglages"]');
+  await click('.tab[data-tab="frigo"]'); await click('[data-action="open-settings"]');
   log(text().includes('Marie') || $('[data-setting="userName"]').value === 'Marie', 'Réglages : prénom');
   await click('[data-action="alert-plus"]');
   log($('#alert-days').textContent === '3 jours avant', 'Alerte : 3 jours avant');

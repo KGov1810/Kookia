@@ -12,7 +12,21 @@ body {
   background: var(--bg);
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior-y: none;
+  transition: background-color 300ms ease;
 }
+
+/* Sous l'encoche (barre d'état en blanc) : toujours le vert du bandeau, même en faisant défiler. */
+body::before {
+  content: ""; position: fixed; top: 0; left: 0; right: 0; z-index: 40; height: var(--safe-top);
+  background: var(--head); pointer-events: none;
+}
+
+/* Fiche ouverte : la page recule un peu derrière (voir sheet.js). */
+#screen { background: var(--bg); transition: transform 500ms var(--ease-sheet), border-radius 500ms var(--ease-sheet); }
+
+body.sheet-open { background: var(--root); }
+
+body.sheet-open #screen { transform: scale(.94); border-radius: 22px; }
 
 button, input, select, textarea { font: inherit; color: inherit; }
 
@@ -32,7 +46,7 @@ body.onboarding .tabbar { display: none; }
 
 h1 {
   font: 800 34px/1.1 var(--font-round);
-  letter-spacing: -.02em;
+  letter-spacing: -.5px;
   margin: 0;
 }
 
@@ -66,11 +80,12 @@ body.onboarding #toast { bottom: calc(var(--safe-bottom) + 20px); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
   .days { transform: none !important; }
+  body.sheet-open #screen { transform: none; border-radius: 0; }
+  body.sheet-open { background: var(--bg); }
 }
 
 /* Pendant le scan, rien d'autre n'est dessiné sous la caméra (évite des écrans noirs sur iOS). */
 body.scanning .tabbar,
-body.scanning .fab,
 body.scanning .sheet-backdrop { visibility: hidden; }
 
 h2.section.pending { color: var(--herb-strong); }

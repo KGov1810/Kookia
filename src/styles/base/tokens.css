@@ -1,47 +1,152 @@
-/* Kookia — Couleurs, rayons et ombres (thème clair et sombre). */
+/* Kookia — Couleurs, polices, rayons et ombres : thème Potager (vert sapin et mangue), clair et sombre.
+   Le thème suit l'iPhone, sauf si Réglages → Apparence le force (attribut data-theme sur <html>).
+   --herb : textes et icônes verts ; --herb-fill : fonds verts (boutons, cases cochées). */
 
 :root {
-  --herb: #2A7557;
-  --herb-strong: #1F5C43;
-  --herb-soft: #E2EFE8;
-  --bg: #F2F5F3;
+  --herb: #12463E;
+  --herb-fill: #12463E;
+  --herb-strong: #0B302A;
+  --herb-soft: #E2EEE8;
+  --bg: #FBF6EC;
   --surface: #FFFFFF;
-  --surface-2: #E8EEEA;
-  --ink: #14231C;
-  --muted: #5C6C64;
-  --line: #D8E1DC;
-  --tomato: #C9432A;
-  --tomato-soft: #FBE6E0;
-  --apricot: #C97612;
-  --apricot-soft: #FCEFD9;
+  --surface-2: #F3EDE1;
+  --ink: #1D2925;
+  --muted: #5F6B66;
+  --line: #E9E2D3;
+  --circle: #C9C0AE;
+  --tomato: #B23A24;
+  --tomato-fill: #B23A24;
+  --tomato-soft: #FBE1DA;
+  --apricot: #8A4B05;
+  --apricot-fill: #A65E0B;
+  --apricot-soft: #FCEBD3;
   --on-accent: #FFFFFF;
-  --shadow: 0 1px 2px rgba(20, 35, 28, .06), 0 6px 18px rgba(20, 35, 28, .06);
+  --mango: #F5A83B;
+  --on-mango: #12463E;
+  --cta: #F5A83B;
+  --on-cta: #12463E;
+  --head: #12463E;
+  --head-ink: #FFFFFF;
+  --head-sub: #B8D3CA;
+  --head-card: #1D5A4F;
+  --head-btn: rgba(255, 255, 255, .12);
+  --head-field: #FFFFFF;
+  --nav: #12463E;
+  --nav-edge: transparent;
+  --nav-shadow: 0 10px 28px rgba(18, 70, 62, .35);
+  --root: #0C2A25;
+  --scrim: rgba(12, 42, 37, .45);
+  --toast-bg: #1D2925;
+  --toast-ink: #FFFFFF;
+  --toast-action: #F5A83B;
+  --shadow: 0 1px 2px rgba(29, 41, 37, .06), 0 4px 14px rgba(29, 41, 37, .05);
+  --seg-on: #FFFFFF;
+  --on-seg: #12463E;
+  --tint-green: #E4F1E2;
+  --tint-pink: #F8E3DC;
+  --tint-blue: #E9F1F7;
+  --tint-cream: #FBF0D6;
 
-  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "Segoe UI", Roboto, sans-serif;
-  --font-round: ui-rounded, "SF Pro Rounded", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font: 'Figtree Variable', -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "Segoe UI", Roboto, sans-serif;
+  --font-round: 'Bricolage Grotesque Variable', 'Figtree Variable', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 
-  --tabbar-h: 56px;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-sheet: cubic-bezier(0.32, 0.72, 0, 1);
+
+  --tabbar-h: 68px;
+  --nav-bottom: 16px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
-  color-scheme: light dark;
+  color-scheme: light;
 }
 
+/* Sombre graphite : fond neutre, le vert sapin reste sur le bandeau et la barre, le mangue plein seulement sur le +. */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --herb: #53B287;
-    --herb-strong: #74C9A0;
-    --herb-soft: #193126;
-    --bg: #0D1512;
-    --surface: #16211C;
-    --surface-2: #1F2C26;
-    --ink: #E5EEE9;
-    --muted: #94A79D;
-    --line: #26352E;
-    --tomato: #F0775C;
-    --tomato-soft: #3A1E18;
-    --apricot: #F0A64A;
-    --apricot-soft: #362814;
-    --on-accent: #0D1512;
+  :root:not([data-theme="light"]) {
+    --herb: #86D0B6;
+    --herb-fill: #2D7A65;
+    --herb-strong: #A4DEC9;
+    --herb-soft: #21302C;
+    --bg: #121413;
+    --surface: #1D201F;
+    --surface-2: #272B29;
+    --ink: #F1F3F2;
+    --muted: #A3AAA7;
+    --line: #353A38;
+    --circle: #5F6764;
+    --tomato: #FF8E7C;
+    --tomato-fill: #C4442E;
+    --tomato-soft: #3A1E19;
+    --apricot: #F5C27C;
+    --apricot-fill: #A65E0B;
+    --apricot-soft: #352A18;
+    --on-mango: #12302A;
+    --cta: #3A2D17;
+    --on-cta: #F7B95A;
+    --head: #16362F;
+    --head-sub: #A8C4BA;
+    --head-card: #1F453C;
+    --head-btn: rgba(255, 255, 255, .10);
+    --head-field: #272B29;
+    --nav: #16362F;
+    --nav-edge: rgba(255, 255, 255, .08);
+    --nav-shadow: 0 10px 28px rgba(0, 0, 0, .5);
+    --root: #000000;
+    --scrim: rgba(0, 0, 0, .55);
+    --toast-bg: #F1F3F2;
+    --toast-ink: #121413;
+    --toast-action: #1F6E58;
+    --seg-on: #2D5E52;
+    --on-seg: #FFFFFF;
+    --tint-green: #23332B;
+    --tint-pink: #3A2A27;
+    --tint-blue: #232E35;
+    --tint-cream: #35301F;
     --shadow: none;
+    color-scheme: dark;
   }
+}
+
+:root[data-theme="dark"] {
+  --herb: #86D0B6;
+  --herb-fill: #2D7A65;
+  --herb-strong: #A4DEC9;
+  --herb-soft: #21302C;
+  --bg: #121413;
+  --surface: #1D201F;
+  --surface-2: #272B29;
+  --ink: #F1F3F2;
+  --muted: #A3AAA7;
+  --line: #353A38;
+  --circle: #5F6764;
+  --tomato: #FF8E7C;
+  --tomato-fill: #C4442E;
+  --tomato-soft: #3A1E19;
+  --apricot: #F5C27C;
+  --apricot-fill: #A65E0B;
+  --apricot-soft: #352A18;
+  --on-mango: #12302A;
+  --cta: #3A2D17;
+  --on-cta: #F7B95A;
+  --head: #16362F;
+  --head-sub: #A8C4BA;
+  --head-card: #1F453C;
+  --head-btn: rgba(255, 255, 255, .10);
+  --head-field: #272B29;
+  --nav: #16362F;
+  --nav-edge: rgba(255, 255, 255, .08);
+  --nav-shadow: 0 10px 28px rgba(0, 0, 0, .5);
+  --root: #000000;
+  --scrim: rgba(0, 0, 0, .55);
+  --toast-bg: #F1F3F2;
+  --toast-ink: #121413;
+  --toast-action: #1F6E58;
+  --seg-on: #2D5E52;
+  --on-seg: #FFFFFF;
+  --tint-green: #23332B;
+  --tint-pink: #3A2A27;
+  --tint-blue: #232E35;
+  --tint-cream: #35301F;
+  --shadow: none;
+  color-scheme: dark;
 }

@@ -55,7 +55,7 @@
 
 .servings-row .chip svg { width: 16px; height: 16px; }
 
-.servings-row .chip i { background: var(--herb); color: var(--on-accent); border-radius: 999px; padding: 1px 6px; font-size: 12px; }
+.servings-row .chip i { background: var(--herb-fill); color: var(--on-accent); border-radius: 999px; padding: 1px 6px; font-size: 12px; }
 
 .start-action { padding: 2px 16px 14px; }
 
@@ -104,7 +104,7 @@
 
 .steps li::before {
   content: counter(step); width: 28px; height: 28px; border-radius: 50%;
-  background: var(--herb); color: var(--on-accent); font: 700 15px/28px var(--font-round); text-align: center;
+  background: var(--herb-fill); color: var(--on-accent); font: 700 15px/28px var(--font-round); text-align: center;
 }
 
 /* Sélecteur de produits */
@@ -116,7 +116,7 @@
 
 .pick .box svg { width: 16px; height: 16px; stroke-width: 3; }
 
-.pick[aria-checked="true"] .box { background: var(--herb); border-color: var(--herb); color: var(--on-accent); }
+.pick[aria-checked="true"] .box { background: var(--herb-fill); border-color: var(--herb-fill); color: var(--on-accent); }
 
 .pick .product-text { flex: 1; }
 
@@ -146,7 +146,7 @@
 
 .pick-box .box svg { width: 16px; height: 16px; stroke-width: 3; }
 
-.pick-box[aria-checked="true"] .box { background: var(--herb); border-color: var(--herb); color: var(--on-accent); }
+.pick-box[aria-checked="true"] .box { background: var(--herb-fill); border-color: var(--herb-fill); color: var(--on-accent); }
 
 .origin-grid { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 12px; }
 

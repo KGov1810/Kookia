@@ -36,13 +36,13 @@ test("Quantité numérique, réglages et styles", async () => {
   log(restored?.quantity === '2', 'Suppression annulée : quantité 2 conservée');
 
   console.log('\n— Réglages et styles —');
-  await click('.tab[data-tab="reglages"]');
+  await click('.tab[data-tab="frigo"]'); await click('[data-action="open-settings"]');
   log($('#kcal-max').textContent === '400 kcal', 'Recette légère : « 400 kcal » (plus de texte coupé)');
   log([...$('#model').options].map((o) => o.textContent).join(' | ') === 'Sonnet 5.5 (conseillé) | Haiku 4.5 (économique)', 'Noms de modèles raccourcis');
   const css = readAllCss();
   const rule = (sel) => { const i = css.lastIndexOf(`${sel} {`); return i < 0 ? '' : css.slice(i, css.indexOf('}', i)); };
   log(/flex: none/.test(rule('.field input.switch')) && /width: 51px/.test(rule('.field input.switch')) && /min-height: 0/.test(rule('.field input.switch')), 'Interrupteurs : taille fixe 51 × 31 px, plus étirés');
-  log(/background: var\(--herb\)/.test(rule('.field input.switch:checked')), 'Interrupteur activé : fond vert conservé');
+  log(/background: var\(--herb-fill\)/.test(rule('.field input.switch:checked')), 'Interrupteur activé : fond vert conservé');
   log(/flex: 1 1 auto/.test(rule('.field > .label-stack')) && /min-width: 0/.test(rule('.field > .label-stack')), 'Libellés longs : passage à la ligne autorisé');
   await click('.tab[data-tab="recettes"]');
   log($$('.quick-filters .filter-chip').length === 4 && $('.servings-row [data-action="more-filters"]') && /flex-wrap: wrap/.test(rule('.quick-filters')), 'Recettes : 4 pastilles et un bouton « Filtres », qui passent à la ligne au lieu de déborder');

@@ -182,7 +182,7 @@ test('Prix, produits jetés et statistiques', async () => {
   log(lastMove().name === 'Pommes' && lastMove().unitPrice === 1.79 && lastMove().count === 1, 'Pommes de la grille : 1,79 € repris du ticket');
 
   console.log('\n— Onglet Stats —');
-  log($$('.tab').length === 5 && $('.tab[data-tab="stats"] span').textContent === 'Stats', '5 onglets, dont « Stats »');
+  log($$('.tab').length === 4 && $('.nav-add') && $('.tab[data-tab="stats"] span').textContent === 'Stats', '4 onglets et le + au centre, dont « Stats »');
   await click('.tab[data-tab="stats"]', 80);
   log($('h1').textContent === 'Statistiques' && $('[data-action="stats-period"][aria-pressed="true"]').textContent === '12 mois', 'Écran Statistiques, « 12 mois » par défaut');
   const spent = () => $('.stats-spent strong').textContent;
@@ -247,7 +247,7 @@ test('Prix, produits jetés et statistiques', async () => {
   const movesRule = rules.slice(rules.indexOf('match /mouvements'), rules.indexOf('match /historique'));
   log(/allow read, create, delete/.test(movesRule) && !/update/.test(movesRule), 'Règles : mouvements lisibles, ajout et suppression, jamais modifiables');
   log(/collection in \['produits', 'courses', 'recettes', 'prix'\]/.test(rules), 'Règles : mémoire des prix autorisée');
-  log(/repeat\(5, 1fr\)/.test(readAllCss()), 'Barre d\'onglets sur 5 colonnes');
+  log(/repeat\(5, minmax\(0, 1fr\)\)/.test(readAllCss()), 'Barre d\'onglets sur 5 colonnes (4 onglets et le +)');
   console.log('\nErreurs JS :', P.errors.length ? P.errors : 'aucune');
   log(!P.errors.length, 'Aucune erreur JS');
 });

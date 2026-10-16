@@ -1,8 +1,8 @@
 /* Kookia — Recettes : bascule Idées / Semaine, planning des repas et préparation de la semaine. */
 
-.mode-switch { margin: 0 0 12px; }
+.mode-switch { margin: 0; }
 
-.mode-switch button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 38px; font-size: 15px; }
+.mode-switch button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
 
 .mode-switch svg { width: 17px; height: 17px; }
 
@@ -28,7 +28,7 @@
 
 .week-new svg { width: 18px; height: 18px; }
 
-.week-head .secondary i { font-style: normal; font-weight: 700; background: var(--herb); color: var(--on-accent); border-radius: 999px; padding: 1px 7px; font-size: 13px; }
+.week-head .secondary i { font-style: normal; font-weight: 700; background: var(--herb-fill); color: var(--on-accent); border-radius: 999px; padding: 1px 7px; font-size: 13px; }
 
 h2.section.today { color: var(--herb-strong); }
 
@@ -40,7 +40,7 @@ h2.section.today { color: var(--herb-strong); }
 }
 
 .week-slot .meal {
-  flex: none; width: 46px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--muted);
+  flex: none; width: 46px; font-size: 13px; font-weight: 700; color: var(--herb);
 }
 
 .week-recipe { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; text-align: left; padding: 4px 0; }
