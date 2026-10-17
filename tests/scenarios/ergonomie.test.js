@@ -45,7 +45,7 @@ test('Ergonomie : recettes, glisser, courses, réglages', async () => {
 
   console.log('\n— Recettes : filtres mémorisés —');
   await click('.tab[data-tab="recettes"]');
-  log($('[data-action="quick-diet"]').getAttribute('aria-pressed') === 'true' && $('[data-action="quick-time"]').textContent.includes('≤ 30 min'), 'Filtres de la dernière fois repris : Végétarien, ≤ 30 min');
+  log($('[data-action="quick-diet"]').getAttribute('aria-pressed') === 'true' && $('[data-action="quick-time"]').textContent.includes('30 min ou moins'), 'Filtres de la dernière fois repris : Végétarien, 30 min ou moins');
   log(!$('[data-action="more-filters"] i'), 'L\'envie (« curry ») n\'est pas reprise');
   const titles = () => $$('.list').at(-1).querySelectorAll('.recipe-card h3');
   log(titles().length === 1 && titles()[0].textContent.includes('Raïta'), 'Seule la recette végétarienne et rapide est affichée');

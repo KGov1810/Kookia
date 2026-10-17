@@ -96,8 +96,8 @@ test("Recettes compatibles, codes-barres, caméra, reconnexion", async () => {
   const generateButton = $('[data-action="generate"]');
   const order = [...$('#screen').querySelectorAll('.recipe-card, [data-action="generate"]')].map((e) => e.dataset.action === 'generate' ? 'BOUTON' : 'carte');
   log(order[0] === 'BOUTON' && generateButton.textContent.includes('Proposer 5 recettes') && generateButton.classList.contains('primary'), 'Bouton principal en haut, avant les recettes');
-  log(compatSection.textContent.includes('produit en stock · rien à acheter'), 'Carte : « 1 produit en stock · rien à acheter »');
-  log(compatSection.textContent.includes('manque gruyère râpé'), 'Carte : « manque gruyère râpé »');
+  log(compatSection.textContent.includes('Tout est dans le stock'), 'Carte : « Tout est dans le stock »');
+  log(compatSection.textContent.includes('Il manque gruyère râpé'), 'Carte : « Il manque gruyère râpé »');
   // J'ai cuisiné : retire le nouveau yaourt (retrouvé par code-barres)
   await click($$('.recipe-card').find((c) => c.textContent.includes('Taboulé')), 400);
   await click(sheet().querySelector('[data-action="cooked"]'), 50);

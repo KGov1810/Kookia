@@ -144,13 +144,13 @@ test("Premier iPhone : connexion, foyer, stock, courses, recettes", async () => 
   log(globalThis.__prompt.includes('[P1] Yaourt nature') && globalThis.__prompt.includes('difficulté « facile »'), 'Prompt : produit prioritaire + filtre transmis');
   log(!globalThis.__prompt.includes('Poulet'), 'Produit périmé non proposé comme ingrédient secondaire');
   log(myCards() === 1 && text().includes('Gratin de pâtes'), 'Filtre local : seule la recette facile affichée');
-  log(text().includes('2 produits en stock · manque gruyère râpé'), 'Carte : « 2 produits en stock · manque gruyère râpé »');
+  log(text().includes('Il manque gruyère râpé'), 'Carte : « Il manque gruyère râpé »');
   await click('[data-action="more-filters"]', 350);
   await click(sheet().querySelector('[data-action="set-difficulty"][data-value=""]'));
   await click(sheet().querySelector('[data-action="close"]'), 350);
   log(myCards() === 2, 'Filtre « Toutes » : 2 recettes');
   await click('[data-action="quick-time"]');
-  log(myCards() === 1 && $('[data-action="quick-time"]').textContent.includes('≤ 30 min'), 'Pastille « Rapide » : 30 min, 1 recette');
+  log(myCards() === 1 && $('[data-action="quick-time"]').textContent.includes('30 min ou moins'), 'Pastille « Rapide » : 30 min ou moins, 1 recette');
   await click('[data-action="quick-batch"]');
   log(myCards() === 1, 'Filtre batch cooking : 1 recette');
   await click('.recipe-card', 400);

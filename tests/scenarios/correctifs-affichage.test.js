@@ -45,7 +45,7 @@ test("Quantité numérique, réglages et styles", async () => {
   log(/background: var\(--herb-fill\)/.test(rule('.field input.switch:checked')), 'Interrupteur activé : fond vert conservé');
   log(/flex: 1 1 auto/.test(rule('.field > .label-stack')) && /min-width: 0/.test(rule('.field > .label-stack')), 'Libellés longs : passage à la ligne autorisé');
   await click('.tab[data-tab="recettes"]');
-  log($$('.quick-filters .filter-chip').length === 4 && $('.servings-row [data-action="more-filters"]') && /flex-wrap: wrap/.test(rule('.quick-filters')), 'Recettes : 4 pastilles et un bouton « Filtres », qui passent à la ligne au lieu de déborder');
+  log($$('.quick-filters [data-action^="quick-"]').length === 4 && $('.quick-filters .servings-pill') && $('.quick-filters [data-action="more-filters"]') && /flex-wrap: wrap/.test(rule('.quick-filters')), 'Recettes : personnes, 4 pastilles et « Filtres » sur une rangée qui passe à la ligne au lieu de déborder');
   console.log('\nErreurs JS :', P.errors.length ? P.errors : 'aucune');
 
 });

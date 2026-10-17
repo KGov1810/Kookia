@@ -1,8 +1,8 @@
-// Kookia — Écran Recettes : produits prioritaires, filtres rapides et bouton principal, puis « Mes recettes » en onglets.
+// Kookia — Écran Recettes : repas du jour, produits prioritaires, filtres en pastilles, gros bouton, puis « Mes recettes » en onglets.
 
 import { html, raw } from '../../components/html.js';
 import { I } from '../../components/icons.js';
-import { shortExpiry } from '../../components/product-visuals.js';
+import { shortExpiry, thumbTint } from '../../components/product-visuals.js';
 import * as R from '../../data/reference/index.js';
 import * as store from '../../data/store/index.js';
 import { hasClaudeKey } from '../../data/store/selectors.js';
@@ -57,18 +57,22 @@ function activeTab(tabs) {
   return tabs.realisables.items.length ? 'realisables' : 'toutes';
 }
 
-function priorityBlock() {
+/** Carte « À utiliser en priorité » : les produits choisis, avec leur emoji et le temps qui reste. */
+function priorityCard() {
   const priority = store.sortedProducts().filter((p) => ui.priority.has(p.id));
   return html`
-    <div class="group-head">
-      <h2>À utiliser en priorité</h2>
-      <button class="link" data-action="pick-products" ${state.products.length ? '' : raw('disabled')}>${priority.length ? 'Modifier' : 'Choisir'}</button>
-    </div>
-    ${priority.length
-      ? html`<div class="chips">${priority.map((p) => html`<span class="chip">${R.category(p.category).emoji} ${p.name} <i class="${store.productStatus(p)}">${shortExpiry(p)}</i></span>`)}</div>`
-      : html`<p class="hint inset">${state.products.length ? 'Rien d\'urgent : Claude pioche dans tout le stock.' : 'Stock vide : Claude part de la liste de courses.'}</p>`}`;
+    <section class="group priority-card">
+      <div class="group-head">
+        <h2>À utiliser en priorité</h2>
+        <button class="link" data-action="pick-products" ${state.products.length ? '' : raw('disabled')}>${priority.length ? 'Modifier' : 'Choisir'}</button>
+      </div>
+      ${priority.length
+        ? html`<div class="prio-chips">${priority.map((p) => html`<span class="prio-chip"><span class="prio-icon ${thumbTint(p)}" aria-hidden="true">${R.category(p.category).emoji}</span>${p.name}<b class="${store.productStatus(p)}">${shortExpiry(p)}</b></span>`)}</div>`
+        : html`<p class="hint">${state.products.length ? 'Rien d\'urgent : Claude pioche dans tout le stock.' : 'Stock vide : Claude part de la liste de courses.'}</p>`}
+    </section>`;
 }
 
+/** Le gros bouton mangue « Proposer 5 recettes », et ce que Claude a répondu. */
 function generateBlock() {
   const hasKey = hasClaudeKey();
   const canGenerate = hasKey && !ui.generating && (state.products.length > 0 || state.shopping.length > 0);
@@ -98,14 +102,12 @@ export const recipesView = {
       ${recipesHeader()}
       ${tonightCard()}
 
-      <section class="group recipe-start">
-        ${priorityBlock()}
-        ${quickFilters()}
-        ${generateBlock()}
-      </section>
+      ${priorityCard()}
+      ${quickFilters()}
+      ${generateBlock()}
 
-      <h2 class="section">Mes recettes</h2>
-      <div class="segmented recipe-tabs" role="tablist" aria-label="Mes recettes">
+      <h2 class="section recipes-title">Mes recettes</h2>
+      <div class="recipe-tabs" role="tablist" aria-label="Mes recettes">
         ${Object.entries(tabs).map(([id, tab]) => html`
           <button role="tab" data-action="recipe-tab" data-value="${id}" aria-selected="${String(id === current)}" aria-pressed="${String(id === current)}">${tab.label}<i>${tab.items.length}</i></button>`)}
       </div>

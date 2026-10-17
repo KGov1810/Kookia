@@ -1,30 +1,35 @@
-// Kookia — Carte compacte d'une recette : titre, temps, origine, produits en stock et ce qui manque.
+// Kookia — Carte d'une recette : vignette du plat, titre, temps, origine, et ce qui manque.
 
 import { html } from '../../components/html.js';
 import { I } from '../../components/icons.js';
+import { recipeThumb } from '../../components/recipe-visuals.js';
 import * as R from '../../data/reference/index.js';
 import * as store from '../../data/store/index.js';
 import * as S from '../../services/index.js';
 import { ui } from '../app/ui-state.js';
 
-/** « 3 produits en stock · rien à acheter », « 2 produits en stock · manque gruyère râpé… » (rien sans produit du stock). */
+/** « Tout est dans le stock », « Il manque gruyère râpé, crème… » (rien si la recette n'utilise pas le stock). */
 function stockLine(inFridge, missing) {
   if (!inFridge.length) return '';
   const names = missing.slice(0, 2).map((i) => i.name.toLowerCase()).join(', ');
-  return html`<span class="fit"><b>${S.plural(inFridge.length, 'produit')} en stock</b> · ${missing.length ? `manque ${names}${missing.length > 2 ? '…' : ''}` : 'rien à acheter'}</span>`;
+  return html`<span class="fit">${missing.length ? `Il manque ${names}${missing.length > 2 ? '…' : ''}` : 'Tout est dans le stock'}</span>`;
 }
 
+/** Carte d'une recette : grande vignette du plat, titre, temps, origine, produits à consommer vite, ce qui manque. */
 export function recipeCard(recipe, availability = store.recipeAvailability(recipe, ui.priority)) {
   const { inFridge, missing, urgentUsed } = availability;
   const origin = R.originOf(recipe.origin);
   return html`
     <button class="recipe-card" data-action="open-recipe" data-id="${recipe.id}">
-      <h3><span>${recipe.title}</span>${ui.freshIds.has(recipe.id) ? html`<b class="badge">Nouvelle</b>` : ''}${recipe.favorite ? I.star : ''}</h3>
-      <span class="facts">
-        <span>${I.clock}${S.formatMinutes(recipe.totalMinutes)}</span>
-        ${origin ? html`<span class="flag" title="${origin.label}" aria-label="Cuisine ${origin.label.toLowerCase()}">${origin.emoji}</span>` : ''}
-        ${urgentUsed ? html`<span class="urgent">${urgentUsed} à consommer vite</span>` : ''}
+      ${recipeThumb(recipe)}
+      <span class="recipe-card-text">
+        <h3><span>${recipe.title}</span>${ui.freshIds.has(recipe.id) ? html`<b class="badge">Nouvelle</b>` : ''}${recipe.favorite ? I.star : ''}</h3>
+        <span class="facts">
+          <span>${I.clock}${S.formatMinutes(recipe.totalMinutes)}</span>
+          ${origin ? html`<span class="flag" title="${origin.label}" aria-label="Cuisine ${origin.label.toLowerCase()}">${origin.emoji}</span>` : ''}
+          ${urgentUsed ? html`<span class="urgent">${urgentUsed} à consommer vite</span>` : ''}
+        </span>
+        ${stockLine(inFridge, missing)}
       </span>
-      ${stockLine(inFridge, missing)}
     </button>`;
 }

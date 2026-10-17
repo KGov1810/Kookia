@@ -26,6 +26,7 @@
   --on-mango: #12463E;
   --cta: #F5A83B;
   --on-cta: #12463E;
+  --cta-shadow: 0 8px 18px rgba(245, 168, 59, .28);
   --head: #12463E;
   --head-ink: #FFFFFF;
   --head-sub: #B8D3CA;
@@ -89,6 +90,7 @@
     --on-mango: #12302A;
     --cta: #3A2D17;
     --on-cta: #F7B95A;
+    --cta-shadow: none;
     --head: #16362F;
     --head-sub: #A8C4BA;
     --head-card: #1F453C;
@@ -139,6 +141,7 @@
   --on-mango: #12302A;
   --cta: #3A2D17;
   --on-cta: #F7B95A;
+  --cta-shadow: none;
   --head: #16362F;
   --head-sub: #A8C4BA;
   --head-card: #1F453C;

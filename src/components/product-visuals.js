@@ -16,10 +16,15 @@ const TINT = {
   laitier: 'blue', boisson: 'blue', surgele: 'blue'
 };
 
+/** Classe de teinte d'un produit (« tint-green »…), ou '' pour la teinte crème par défaut. */
+export function thumbTint(product) {
+  return TINT[product.category] ? `tint-${TINT[product.category]}` : '';
+}
+
 /** Vignette : la photo du produit, sinon l'emoji de sa catégorie sur une tuile teintée (le nombre est écrit à côté). */
 export function thumb(product) {
   const src = product.image || product.imageUrl;
-  const tint = TINT[product.category] ? `tint-${TINT[product.category]}` : '';
+  const tint = thumbTint(product);
   return src
     ? html`<span class="thumb"><img src="${src}" alt="" loading="lazy"></span>`
     : html`<span class="thumb ${tint}">${R.category(product.category).emoji}</span>`;
@@ -47,7 +52,7 @@ export function shortExpiry(product) {
   if (c.label.includes('passé')) return store.productStatus(product) === 'expired' ? 'périmé' : 'à vérifier';
   if (c.label === 'dernier jour') return 'auj.';
   if (c.label === 'mois') return `${c.approx ? '≈' : ''}${c.number} mois`;
-  return `${c.approx ? '≈' : ''}J-${c.number}`;
+  return `${c.approx ? '≈' : ''}${c.number} j`;
 }
 
 export function longDate(iso) {

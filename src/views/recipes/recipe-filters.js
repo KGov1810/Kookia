@@ -37,26 +37,24 @@ export function hasFilters() {
 const pill = (action, pressed, label) =>
   html`<button class="chip filter-chip" data-action="${action}" aria-pressed="${String(pressed)}">${label}</button>`;
 
-/** Nombre de personnes et bouton « Filtres », puis pastilles Rapide, Léger, Végé, Batch. */
+/** Une ligne de pastilles : « − 2 pers. + », Rapide, Léger, Végé, Batch et « Filtres » (elles passent à la ligne). */
 export function quickFilters() {
   const f = ui.filters;
   const servings = state.settings.servings || 2;
   const diet = R.DIETS.find((d) => d.id === f.diet);
   const extra = extraCount();
   return html`
-    <div class="servings-row">
-      <div class="stepper" role="group" aria-label="Nombre de personnes">
+    <div class="quick-filters" role="group" aria-label="Personnes et filtres">
+      <div class="servings-pill" role="group" aria-label="Nombre de personnes : ${servingsLabel(servings)}">
         <button data-action="servings-minus" aria-label="Une personne de moins" ${servings <= 1 ? raw('disabled') : ''}>−</button>
-        <output>${servingsLabel(servings)}</output>
+        <output>${servings} pers.</output>
         <button data-action="servings-plus" aria-label="Une personne de plus" ${servings >= 12 ? raw('disabled') : ''}>+</button>
       </div>
-      <button class="chip filter-chip more" data-action="more-filters" aria-pressed="${String(extra > 0)}">${I.sliders}Filtres${extra ? html`<i>${extra}</i>` : ''}</button>
-    </div>
-    <div class="quick-filters" role="group" aria-label="Filtres rapides">
-      ${pill('quick-time', f.maxMinutes > 0, f.maxMinutes ? `≤ ${S.formatMinutes(f.maxMinutes)}` : 'Rapide')}
+      ${pill('quick-time', f.maxMinutes > 0, f.maxMinutes ? `${S.formatMinutes(f.maxMinutes)} ou moins` : 'Rapide')}
       ${pill('quick-light', f.light, f.light ? `Léger ≤ ${state.settings.lightMaxKcal || 500} kcal` : 'Léger')}
       ${pill('quick-diet', Boolean(f.diet), f.diet ? diet.label : 'Végé')}
       ${pill('quick-batch', f.batchOnly, 'Batch')}
+      <button class="chip filter-chip more" data-action="more-filters" aria-pressed="${String(extra > 0)}">${I.sliders}Filtres${extra ? html`<i>${extra}</i>` : ''}</button>
     </div>`;
 }
 

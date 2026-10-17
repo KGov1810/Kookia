@@ -3,6 +3,7 @@
 
 import { html } from '../../components/html.js';
 import { I } from '../../components/icons.js';
+import { recipeThumb } from '../../components/recipe-visuals.js';
 import * as store from '../../data/store/index.js';
 import { state } from '../../data/store/state.js';
 import * as S from '../../services/index.js';
@@ -32,7 +33,7 @@ export function tonightCard() {
   return html`
     <section class="group tonight" aria-label="Prévu ${when}">
       <button class="tonight-head" data-action="open-recipe" data-id="${recipe.id}">
-        <span class="tonight-icon" aria-hidden="true">${I.flame}</span>
+        ${recipeThumb(recipe)}
         <span class="tonight-text"><small>Prévu ${when}</small><b>${recipe.title}</b><span>${facts}</span></span>
       </button>
       <div class="tonight-actions">

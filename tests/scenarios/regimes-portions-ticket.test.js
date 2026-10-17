@@ -53,10 +53,10 @@ test("Régimes, portions, calories, ticket de caisse", async () => {
 
   console.log('\n— Personnes, régime, léger —');
   await click('.tab[data-tab="recettes"]');
-  const servingsOut = () => $$('.stepper output').find((o) => o.textContent.includes('personne'));
-  log(servingsOut()?.textContent === '2 personnes', 'Par défaut : 2 personnes');
+  const servingsOut = () => $('.servings-pill output');
+  log(servingsOut()?.textContent === '2 pers.', 'Par défaut : 2 personnes');
   await click('[data-action="servings-plus"]');
-  log(servingsOut().textContent === '3 personnes' && JSON.parse(w.localStorage.getItem('frigo.settings.v1')).servings === 3, '3 personnes, choix mémorisé');
+  log(servingsOut().textContent === '3 pers.' && JSON.parse(w.localStorage.getItem('frigo.settings.v1')).servings === 3, '3 personnes, choix mémorisé');
   log(mine().textContent.includes('Omelette'), 'Ancienne recette visible sans filtre');
   // Régime détaillé : fiche « Plus de filtres », appliqué tout de suite
   const setDiet = async (value) => {
@@ -74,7 +74,7 @@ test("Régimes, portions, calories, ticket de caisse", async () => {
   log(lastPrompt.includes('Pour 3 personnes') && lastPrompt.includes('végétariennes') && lastPrompt.includes('au plus 500 kcal'), 'Demande à Claude : 3 personnes, végétarien, 500 kcal max');
   const cards = [...mine().querySelectorAll('.recipe-card')];
   log(cards.length === 1 && cards[0].textContent.includes('Gratin de courgettes'), 'Filtres appliqués : seul le gratin végétarien et léger est affiché');
-  log(cards[0].querySelector('.badge')?.textContent === 'Nouvelle' && cards[0].textContent.includes('35 min') && cards[0].textContent.includes('1 produit en stock'), 'Carte compacte : « Nouvelle », 35 min, « 1 produit en stock »');
+  log(cards[0].querySelector('.badge')?.textContent === 'Nouvelle' && cards[0].textContent.includes('35 min') && /Il manque|Tout est dans le stock/.test(cards[0].querySelector('.fit')?.textContent ?? '') && cards[0].querySelector('.recipe-thumb'), 'Carte : vignette du plat, « Nouvelle », 35 min, ce qui manque');
   await setDiet('vegan');
   log(!mine().querySelector('.recipe-card') && $('[data-action="clear-filters"]'), 'Vegan : le gratin végétarien (avec crème) disparaît ; bouton « Effacer les filtres »');
   await click('[data-action="clear-filters"]');
