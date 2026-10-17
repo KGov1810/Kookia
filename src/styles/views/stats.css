@@ -1,6 +1,6 @@
 /* Kookia — Écran Statistiques : résumé, graphiques par mois et par catégorie. */
 
-.stats-period { margin: 0 0 4px; }
+.stats-period { margin: 16px 0 4px; }
 
 /* Valeur du stock en ce moment, dans le bandeau vert : le montant en grand, le détail par lieu, ce qui est à consommer vite. */
 .stats-stock p { margin: 0; }
@@ -14,15 +14,13 @@
 .stock-places { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
 
 .stock-place {
-  display: grid; grid-template-columns: 20px minmax(0, 1fr); align-items: center; column-gap: 8px; min-width: 0;
-  padding: 8px 12px; border-radius: 14px; background: var(--head-card);
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 2px 8px; min-width: 0;
+  min-height: 42px; padding: 8px 12px; border-radius: 14px; background: var(--head-card);
 }
 
-.stock-place svg { grid-row: span 2; width: 18px; height: 18px; color: var(--head-sub); }
+.stock-place span { min-width: 0; font-size: 14px; color: var(--head-sub); }
 
-.stock-place span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12.5px; color: var(--head-sub); }
-
-.stock-place b { font-size: 16px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.stock-place b { font-size: 14.5px; font-weight: 700; font-variant-numeric: tabular-nums; }
 
 .stock-soon {
   display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; min-height: 48px;
@@ -38,8 +36,6 @@
 
 .stats-stock .hint { margin: 10px 0 0; padding: 0; color: var(--head-sub); }
 
-.stats-period-title { margin-top: 18px; }
-
 /* Filtres : pastilles sur une ligne, comme les lieux de l'écran Stock. */
 .stats-filters { margin: 4px -16px 0; padding: 4px 16px 4px; }
 
@@ -52,30 +48,20 @@
 
 .filter-select[data-active="true"] { background-color: var(--herb-soft); border-color: var(--herb); color: var(--herb-strong); }
 
-/* Résumé : le montant dépensé en grand, puis ce qui est sorti du stock. */
-.stats-summary { background: var(--surface); border-radius: 18px; box-shadow: var(--shadow); padding: 16px 16px 14px; margin: 12px 0; }
+/* Sorti du stock : la barre consommé / jeté, la légende avec les montants, la part jetée. */
+.stats-summary { display: flex; flex-direction: column; gap: 12px; background: var(--surface); border-radius: 20px; box-shadow: var(--shadow); padding: 16px; margin: 12px 0; }
 
-.stats-summary p { margin: 0; }
+.stats-summary p, .stats-summary h2 { margin: 0; }
 
-.stats-spent { display: flex; flex-direction: column; gap: 2px; }
+.stats-summary h2, .months-head h2 { font: 700 17px/1.2 var(--font-round); margin: 0; }
 
-.stats-spent span, .stats-out span { font-size: 14px; font-weight: 600; color: var(--muted); }
+.stats-split { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 12px; }
 
-.stats-spent strong {
-  font: 800 40px/1.05 var(--font-round); letter-spacing: -.02em; font-variant-numeric: tabular-nums;
-}
+.stats-out { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; }
 
-.stats-split { display: flex; justify-content: space-between; gap: 12px; margin: 16px 0 8px; }
+.stats-out b { font-weight: 700; font-variant-numeric: tabular-nums; }
 
-.stats-out { display: flex; flex-direction: column; gap: 1px; }
-
-.stats-out b { font: 700 22px/1.2 var(--font-round); font-variant-numeric: tabular-nums; }
-
-.stats-out.wasted { text-align: right; }
-
-.stats-out span { display: inline-flex; align-items: center; gap: 6px; }
-
-.swatch { width: 10px; height: 10px; border-radius: 3px; background: var(--chart-a); }
+.swatch { width: 10px; height: 10px; border-radius: 3px; background: var(--chart-a); flex: none; }
 
 .stats-out.wasted .swatch { background: var(--chart-b); }
 
@@ -91,7 +77,20 @@
 
 .split-bar i.waste { background: var(--chart-b); }
 
-.stats-summary .stats-share { margin-top: 10px; font-size: 15px; color: var(--muted); }
+.stats-summary .stats-share { font-size: 14px; color: var(--muted); }
+
+/* Carte « Dépensé » : titre et « Tableau », total de la période, détail du mois choisi. */
+.months-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 12px 0 16px; min-height: 44px; }
+
+.pill-btn.outline { background: var(--surface); border: 1px solid var(--line); color: var(--herb); font-size: 13.5px; font-weight: 700; }
+
+.stats-spent { margin: 2px 16px 0; display: flex; align-items: baseline; gap: 6px; }
+
+.stats-spent strong { font: 800 26px/1.15 var(--font-round); letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
+
+.stats-spent span { font-size: 14px; color: var(--muted); }
+
+.stats-months > .stats-spent:last-child { margin-bottom: 14px; }
 
 /* Dépensé par mois : axe gradué (filets fins), une barre par mois, le mois choisi en vert, les autres en gris. */
 .month-plot { position: relative; height: 172px; margin: 4px 12px 10px 4px; }
@@ -122,7 +121,9 @@
 
 .month-col[aria-pressed="true"] small { color: var(--ink); font-weight: 800; }
 
-.month-detail { margin: 0; padding: 12px 16px 4px; font-size: 15px; font-weight: 600; }
+.month-detail { margin: 0; padding: 8px 16px 4px; min-height: 20px; font-size: 13.5px; color: var(--muted); }
+
+.month-detail b { color: var(--ink); font-size: 15px; font-variant-numeric: tabular-nums; }
 
 .month-table { width: calc(100% - 32px); margin: 8px 16px 12px; border-collapse: collapse; font-size: 14px; }
 

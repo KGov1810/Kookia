@@ -1,4 +1,4 @@
-// Kookia — Statistiques : résumé de la période, produits sans prix, produits les plus jetés.
+// Kookia — Statistiques : sorti du stock sur la période, produits sans prix, produits les plus jetés.
 
 import { html, raw } from '../../components/html.js';
 import * as S from '../../services/index.js';
@@ -10,21 +10,26 @@ function wasteSentence(share) {
   return `${percent < 1 ? 'Moins de 1' : percent} % de ce qui est sorti du stock a été jeté.`;
 }
 
-/** Dépensé en grand, puis la sortie du stock : consommé et jeté, avec la barre de partage. */
-export function summaryCard(summary) {
+/** « sur 12 mois », « ce mois-ci », « depuis le début » : la période choisie, en clair. */
+export function periodPhrase(period) {
+  return { mois: 'ce mois-ci', '3mois': 'sur 3 mois', '12mois': 'sur 12 mois', tout: 'depuis le début' }[period] ?? '';
+}
+
+/** Sorti du stock : la barre consommé / jeté, la légende avec les montants, la part jetée. */
+export function summaryCard(summary, period) {
   const share = summary.wasteShare;
   const wastedWidth = share === null ? 0 : Math.max(share > 0 ? 2 : 0, Math.round(share * 1000) / 10);
   return html`
-    <section class="stats-summary" aria-label="Résumé de la période">
-      <p class="stats-spent"><span>Dépensé</span><strong>${S.formatEuro(summary.spent)}</strong></p>
-      <div class="stats-split">
-        <p class="stats-out consumed"><span><i class="swatch" aria-hidden="true"></i>Consommé</span><b>${S.formatEuro(summary.consumed)}</b></p>
-        <p class="stats-out wasted"><span><i class="swatch" aria-hidden="true"></i>Jeté</span><b>${S.formatEuro(summary.wasted)}</b></p>
-      </div>
+    <section class="stats-summary" aria-label="Sorti du stock ${periodPhrase(period)}">
+      <h2>Sorti du stock ${periodPhrase(period)}</h2>
       ${share === null ? '' : html`
         <div class="split-bar" aria-hidden="true">
           ${wastedWidth < 100 ? html`<i style="${raw(`width: ${100 - wastedWidth}%`)}"></i>` : ''}${wastedWidth > 0 ? html`<i class="waste" style="${raw(`width: ${wastedWidth}%`)}"></i>` : ''}
         </div>`}
+      <div class="stats-split">
+        <p class="stats-out consumed"><i class="swatch" aria-hidden="true"></i><span>Consommé</span><b>${S.formatEuro(summary.consumed)}</b></p>
+        <p class="stats-out wasted"><i class="swatch" aria-hidden="true"></i><span>Jeté</span><b>${S.formatEuro(summary.wasted)}</b></p>
+      </div>
       <p class="stats-share">${wasteSentence(share)}</p>
     </section>`;
 }

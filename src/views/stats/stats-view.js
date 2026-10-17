@@ -18,8 +18,7 @@ export const statsView = {
   render() {
     return html`
       <header class="top"><div class="top-row"><h1>Statistiques</h1></div><div id="stats-stock"></div></header>
-      <h2 class="section stats-period-title">Sur la période</h2>
-      <div class="segmented stats-period" id="stats-period" role="group" aria-label="Période"></div>
+      <div class="segmented stats-period" id="stats-period" role="group" aria-label="Période (le stock en haut n'en dépend pas)"></div>
       <div id="stats-body"></div>`;
   },
   mounted() {
@@ -56,9 +55,9 @@ function body() {
   return [
     error,
     filters,
-    summaryCard(summary),
+    summaryCard(summary, ui.stats.period),
+    monthSection(list, all, summary),
     unpricedNote(summary),
-    monthSection(list, all),
     categorySection(list),
     wastedSection(list)
   ];

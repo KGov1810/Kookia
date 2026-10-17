@@ -191,18 +191,18 @@ test('Prix, produits jetés et statistiques', async () => {
   log($('.stock-total strong').textContent === euro(Math.round(stockTotal * 100) / 100), `Valeur du stock : ${$('.stock-total strong').textContent}`);
   const place = (label) => $$('.stock-place').find((p) => p.textContent.includes(label))?.querySelector('b').textContent;
   log(place('Congélateur') === '0,90 €', 'Détail par lieu : congélateur 0,90 € (3 œufs)');
-  log($('.stock-soon').textContent.replace(/\s+/g, ' ').includes('1,60 € à consommer vite (1 produit)'), 'À consommer vite : 1,60 € (la crème)');
+  log($('.stock-soon').textContent.replace(/\s+/g, ' ').includes('1,60 € à consommer vite, sur 1 produit'), 'À consommer vite : 1,60 € (la crème)');
   log(!$('.stock-unpriced'), 'Tous les produits en stock ont un prix : pas de mention « sans prix »');
-  log($('.stats-period-title').textContent === 'Sur la période', 'La période ne concerne que la suite de l\'écran');
+  log($('.stats-summary h2').textContent === 'Sorti du stock sur 12 mois' && $('.stats-spent').textContent.includes('sur 12 mois'), 'La période est rappelée dans les cartes : « Sorti du stock sur 12 mois »');
   // 2 × 1,15 + 3,58 + 2,10 + 1,79 + 20 (mois dernier) = 29,77 ; le riz d'il y a 14 mois n'est pas compté.
   log(spent() === '29,77 €', `Dépensé sur 12 mois : ${spent()}`);
   log($('.stats-out.consumed b').textContent === '13,10 €' && $('.stats-out.wasted b').textContent === '4,50 €', 'Consommé 13,10 € (yaourt, comté, œufs), jeté 4,50 € (yaourts, steak)');
   log(text().includes('26 % de ce qui est sorti du stock a été jeté.'), 'Part jetée : 26 %');
   log(text().includes('Sans prix, non comptés : 1 produit jeté.'), 'Produit sans prix signalé (pain)');
   log($$('.month-col').length === 12 && $('.month-col[aria-pressed="true"]').dataset.value === monthKey(now), '12 mois, le mois en cours sélectionné');
-  log($('.month-detail').textContent === `${monthLabel(monthKey(now), { long: true })} : 9,77 € dépensés et 4,50 € jetés.`, `Détail du mois : ${$('.month-detail').textContent}`);
+  log($('.month-detail').textContent === `9,77 € dépensés en ${monthLabel(monthKey(now), { long: true }).toLowerCase().replace(/ \d{4}$/, '')}, dont 4,50 € jetés`, `Détail du mois : ${$('.month-detail').textContent}`);
   await click($$('.month-col').at(-2));
-  log($('.month-detail').textContent.includes('20,00 € dépensés et 0,00 € jetés'), 'Toucher le mois dernier : 20,00 € dépensés');
+  log($('.month-detail').textContent.startsWith('20,00 € dépensés en') && $('.month-detail').textContent.endsWith('dont 0,00 € jetés'), 'Toucher le mois dernier : 20,00 € dépensés');
   await click('[data-action="stats-table"]');
   const tableRows = $$('.month-table tbody tr');
   log(!$('.month-chart') && tableRows.length === 12 && tableRows[1].textContent.includes('20,00 €'), 'Tableau : les 12 mois en chiffres, le plus récent en premier');

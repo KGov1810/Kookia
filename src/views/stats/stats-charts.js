@@ -4,6 +4,7 @@ import { html, raw } from '../../components/html.js';
 import * as R from '../../data/reference/index.js';
 import * as S from '../../services/index.js';
 import { ui } from '../app/ui-state.js';
+import { periodPhrase } from './stats-summary.js';
 
 /** Largeur d'une barre en % (une petite valeur reste visible). */
 function share(value, max) {
@@ -12,7 +13,14 @@ function share(value, max) {
 }
 
 function monthSentence(row) {
-  return `${S.monthLabel(row.month, { long: true })} : ${S.formatEuro(row.spent)} dépensés et ${S.formatEuro(row.wasted)} jetés`;
+  return `${S.monthLabel(row.month, { long: true })} : ${S.formatEuro(row.spent)} dépensés, dont ${S.formatEuro(row.wasted)} jetés`;
+}
+
+/** « 129,00 € dépensés en octobre, dont 3,00 € jetés » (le montant en gras ; l'année si ce n'est pas celle-ci). */
+function monthDetail(row) {
+  const long = S.monthLabel(row.month, { long: true }).toLowerCase();
+  const month = row.month.startsWith(String(new Date().getFullYear())) ? long.replace(/ \d{4}$/, '') : long;
+  return html`<p class="month-detail" aria-live="polite"><b>${S.formatEuro(row.spent)}</b> dépensés en ${month}, dont ${S.formatEuro(row.wasted)} jetés</p>`;
 }
 
 /** Graduations « rondes » de l'axe : 0, 50, 100, 150 € pour un maximum de 129 €. */
@@ -26,17 +34,20 @@ function niceTicks(max) {
 }
 
 /**
- * Dépensé par mois : une seule série, le mois choisi en vert, les autres en gris. Toucher un mois affiche
- * ses montants (dépensé et jeté) ; « Tableau » donne les chiffres de chaque mois.
+ * Dépensé : le total de la période, puis (sur plusieurs mois) une barre par mois, le mois choisi en vert,
+ * les autres en gris. Toucher un mois affiche ses montants ; « Tableau » donne les chiffres de chaque mois.
  */
-export function monthSection(movements, allMovements) {
-  if (ui.stats.period === 'mois') return '';
+export function monthSection(movements, allMovements, summary) {
+  const total = html`<p class="stats-spent"><strong>${S.formatEuro(summary.spent)}</strong> <span>${periodPhrase(ui.stats.period)}</span></p>`;
+  if (ui.stats.period === 'mois') {
+    return html`<section class="group stats-months"><div class="months-head"><h2>Dépensé ce mois-ci</h2></div>${total}</section>`;
+  }
   const months = S.periodMonths(ui.stats.period, allMovements);
   const rows = S.monthlyTotals(movements, months);
   const ticks = niceTicks(Math.max(0, ...rows.map((r) => r.spent)));
   const top = ticks.at(-1);
   const picked = rows.find((r) => r.month === ui.stats.month) ?? rows.at(-1);
-  const toggle = html`<button class="pill-btn" data-action="stats-table" aria-pressed="${String(ui.stats.table)}">${ui.stats.table ? 'Graphique' : 'Tableau'}</button>`;
+  const toggle = html`<button class="pill-btn outline" data-action="stats-table" aria-pressed="${String(ui.stats.table)}">${ui.stats.table ? 'Graphique' : 'Tableau'}</button>`;
   const chart = html`
     <div class="month-plot">
       ${ticks.map((t) => html`<span class="month-tick" style="${raw(`bottom: calc(26px + ${(t / top) * 100} * (100% - 26px) / 100)`)}" aria-hidden="true"><i>${t ? `${String(t).replace('.', ',')} €` : '0'}</i></span>`)}
@@ -54,9 +65,10 @@ export function monthSection(movements, allMovements) {
       <tbody>${[...rows].reverse().map((row) => html`<tr><th scope="row">${S.monthLabel(row.month, { long: true })}</th><td>${S.formatEuro(row.spent)}</td><td>${S.formatEuro(row.wasted)}</td></tr>`)}</tbody>
     </table>`;
   return html`
-    <div class="section-row"><h2 class="section">Dépensé par mois</h2>${toggle}</div>
     <section class="group stats-months">
-      ${ui.stats.table ? table : html`<p class="month-detail" aria-live="polite">${monthSentence(picked)}.</p>${chart}`}
+      <div class="months-head"><h2>Dépensé par mois</h2>${toggle}</div>
+      ${total}
+      ${ui.stats.table ? table : html`${monthDetail(picked)}${chart}`}
     </section>`;
 }
 
