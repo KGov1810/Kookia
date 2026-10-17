@@ -1,7 +1,7 @@
 {
   "name": "kookia",
   "private": true,
-  "version": "2.21.1",
+  "version": "2.21.2",
   "description": "Kookia : le stock de nourriture de la maison, partagé à deux.",
   "type": "module",
   "scripts": {

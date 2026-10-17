@@ -1,12 +1,21 @@
 // Kookia — Vues dérivées de l'état (tris, filtres, compteurs).
 
 import { splitItemName } from '../../services/quantities/quantities.js';
+import { hasDate } from '../../services/dates/dates.js';
+import { ageInDays } from '../../services/stock/stock-dates.js';
 import { stockStatus } from '../../services/stock/stock-status.js';
 import { nameMatchScore } from '../../services/text/text.js';
 import { state } from './state.js';
 
+/**
+ * Produits du plus urgent au moins urgent : d'abord ceux qui ont une date, celle qui arrive le plus tôt en tête ;
+ * puis ceux sans date, les plus anciens d'abord (le plus grand « jours ici »).
+ */
 export function sortedProducts() {
-  return [...state.products].sort((a, b) => a.expiry.localeCompare(b.expiry) || a.name.localeCompare(b.name, 'fr'));
+  const undated = (p) => Number(!hasDate(p.expiry));
+  return [...state.products].sort((a, b) => undated(a) - undated(b)
+    || (undated(a) ? ageInDays(b) - ageInDays(a) : a.expiry.localeCompare(b.expiry))
+    || a.name.localeCompare(b.name, 'fr'));
 }
 
 export function productStatus(product) {
