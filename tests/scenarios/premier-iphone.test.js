@@ -78,7 +78,7 @@ test("Premier iPhone : connexion, foyer, stock, courses, recettes", async () => 
   await click($$('.product-main').find((b) => b.textContent.includes('Pâtes')), 400);
   const body = sheet().querySelector('.sheet-body');
   const tiles = [...sheet().querySelectorAll('.action-tiles .tile')].map((t) => t.textContent.trim());
-  log(sheet().querySelector('.sheet-head h2').textContent.includes('Pâtes') && body.firstElementChild.classList.contains('product-actions'), 'Fiche d\'un produit en stock : son nom en titre, les actions en premier');
+  log(sheet().querySelector('.product-hero h1').textContent.includes('Pâtes') && body.firstElementChild.classList.contains('product-actions'), 'Fiche d\'un produit en stock : son nom en titre, les actions en premier');
   log(tiles.join(' | ') === 'Consommé | Congeler | Jeté' && sheet().querySelectorAll('[data-action="set-remaining"]').length === 3, `Gros boutons (${tiles.join(', ')}) et ¾ ½ ¼ directement`);
   log(!sheet().querySelector('[data-action="scan"]') && !sheet().querySelector('[data-action="photo"]') && sheet().textContent.includes('Ajouté par'), 'Pas de code-barres ni de photo pour un produit déjà en stock ; « Ajouté par » en bas');
   await click(sheet().querySelector('[data-action="to-shopping"]'));

@@ -15,6 +15,7 @@
 @import './components/sheet.css';
 @import './components/toast.css';
 @import './views/product-editor.css';
+@import './views/product-sheet.css';
 @import './views/stock.css';
 @import './views/produce.css';
 @import './views/recipes.css';

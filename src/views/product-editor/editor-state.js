@@ -1,11 +1,13 @@
 // Kookia — Fiche produit : état (produit en cours, lieu, type de date).
 
+import { fmt } from '../../components/html.js';
 import * as R from '../../data/reference/index.js';
 import * as store from '../../data/store/index.js';
 import { state } from '../../data/store/state.js';
 import * as S from '../../services/index.js';
 import { ui } from '../app/ui-state.js';
 import { applyKnownPrice } from './editor-price.js';
+import { draftStatus } from './editor-top-actions.js';
 
 /** Prépare le produit affiché et l'état de la fiche (ajout ou modification). */
 export function createEditorContext({ product = null, draft = null, mode = 'manual', filePromise = null, shoppingItemId = null, barcode = '' } = {}) {
@@ -72,7 +74,12 @@ export function applyReadDate(ctx, date) {
 /** Mise à jour du statut sans tout redessiner (le sélecteur de date d'iOS resterait sinon bloqué). */
 export function refreshStatus(ctx) {
   const { p } = ctx;
-  const status = ctx.sheet.panel.querySelector('.expiry-status');
+  const card = ctx.sheet.panel.querySelector('.status-card');
+  if (card) {
+    card.outerHTML = fmt(draftStatus(ctx)); // produit en stock : la carte d'état du haut suit la date
+    return;
+  }
+  const status = ctx.sheet.panel.querySelector('#date-section .expiry-status');
   if (status) {
     status.className = `expiry-status ${S.stockStatus(p, state.settings.alertDays)}`;
     status.textContent = S.stockLabel(p);

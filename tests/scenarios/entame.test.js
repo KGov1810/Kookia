@@ -40,7 +40,7 @@ test('Produits entamés', async () => {
   console.log('\n— Entamer un produit —');
   await openFiche('Lait UHT');
   const choices = [...sheet().querySelectorAll('[data-action="set-remaining"]')];
-  log(choices.map((b) => b.textContent).join(' ') === '¾ ½ ¼' && sheet().textContent.includes('Entamé ? Il en reste :'), 'Choix ¾ · ½ · ¼ visibles d\'emblée, en haut de la fiche');
+  log(choices.map((b) => b.textContent).join(' ') === '¾ ½ ¼' && sheet().textContent.includes('Entamé ? Il en reste'), 'Choix ¾ · ½ · ¼ visibles d\'emblée, en haut de la fiche');
   log(sheet().textContent.includes('À l\'ouverture : à finir avant le') && sheet().textContent.includes('rangé au frigo'), 'Annonce : date après ouverture et rangement au frigo');
   await click(choices.find((b) => b.textContent === '½'), 350);
   const lait = () => one('Lait UHT');

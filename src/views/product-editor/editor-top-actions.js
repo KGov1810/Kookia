@@ -1,22 +1,82 @@
-// Kookia — Fiche d'un produit en stock : les gestes du quotidien en haut (Consommé, Congeler, Jeté, Entamé, courses).
+// Kookia — Fiche d'un produit en stock : le produit en grand et son état, puis les gestes du quotidien
+// (Consommé, Congeler, Jeté, Entamé, courses).
 
 import { html } from '../../components/html.js';
 import { I } from '../../components/icons.js';
+import { dayCounter, thumb } from '../../components/product-visuals.js';
+import * as R from '../../data/reference/index.js';
 import * as store from '../../data/store/index.js';
 import { state } from '../../data/store/state.js';
 import * as S from '../../services/index.js';
 import { openingRow } from './editor-opening.js';
 import { unitsBox, unitsTile } from './editor-units.js';
 
+const DATE_LINE = { dlc: 'À consommer jusqu\'au', ddm: 'De préférence avant le', estimee: 'Estimé jusqu\'au' };
+
+/** Vignette, nom en grand et étiquettes : lieu, catégorie, contenance. */
+function hero(product) {
+  const chips = [R.locationOf(product.location).label, R.category(product.category).label, S.quantityLabel(product)].filter(Boolean);
+  return html`
+    <div class="product-hero">
+      ${thumb(product)}
+      <div class="hero-text">
+        <h1>${product.name}</h1>
+        <p class="hero-chips">${chips.map((chip) => html`<span>${chip}</span>`)}</p>
+      </div>
+    </div>`;
+}
+
+function openedText(product) {
+  const remaining = S.remainingOf(product);
+  if (remaining >= 1) return '';
+  const when = product.openedAt ? ` le ${S.formatDate(product.openedAt, { day: 'numeric', month: 'short' })}` : '';
+  return `Entamé${when}, il en reste ${S.remainingLabel(remaining)}`;
+}
+
+/**
+ * Carte d'état : la date en toutes lettres (« À finir avant le jeudi 22 octobre »), le compteur de jours,
+ * et dessous ce qu'il faut savoir (entamé, « souvent encore bon »…). Sans date : « Lire la date ».
+ */
+function statusCard(product) {
+  const status = S.stockStatus(product, state.settings.alertDays);
+  if (status === 'pending') {
+    return html`
+      <div class="status-card read-date">
+        <div class="status-text"><p class="status-title">Pas encore de date</p><small class="expiry-status pending">Elle est sur l'emballage.</small></div>
+        <button class="pill-btn strong" data-action="date-photo">${I.camera}Lire la date</button>
+      </div>`;
+  }
+  const kind = S.dateKindOf(product);
+  const opened = openedText(product);
+  const dated = DATE_LINE[kind] && S.hasDate(product.expiry);
+  const title = dated
+    ? `${opened && kind !== 'ddm' ? 'À finir avant le' : DATE_LINE[kind]} ${S.formatDate(product.expiry, { weekday: 'long', day: 'numeric', month: 'long' })}`
+    : S.stockLabel(product);
+  const detail = dated ? opened || S.stockLabel(product) : opened;
+  return html`
+    <div class="status-card">
+      <div class="status-text">
+        <p class="status-title ${dated ? '' : `expiry-status ${status}`}">${title}</p>
+        ${dated ? html`<small class="expiry-status ${status}">${detail}</small>` : detail ? html`<small>${detail}</small>` : ''}
+      </div>
+      ${dayCounter(product)}
+    </div>`;
+}
+
+/** Carte d'état du produit en stock, avec la date en cours de saisie dans la fiche. */
+export function draftStatus(ctx) {
+  const product = store.productById(ctx.p.id) ?? ctx.p;
+  const { expiry, dateKind, frozenAt } = ctx.p;
+  return statusCard({ ...product, expiry, dateKind, frozenAt });
+}
+
 export function topActions(ctx) {
   const product = store.productById(ctx.p.id) ?? ctx.p;
   const canFreeze = !['congelateur', 'placard'].includes(product.location);
-  const status = S.stockStatus(product, state.settings.alertDays);
   return html`
-    <section class="group product-actions">
-      <p class="action-status expiry-status ${status}">${[S.quantityLabel(product), S.stockLabel(product)].filter(Boolean).join(' · ')}</p>
-      ${status === 'pending' ? html`<div class="read-date"><span>Pas encore de date : elle est sur l'emballage.</span>
-        <button class="pill-btn strong" data-action="date-photo">${I.camera}Lire la date</button></div>` : ''}
+    <div class="product-actions">
+      ${hero(product)}
+      ${draftStatus(ctx)}
       <div class="action-tiles">
         ${unitsTile(ctx, 'consume')}
         ${canFreeze ? unitsTile(ctx, 'freeze') : ''}
@@ -24,7 +84,7 @@ export function topActions(ctx) {
       </div>
       ${unitsBox(ctx)}
       ${openingRow(ctx)}
-      <button class="row-button" data-action="to-shopping">${I.cart}Ajouter à la liste de courses</button>
-    </section>
+      <button class="row-card" data-action="to-shopping">${I.cart}<span>Remettre sur la liste de courses</span>${I.chevron}</button>
+    </div>
     <h2 class="section">Modifier</h2>`;
 }

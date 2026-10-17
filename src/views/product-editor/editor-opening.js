@@ -1,7 +1,6 @@
 // Kookia — Fiche produit : « Entamé, il en reste ¾ · ½ · ¼ », en un toucher, en haut de la fiche.
 
 import { html, raw } from '../../components/html.js';
-import { I } from '../../components/icons.js';
 import { toast } from '../../components/toast.js';
 import * as R from '../../data/reference/index.js';
 import * as store from '../../data/store/index.js';
@@ -23,20 +22,20 @@ function changesText(product) {
   ].filter(Boolean).join(' · ');
 }
 
-/** Ligne « Entamé, il en reste » + ¾ ½ ¼ (les parts déjà dépassées sont grisées), et ce que l'ouverture change. */
+/**
+ * Carte « Il en reste ¾ ½ ¼ » (les parts déjà dépassées sont grisées), et ce que l'ouverture change.
+ * La date d'ouverture et la part restante sont rappelées dans la carte d'état, au-dessus.
+ */
 export function openingRow(ctx) {
   const product = stored(ctx);
   const remaining = S.remainingOf(product);
   const opened = remaining < 1;
   const count = product.count ?? 1;
-  const label = opened
-    ? `Entamé${product.openedAt ? ` le ${S.formatDate(product.openedAt, { day: 'numeric', month: 'short' })}` : ''}, il en reste ${S.remainingLabel(remaining)}`
-    : 'Entamé ? Il en reste :';
   const effect = changesText(product);
   const note = [count > 1 && !opened ? `1 sur ${count}, mis à part` : '', effect ? `à l'ouverture : ${effect}` : ''].filter(Boolean).join(' · ');
   return html`
     <div class="opening-row" role="group" aria-label="Combien en reste-t-il ?">
-      <span class="opening-label">${I.gauge}${label}</span>
+      <span class="opening-label">${opened ? 'Il en reste' : 'Entamé ? Il en reste'}</span>
       <span class="opening-choices">
         ${R.REMAINING_CHOICES.map((value) => html`<button class="chip" data-action="set-remaining" data-value="${value}" ${value >= remaining ? raw('disabled') : ''} aria-pressed="${String(opened && Math.abs(value - remaining) < 0.02)}" aria-label="Il en reste ${S.remainingLabel(value)}">${S.remainingLabel(value)}</button>`)}
       </span>

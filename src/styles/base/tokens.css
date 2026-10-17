@@ -47,6 +47,7 @@
   --tint-pink: #F8E3DC;
   --tint-blue: #E9F1F7;
   --tint-cream: #FBF0D6;
+  --freeze: #2F6E8F;
   --chart-a: #0E8A68;
   --chart-b: #C8432B;
   --chart-idle: #D3DBD7;
@@ -107,6 +108,7 @@
     --tint-pink: #3A2A27;
     --tint-blue: #232E35;
     --tint-cream: #35301F;
+    --freeze: #8CC4E0;
     --chart-a: #22A47E;
     --chart-b: #E8604A;
     --chart-idle: #3A3F3D;
@@ -156,6 +158,7 @@
   --tint-pink: #3A2A27;
   --tint-blue: #232E35;
   --tint-cream: #35301F;
+  --freeze: #8CC4E0;
   --chart-a: #22A47E;
   --chart-b: #E8604A;
   --chart-idle: #3A3F3D;
