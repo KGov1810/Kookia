@@ -105,7 +105,7 @@ test('Planning de la semaine', async () => {
   log(!slots().some((s) => s.day === 8), 'Repas non demandé (J9) ignoré');
   log(docs('recettes').filter((r) => r.title !== 'Omelette au jambon').length === 6 && docs('historique').some((h) => h.action === 'planning' && h.name === '8 repas'), '6 recettes enregistrées ; historique « a planifié la semaine »');
   log($('.note.ok')?.textContent.includes('7 repas planifiés ; 1 repas sans recette, à compléter'), 'Message : 7 planifiés, 1 à compléter');
-  log($('.week-head').textContent.includes('Le poulet et la crème partent en premier') && $$('.week-slot').length === 8 && $('.week-batch')?.textContent.includes('Riz cantonais'), 'Stratégie, 8 repas, carte batch cooking');
+  log($('.week-head').textContent.includes('Le poulet et la crème partent en premier') && $$('.week-slot').length === 8 && $('.week-batch')?.textContent.toLowerCase().includes('avance riz cantonais'), 'Stratégie, 8 repas, carte batch cooking');
   log($$('.week-slot.leftovers').length === 1 && $('.week-slot.leftovers').textContent.includes('Restes : Poulet à la crème') && $('.week-slot.missing'), 'Ligne « Restes : Poulet à la crème » et repas vide');
   log($('h2.section.today')?.textContent.includes("Aujourd'hui"), 'Aujourd\'hui mis en avant');
 
@@ -122,7 +122,7 @@ test('Planning de la semaine', async () => {
   await click(sheet().querySelector('[data-action="cooked"]'), 80);
   log(slots()[2].done && !docs('produits').some((p) => p.name === 'Jambon blanc' && p.count === 1 && !p.remaining), 'Repas coché, stock mis à jour');
   await click(sheet().querySelector('[data-action="close"]'), 350);
-  log($('.week-head').textContent.includes('1/8 cuisiné'), 'En-tête : 1/8 cuisiné');
+  log($('.week-head').textContent.includes('1 repas sur 8') && $('.week-progress[aria-valuenow="1"]'), 'En-tête : 1 repas sur 8, barre de progression');
 
   console.log('\n— Changer un repas —');
   await click($('.week-slot.missing [data-action="week-slot"]'), 350);

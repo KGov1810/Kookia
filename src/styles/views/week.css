@@ -14,69 +14,116 @@
 
 .week-busy p { margin: 0; font-weight: 600; }
 
-.week-title { display: flex; flex-direction: column; gap: 2px; padding: 14px 16px 6px; }
+/* En-tête de la semaine : dates, repas cuisinés, stratégie, courses. */
+.week-head { display: flex; flex-direction: column; gap: 10px; padding: 16px; }
 
-.week-title b { font: 700 17px var(--font-round); }
+.week-title { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
 
-.week-title small { color: var(--muted); font-size: 14px; }
+.week-title h2 { margin: 0; font: 800 19px/1.2 var(--font-round); }
 
-.week-head .row-actions { padding-top: 6px; }
+.week-title b { flex: none; font-size: 13px; font-weight: 700; color: var(--herb); }
 
-.week-past { display: block; margin: 14px auto 0; }
+.week-intro { margin: 0; font-size: 13.5px; color: var(--muted); }
+
+.week-progress { height: 8px; border-radius: 4px; background: var(--surface-2); overflow: hidden; }
+
+.week-progress i { display: block; height: 100%; border-radius: 4px; background: var(--herb-fill); transition: width 300ms var(--ease-out); }
+
+.outline-btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; margin-top: 4px; padding: 0 16px;
+  border-radius: 24px; border: 1.5px solid var(--herb); color: var(--herb); font-size: 15px; font-weight: 800;
+  transition: transform 160ms var(--ease-out);
+}
+
+.outline-btn:active { transform: scale(.97); }
+
+.outline-btn svg { width: 20px; height: 20px; }
+
+.outline-btn i { font-style: normal; font-weight: 700; background: var(--herb-fill); color: var(--on-accent); border-radius: 999px; padding: 1px 7px; font-size: 13px; }
+
+.week-head .link { align-self: center; min-height: 40px; font-size: 14px; font-weight: 700; }
+
+.week-past { display: flex; align-items: center; gap: 6px; margin: 12px auto 0; font-weight: 700; font-size: 14px; }
+
+.week-past svg { width: 16px; height: 16px; transform: rotate(90deg); transition: transform 200ms var(--ease-out); }
+
+.week-past[aria-expanded="true"] svg { transform: rotate(-90deg); }
 
 .week-new { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; margin-top: 16px; }
 
 .week-new svg { width: 18px; height: 18px; }
 
-.week-head .secondary i { font-style: normal; font-weight: 700; background: var(--herb-fill); color: var(--on-accent); border-radius: 999px; padding: 1px 7px; font-size: 13px; }
+/* Jours : le titre, et « Aujourd'hui » en pastille mangue. */
+h2.section.week-day-title { font-size: 18px; margin: 18px 4px 8px; align-items: center; }
 
-h2.section.today { color: var(--herb-strong); }
+.today-badge { padding: 3px 9px; border-radius: 10px; background: var(--cta); color: var(--on-cta); font-size: 12px; font-weight: 800; }
 
-.week-day { gap: 6px; }
+h2.section .today-badge { font: 800 12px/1.2 var(--font); color: var(--on-cta); }
 
+.week-day { gap: 8px; }
+
+/* Un repas : le moment, la vignette du plat, le titre et ce qu'il faut savoir, « changer ». */
 .week-slot {
-  display: flex; align-items: center; gap: 10px; padding: 8px 4px 8px 12px;
-  background: var(--surface); border-radius: 16px; box-shadow: var(--shadow);
+  display: flex; flex-direction: column; gap: 10px; padding: 10px 6px 10px 12px;
+  background: var(--surface); border-radius: 18px; box-shadow: var(--shadow);
 }
 
-.week-slot .meal {
-  flex: none; width: 46px; font-size: 13px; font-weight: 700; color: var(--herb);
-}
+.slot-line { display: flex; align-items: center; gap: 12px; }
 
-.week-recipe { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; text-align: left; padding: 4px 0; }
+.week-slot .meal { flex: none; width: 40px; font-size: 13px; font-weight: 700; color: var(--herb); }
 
-.week-recipe b { font: 650 16px/1.25 var(--font-round); }
+.week-recipe { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; text-align: left; }
 
-.week-recipe small { color: var(--muted); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.week-recipe .recipe-thumb { width: 48px; height: 48px; border-radius: 14px; font-size: 27px; }
 
-.week-slot.leftovers .week-recipe b { color: var(--muted); font-weight: 600; }
+.recipe-thumb.empty { background: var(--surface-2); color: var(--muted); font: 800 20px var(--font-round); }
+
+.slot-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+
+.slot-text b { font-size: 15px; font-weight: 700; line-height: 1.25; }
+
+.slot-text small { color: var(--muted); font-size: 12.5px; }
+
+.week-slot.leftovers { background: var(--bg); border: 1.5px dashed var(--circle); box-shadow: none; }
 
 .week-slot.done { background: color-mix(in srgb, var(--herb-soft) 55%, var(--surface)); }
 
-.week-slot.done .week-recipe b { color: var(--herb-strong); }
+.week-slot.done .slot-text b { color: var(--herb-strong); }
 
-.week-slot.missing .week-recipe b { color: var(--apricot); }
+.week-slot.missing .slot-text b { color: var(--apricot); }
 
 .cooked { color: var(--herb); display: inline-flex; vertical-align: -2px; margin-right: 4px; }
 
 .cooked svg { width: 17px; height: 17px; stroke-width: 3; }
 
-.week-change { flex: none; color: var(--herb); }
+.week-change { flex: none; color: var(--muted); }
 
 .week-change svg { width: 20px; height: 20px; }
 
 .week-change .spinner { width: 18px; height: 18px; }
 
-.week-batch {
-  display: flex; flex-direction: column; gap: 2px; width: 100%; text-align: left; padding: 10px 14px; border-radius: 16px;
-  background: var(--apricot-soft); border: 1.5px solid color-mix(in srgb, var(--apricot) 35%, transparent);
+/* Repas du jour : « Je l'ai cuisiné, retirer 3 produits ». */
+.slot-cooked {
+  display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; margin: 0 6px 2px 52px;
+  border-radius: 22px; background: var(--herb-fill); color: var(--on-accent); font-size: 14.5px; font-weight: 800;
+  transition: transform 160ms var(--ease-out);
 }
 
-.week-batch b { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; }
+.slot-cooked:active { transform: scale(.97); }
 
-.week-batch b svg { width: 18px; height: 18px; color: var(--apricot); }
+.slot-cooked svg { width: 18px; height: 18px; }
 
-.week-batch small { color: var(--muted); font-size: 13px; }
+/* Séance de batch cooking. */
+.week-batch {
+  display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 12px 14px; border-radius: 18px;
+  background: var(--apricot-soft); color: var(--ink);
+}
+
+.batch-icon { width: 44px; height: 44px; flex: none; display: grid; place-items: center; border-radius: 14px; background: var(--surface); color: var(--apricot); }
+
+.batch-icon svg { width: 22px; height: 22px; }
+
+.week-batch small { color: var(--apricot); font-size: 13px; }
 
 .planned-on { display: inline-flex; align-items: center; gap: 6px; margin: 0 0 6px; color: var(--herb-strong); font-weight: 650; font-size: 14px; }
 
@@ -98,8 +145,3 @@ h2.section.today { color: var(--herb-strong); }
 .week-grid-row > span { font-weight: 600; text-transform: capitalize; }
 
 .week-grid-row .chip { justify-content: center; min-height: 38px; }
-
-/* Repas du jour : « Je l'ai cuisiné » directement sur la ligne. */
-.week-slot:has(.slot-cooked) { flex-wrap: wrap; }
-
-.week-slot .slot-cooked { flex: 1 0 calc(100% - 64px); justify-content: center; margin: 2px 8px 4px 52px; }
