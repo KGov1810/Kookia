@@ -32,7 +32,7 @@ function cookedButton(recipe) {
 }
 
 function slotRow(plan, slot, index) {
-  const recipe = state.recipes.find((r) => r.id === slot.recipeId);
+  const recipe = S.localRecipe(state.recipes.find((r) => r.id === slot.recipeId));
   const busy = ui.week.slotBusy === index;
   const change = html`<button class="icon-btn week-change" data-action="week-slot" data-index="${index}" aria-label="${t('week.change', { slot: slotTitle(plan, slot) })}" ${busy ? raw('disabled') : ''}>${busy ? html`<span class="spinner"></span>` : I.refresh}</button>`;
   if (!recipe) {
@@ -54,7 +54,7 @@ function slotRow(plan, slot, index) {
 }
 
 function batchCard(plan) {
-  const titles = plan.batch.recipeIds.map((id) => state.recipes.find((r) => r.id === id)?.title.toLowerCase()).filter(Boolean);
+  const titles = plan.batch.recipeIds.map((id) => S.localRecipe(state.recipes.find((r) => r.id === id))?.title.toLowerCase()).filter(Boolean);
   return html`
     <button class="week-batch" data-action="week-batch">
       <span class="batch-icon" aria-hidden="true">${I.box}</span>
@@ -78,7 +78,7 @@ function weekHead(plan) {
   const total = plan.slots.length;
   const toBuy = plan.shopping.filter((i) => !i.added).length;
   const missing = missingWeekItems(plan).length;
-  const intro = [t('week.forPeople', { n: plan.servings }), plan.strategy].filter(Boolean).join(' ');
+  const intro = [t('week.forPeople', { n: plan.servings }), S.localPlan(plan).strategy].filter(Boolean).join(' ');
   return html`
     <section class="group week-head">
       <div class="week-title"><h2>${S.weekRangeLabel(plan.start)}</h2><b>${t('week.mealsDone', { n: cooked, total })}</b></div>

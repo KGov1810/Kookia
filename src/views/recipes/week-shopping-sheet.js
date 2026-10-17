@@ -12,12 +12,12 @@ import * as S from '../../services/index.js';
 /** Déjà dans la liste de courses (même produit, poids compris dans le nom ou non) ? */
 function onList(item) {
   const base = S.splitItemName(item.name).base;
-  return state.shopping.some((s) => !s.checked && S.splitItemName(s.name).base.localeCompare(base, 'fr', { sensitivity: 'base' }) === 0);
+  return state.shopping.some((s) => !s.checked && S.splitItemName(s.name).base.localeCompare(base, S.localeTag(), { sensitivity: 'base' }) === 0);
 }
 
 /** Articles de la semaine à ajouter : ni déjà ajoutés, ni déjà dans la liste (indices dans plan.shopping). */
 export function missingWeekItems(plan = state.plan) {
-  return (plan?.shopping ?? []).map((item, i) => (!item.added && !onList(item) ? i : -1)).filter((i) => i >= 0);
+  return (S.localPlan(plan)?.shopping ?? []).map((item, i) => (!item.added && !onList(item) ? i : -1)).filter((i) => i >= 0);
 }
 
 /** « Ajouter les 4 manquants aux courses » : sans passer par la liste détaillée. */
@@ -36,7 +36,7 @@ export function openWeekShopping() {
   const sheet = openSheet({
     tall: true,
     render: () => {
-      const items = state.plan?.shopping ?? [];
+      const items = S.localPlan(state.plan)?.shopping ?? [];
       return html`
         <header class="sheet-head">
           <button class="link" data-action="close">${t('common.close')}</button>

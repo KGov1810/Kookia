@@ -12,6 +12,7 @@ import { state } from '../../data/store/state.js';
 import { t } from '../../services/i18n/i18n.js';
 import * as S from '../../services/index.js';
 import { cookRecipe } from './recipe-cooking.js';
+import { translateIfNeeded, translationNote } from './recipe-translation.js';
 
 function recipeShareText(recipe, servings = recipe.servings) {
   const factor = servings / (recipe.servings || servings);
@@ -86,9 +87,11 @@ export function openRecipe(id) {
       }
     }
   });
+  // Pas encore dans la langue de cet iPhone : Claude la traduit (bandeau pendant la traduction).
+  translateIfNeeded(id, () => sheet.isOpen && sheet.update());
 
   function findRecipe() {
-    return state.recipes.find((r) => r.id === id) ?? null;
+    return S.localRecipe(state.recipes.find((r) => r.id === id)) ?? null; // textes dans la langue de l'iPhone
   }
 
   function render() {
@@ -110,6 +113,7 @@ export function openRecipe(id) {
         <button class="link strong" data-action="close">${t('common.close')}</button>
       </header>
       <div class="sheet-body">
+        ${translationNote(recipe)}
         <div class="recipe-hero">
           ${planned(recipe) ? html`<p class="planned-on">${I.calendar}${t('detail.onMenu', { when: planned(recipe) })}</p>` : ''}
           <h2>${recipe.title}</h2>

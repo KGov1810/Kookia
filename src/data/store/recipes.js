@@ -3,6 +3,7 @@
 import { deleteDoc, updateDoc, writeBatch } from 'firebase/firestore';
 import { scaleIngredient } from '../../services/quantities/portions.js';
 import { splitItemName } from '../../services/quantities/quantities.js';
+import { localRecipe } from '../../services/recipes/localize.js';
 import { matchesFilters, maxPurchases } from '../../services/recipes/recipe-filters.js';
 import { resolveIngredient } from '../../services/stock/matching.js';
 import { stockAmount } from '../../services/stock/opened.js';
@@ -11,7 +12,7 @@ import { db } from './connection.js';
 import { countName, logChange } from './history.js';
 import { productStatus } from './selectors.js';
 import { addShoppingItem } from './shopping.js';
-import { state } from './state.js';
+import { emit, state } from './state.js';
 import { canWrite, ref, write } from './writes.js';
 
 export function saveRecipes(recipes, { log = true } = {}) {
@@ -34,6 +35,15 @@ export function toggleFavorite(id) {
   if (!recipe || !canWrite()) return;
   logChange({ scope: 'recettes', action: recipe.favorite ? 'favori-retire' : 'favori', name: recipe.title, itemId: id });
   write(updateDoc(ref('recettes', id), { favorite: !recipe.favorite }));
+}
+
+/** Traduction d'une recette dans une langue du foyer (faite à l'ouverture), gardée pour les deux iPhone. */
+export function saveRecipeTranslation(id, lang, translation) {
+  const recipe = state.recipes.find((r) => r.id === id);
+  if (!recipe || !translation || !canWrite()) return;
+  recipe.translations = { ...(recipe.translations ?? {}), [lang]: translation }; // affichage immédiat
+  write(updateDoc(ref('recettes', id), { [`translations.${lang}`]: translation }));
+  emit('recipes');
 }
 
 export function deleteRecipe(id) {
@@ -88,10 +98,11 @@ export function rememberRecipeLinks(products) {
  * inFridge : produits du frigo utilisés (sans doublon) ; missing : ingrédients à se procurer.
  */
 export function recipeAvailability(recipe, priorityIds = new Set()) {
-  const rows = recipe.ingredients.map((ingredient) => {
+  // Ingrédients dans la langue de l'iPhone : comparés à la liste de courses, ajoutés aux courses dans cette langue.
+  const rows = localRecipe(recipe).ingredients.map((ingredient) => {
     const match = resolveIngredient(ingredient, state.products);
     const inShopping = !match && ingredient.source !== 'placard' && state.shopping.some(
-      (item) => splitItemName(item.name).base.localeCompare(ingredient.name, 'fr', { sensitivity: 'base' }) === 0
+      (item) => splitItemName(item.name).base.localeCompare(ingredient.name, undefined, { sensitivity: 'base' }) === 0
     );
     return { ingredient, product: match?.product ?? null, via: match?.via ?? null, inShopping };
   });

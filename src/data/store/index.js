@@ -5,6 +5,7 @@ export * from './errors.js';
 export * from './history.js';
 export * from './household-codes.js';
 export * from './household.js';
+export * from './languages.js';
 export * from './mappers.js';
 export * from './placements.js';
 export * from './movements.js';

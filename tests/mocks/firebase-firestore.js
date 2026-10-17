@@ -64,11 +64,22 @@ export async function setDoc(ref, data, options) {
   globalThis.__db.docs.set(ref.path, options?.merge && prev ? deepMerge(prev, data) : { ...data });
   notify(ref.path);
 }
+// Comme le vrai Firestore : « translations.en » modifie un champ à l'intérieur d'une map.
+function applyUpdate(prev, data) {
+  const next = { ...prev };
+  for (const [key, value] of Object.entries(data)) {
+    const parts = key.split('.');
+    let target = next;
+    parts.slice(0, -1).forEach((part) => { target[part] = { ...(target[part] ?? {}) }; target = target[part]; });
+    target[parts.at(-1)] = value;
+  }
+  return next;
+}
 export async function updateDoc(ref, data) {
   check(data);
   const prev = globalThis.__db.docs.get(ref.path);
   if (!prev) throw notFound();
-  globalThis.__db.docs.set(ref.path, { ...prev, ...data });
+  globalThis.__db.docs.set(ref.path, applyUpdate(prev, data));
   notify(ref.path);
 }
 export async function deleteDoc(ref) {
@@ -95,7 +106,7 @@ export function writeBatch() {
     set(ref, data) { check(data); ops.push(() => globalThis.__db.docs.set(ref.path, { ...data })); },
     update(ref, data) { check(data); ops.push(() => {
       const prev = globalThis.__db.docs.get(ref.path); if (!prev) throw notFound();
-      globalThis.__db.docs.set(ref.path, { ...prev, ...data }); }); },
+      globalThis.__db.docs.set(ref.path, applyUpdate(prev, data)); }); },
     delete(ref) { ops.push(() => globalThis.__db.docs.delete(ref.path)); },
     async commit() { ops.forEach((o) => o()); globalThis.__db.writes++;
       for (const l of globalThis.__db.listeners) fire(l); }

@@ -9,29 +9,30 @@ import { I } from './icons.js';
 import { dayCounter } from './product-visuals.js';
 
 // Vignette d'une recette : l'emoji du plat, d'après les mots du titre (le premier qui correspond), et sa teinte.
+// Mots en français, puis en anglais, espagnol et portugais (recettes écrites dans la langue de l'iPhone).
 const DISHES = [
-  ['soupe|veloute|potage|bouillon|minestrone|gaspacho', '🥣', 'cream'],
-  ['salade|taboule|bowl', '🥗', 'green'],
+  ['soupe|veloute|potage|bouillon|minestrone|gaspacho|soup|sopa|caldo|crema de', '🥣', 'cream'],
+  ['salade|taboule|bowl|salad|ensalada|salada', '🥗', 'green'],
   ['pizza', '🍕', 'cream'],
-  ['quiche|tarte|tourte|feuillete', '🥧', 'cream'],
-  ['burger', '🍔', 'cream'],
-  ['wrap|tacos|fajita|burrito|quesadilla', '🌮', 'cream'],
-  ['sandwich|croque|panini|tartine|bruschetta', '🥪', 'cream'],
+  ['quiche|tarte|tourte|feuillete|pie|tart|tarta|empanada', '🥧', 'cream'],
+  ['burger|hamburguesa|hamburguer', '🍔', 'cream'],
+  ['wrap|tacos|fajita|burrito|quesadilla|enchilada', '🌮', 'cream'],
+  ['sandwich|croque|panini|tartine|bruschetta|toast|tostada', '🥪', 'cream'],
   ['sushi|maki|poke', '🍣', 'blue'],
-  ['nouilles|ramen|pad thai|wok|udon|soba', '🍜', 'cream'],
-  ['pates|penne|spaghetti|tagliatelle|lasagne|macaroni|gnocchi|ravioli|carbonara|bolognaise|fusilli|linguine', '🍝', 'cream'],
+  ['nouilles|ramen|pad thai|wok|udon|soba|noodle|fideos|lamen|yakisoba', '🍜', 'cream'],
+  ['pates|penne|spaghetti|tagliatelle|lasagne|macaroni|gnocchi|ravioli|carbonara|bolognaise|fusilli|linguine|pasta|espagueti|macarrao|lasanha|lasana', '🍝', 'cream'],
   ['risotto|paella', '🍚', 'cream'],
   ['curry|dhal|chili', '🍛', 'cream'],
-  ['tajine|couscous|mijote|ragout|bourguignon|blanquette|daube|pot-au-feu', '🍲', 'cream'],
-  ['gratin|hachis|parmentier|moussaka|tian', '🥘', 'cream'],
-  ['omelette|oeuf|œuf|frittata|shakshuka', '🍳', 'cream'],
-  ['crepe|pancake|gaufre', '🥞', 'cream'],
-  ['gateau|cake|muffin|cookie|brownie|crumble|clafoutis|mousse|compote|flan|fondant', '🍰', 'cream'],
-  ['saumon|poisson|cabillaud|thon|crevette|moules|colin|truite|sardine|maquereau|dorade', '🐟', 'blue'],
-  ['poulet|dinde|volaille|canard', '🍗', 'pink'],
-  ['boeuf|bœuf|steak|porc|veau|agneau|saucisse|jambon|lardons|boulettes|filet mignon', '🥩', 'pink'],
-  ['riz', '🍚', 'cream'],
-  ['legume|ratatouille|poelee|courgette|aubergine|brocoli|chou|epinard|haricot|lentille|pois chiche|falafel|tofu', '🥦', 'green']
+  ['tajine|couscous|mijote|ragout|bourguignon|blanquette|daube|pot-au-feu|stew|guiso|estofado|ensopado|feijoada|cozido|moqueca', '🍲', 'cream'],
+  ['gratin|hachis|parmentier|moussaka|tian|casserole|gratinado|escondidinho', '🥘', 'cream'],
+  ['omelette|oeuf|œuf|frittata|shakshuka|omelet|egg|huevo|ovo|omelete', '🍳', 'cream'],
+  ['crepe|pancake|gaufre|waffle|panqueca|hotcake', '🥞', 'cream'],
+  ['gateau|cake|muffin|cookie|brownie|crumble|clafoutis|mousse|compote|flan|fondant|pastel|bolo|pudim', '🍰', 'cream'],
+  ['saumon|poisson|cabillaud|thon|crevette|moules|colin|truite|sardine|maquereau|dorade|fish|salmon|tuna|cod|shrimp|pescado|atun|bacalao|camaron|peixe|salmao|atum|bacalhau|camarao', '🐟', 'blue'],
+  ['poulet|dinde|volaille|canard|chicken|turkey|duck|pollo|pavo|frango|galinha', '🍗', 'pink'],
+  ['boeuf|bœuf|steak|porc|veau|agneau|saucisse|jambon|lardons|boulettes|filet mignon|beef|pork|lamb|meatball|carne|cerdo|albondiga|picanha|porco|bife|almondega', '🥩', 'pink'],
+  ['riz|rice|arroz', '🍚', 'cream'],
+  ['legume|ratatouille|poelee|courgette|aubergine|brocoli|chou|epinard|haricot|lentille|pois chiche|falafel|tofu|vegetable|veggie|verdura|zucchini|calabacita|abobrinha|broccoli|spinach|espinaca|espinafre|lentil|lenteja|lentilha|bean|frijol|feijao|chickpea|garbanzo', '🥦', 'green']
 ].map(([words, emoji, tint]) => [new RegExp(`\\b(${words})`), emoji, tint]);
 
 export function recipeThumb(recipe) {

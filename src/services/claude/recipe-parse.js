@@ -6,6 +6,7 @@ import { quantityLabel } from '../quantities/quantities.js';
 import { isOpened, remainingLabel, remainingOf } from '../stock/opened.js';
 import { promptStock } from '../stock/stock-status.js';
 import { nameMatchScore } from '../text/text.js';
+import { parseTranslations, splitLanguages } from './languages.js';
 
 /**
  * Lignes « - [P3] Yaourt nature – quantité : 4 × 125 g – produits laitiers – expire dans 2 j »
@@ -29,8 +30,8 @@ export function shoppingLines(shopping) {
   return shopping.map((i) => `- ${i.name}${i.quantity ? ` (${i.quantity})` : ''}${i.checked ? ' – déjà acheté' : ''}`);
 }
 
-/** Recette reçue (outil) → recette de l'app. products : stock décrit ; refs : P1… → id. */
-export function parseRecipe(r, { products, refs, servings, createdAt }) {
+/** Recette reçue (outil) → recette de l'app. products : stock décrit ; refs : P1… → id ; langs : langues du foyer. */
+export function parseRecipe(r, { products, refs, servings, createdAt, langs = ['fr'] }) {
   const ingredients = (r.ingredients ?? []).map((item) => {
     let source = ['stock', 'courses', 'placard', 'a_acheter'].includes(item.source) ? item.source : 'a_acheter';
     const ref = String(item.ref_stock ?? '').replace(/[[\]\s]/g, '').toUpperCase();
@@ -72,6 +73,8 @@ export function parseRecipe(r, { products, refs, servings, createdAt }) {
     ingredients,
     steps: r.etapes ?? [],
     usedProductIds: [...new Set(ingredients.map((x) => x.productId).filter(Boolean))],
+    lang: splitLanguages(langs).base, // langue des textes ; les autres langues du foyer sont dans translations
+    translations: parseTranslations(r.traductions, langs),
     createdAt,
     favorite: false
   };

@@ -27,7 +27,7 @@ export function openSlotSheet(index) {
     render: () => {
       const slot = slotNow();
       if (!slot) return html`<header class="sheet-head"><span></span><h2>${t('slot.title')}</h2><button class="link strong" data-action="close">${t('common.close')}</button></header>`;
-      const recipe = state.recipes.find((r) => r.id === slot.recipeId);
+      const recipe = S.localRecipe(state.recipes.find((r) => r.id === slot.recipeId));
       const plan = state.plan;
       return html`
         <header class="sheet-head">
@@ -39,7 +39,7 @@ export function openSlotSheet(index) {
           ${picking ? html`
             <p class="hint">${t('slot.doableFirst')}</p>
             <div class="list">${pickList(slot.recipeId).map((r) => html`
-              <button class="recipe-card" data-action="pick" data-id="${r.id}"><h3><span>${r.title}</span>${r.favorite ? I.star : ''}</h3>
+              <button class="recipe-card" data-action="pick" data-id="${r.id}"><h3><span>${S.localRecipe(r).title}</span>${r.favorite ? I.star : ''}</h3>
                 <span class="facts"><span>${I.clock}${S.formatMinutes(r.totalMinutes)}</span></span></button>`)}</div>` : html`
             <section class="group">
               ${recipe ? html`<div class="field"><span>${t(slot.leftovers ? 'slot.leftoversOf' : 'slot.onMenu')}</span><b class="slot-current">${recipe.title}</b></div>` : ''}
@@ -82,9 +82,9 @@ export function openBatchSheet() {
   const sheet = openSheet({
     tall: true,
     render: () => {
-      const plan = state.plan;
+      const plan = S.localPlan(state.plan); // étapes du batch dans la langue de l'iPhone
       const batch = plan?.batch;
-      const recipes = (batch?.recipeIds ?? []).map((id) => state.recipes.find((r) => r.id === id)).filter(Boolean);
+      const recipes = (batch?.recipeIds ?? []).map((id) => S.localRecipe(state.recipes.find((r) => r.id === id))).filter(Boolean);
       return html`
         <header class="sheet-head"><span></span><h2>${t('batch.title')}</h2><button class="link strong" data-action="close">${t('common.close')}</button></header>
         <div class="sheet-body">

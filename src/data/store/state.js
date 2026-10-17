@@ -18,6 +18,7 @@ export const state = {
   movementsError: null, // statistiques refusées (règles Firestore pas encore mises à jour)
   prices: {},           // dernier prix payé, par code-barres ou par nom
   placements: {},       // catégorie et rangement corrigés à la main, par code-barres ou par nom
+  languages: {},        // langue de chaque iPhone du foyer (foyers/{code}/prix/langues), par identifiant
   plan: null,           // planning de la semaine (foyers/{code}/prix/semaine), partagé entre les iPhone
   endedPlan: null,      // planning terminé, effacé automatiquement pendant cette session ({ start })
   lastSync: null

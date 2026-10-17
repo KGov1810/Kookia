@@ -2,6 +2,7 @@
 
 import { fmt } from '../../components/html.js';
 import { openSheets } from '../../components/sheet.js';
+import * as store from '../../data/store/index.js';
 import { state } from '../../data/store/state.js';
 import { setLanguage } from '../../services/i18n/i18n.js';
 import { needsOnboarding, renderOnboarding } from '../onboarding/onboarding.js';
@@ -60,6 +61,7 @@ export function showTab(name) {
 
 export function onStoreChange(what) {
   if (what === 'settings' && setLanguage(state.settings.language)) {
+    store.publishLanguage(); // l'autre iPhone le sait : les prochaines recettes seront aussi dans cette langue
     render(); // nouvelle langue : tout l'écran est redessiné
     return;
   }

@@ -2,6 +2,7 @@
 // Les données gardent l'identifiant (ou le nom français) ; Claude reçoit toujours les noms français.
 
 import { category } from '../../data/reference/categories.js';
+import { LANGUAGES } from '../../data/reference/i18n/languages.js';
 import { locationOf } from '../../data/reference/locations.js';
 import { language, localeTag, t } from './i18n.js';
 
@@ -54,6 +55,11 @@ export function difficultyName(id, lang) {
 /** Nom au milieu d'une phrase : en minuscule (« cuisine italienne »), sauf en anglais (« Italian cuisine »). */
 export function inSentence(text, lang = language()) {
   return lang === 'en' ? String(text ?? '') : String(text ?? '').toLocaleLowerCase(localeTag(lang));
+}
+
+/** « Français », « English »… (nom de la langue dans cette langue). */
+export function languageLabel(id) {
+  return LANGUAGES.find((l) => l.id === id)?.label ?? String(id ?? '');
 }
 
 export function capitalize(text) {

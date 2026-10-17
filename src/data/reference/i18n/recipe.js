@@ -27,6 +27,9 @@ export const RECIPE = {
   'detail.share': ['Partager la recette', 'Share the recipe', 'Compartir la receta', 'Compartilhar a receita'],
   'detail.delete': ['Supprimer la recette', 'Delete the recipe', 'Eliminar la receta', 'Excluir a receita'],
   'detail.confirmDelete': ['Supprimer cette recette sur les deux iPhone ?', 'Delete this recipe on both iPhones?', '¿Eliminar esta receta en los dos iPhone?', 'Excluir esta receita nos dois iPhones?'],
+  'detail.translating': ['Claude traduit la recette…', 'Claude is translating the recipe…', 'Claude está traduciendo la receta…', 'O Claude está traduzindo a receita…'],
+  'detail.noKeyTranslate': ['Recette écrite en {language} : avec une clé Claude (Réglages), elle serait traduite.', 'Recipe written in {language}: with a Claude key (Settings), it would be translated.', 'Receta escrita en {language}: con una clave de Claude (Ajustes), se traduciría.', 'Receita escrita em {language}: com uma chave do Claude (Ajustes), ela seria traduzida.'],
+  'detail.translateFailed': ['Traduction impossible pour le moment : {problem}', 'Couldn\'t translate for now: {problem}', 'No se pudo traducir por ahora: {problem}', 'Não foi possível traduzir agora: {problem}'],
   'detail.removes': ['« J\'ai cuisiné » retire une unité de : {names}.', '"I cooked it" removes one unit of: {names}.', '"Ya lo cociné" quita una unidad de: {names}.', '"Já cozinhei" tira uma unidade de: {names}.'],
 
   // Texte partagé

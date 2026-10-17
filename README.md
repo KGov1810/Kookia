@@ -69,11 +69,12 @@ Une app web ne peut pas envoyer de notification une fois fermée. Créez un rapp
 - **Dates estimées** (fruits et légumes, congélation) : ce sont des repères, marqués « ≈ ». Vérifiez l'aspect et l'odeur.
 - **Propositions d'après le nom** (catégorie, produit retrouvé dans une recette) : elles peuvent se tromper ; une correction est retenue.
 - **Statistiques** : elles commencent à leur mise en place. Un produit a un seul prix, le dernier, et une part entamée est estimée au quart près.
+- **Recettes de Claude dans les langues du foyer** : chaque iPhone note sa langue dans le foyer ; Claude écrit les recettes et le planning de la semaine dans toutes ces langues en une fois (un peu plus long et plus cher quand le foyer en a deux), et chaque iPhone les affiche dans la sienne. Une recette qui n'existe pas encore dans la langue de l'iPhone (ancienne recette) est traduite par Claude à son ouverture, puis gardée pour le foyer. Un ancien planning reste dans la langue où il a été préparé.
 - **Ticket et photos** : la photo et la liste de courses sont envoyées à Claude ; la photo n'est pas conservée. Vérifiez les prix lus (remises, produits au poids), les abréviations et les packs (« 16 × 125 g » reste un seul produit).
 - **Open Food Facts** est incomplet, et la lecture de date sans Claude est moins fiable.
 - **Sécurité** : toute personne qui a l'invitation peut voir et modifier vos données.
 - **Une app par iPhone** : utilisez toujours celle de l'écran d'accueil, pas Safari.
-- **Langues** : toute l'app est traduite (français, anglais, espagnol d'Amérique latine, portugais du Brésil), y compris l'accueil et les messages d'erreur. L'historique s'affiche dans la langue de chaque iPhone (les actions notées avant la version 2.25 restent en français). Les noms des produits restent ceux saisis, scannés ou lus (un fruit ou légume choisi dans la liste prend le nom de la langue de l'iPhone), et les recettes de Claude sont encore écrites en français.
+- **Langues** : toute l'app est traduite (français, anglais, espagnol d'Amérique latine, portugais du Brésil), y compris l'accueil et les messages d'erreur. L'historique s'affiche dans la langue de chaque iPhone (les actions notées avant la version 2.25 restent en français). Les noms des produits restent ceux saisis, scannés ou lus (un fruit ou légume choisi dans la liste prend le nom de la langue de l'iPhone) ; une photo ou un ticket donne des noms dans la langue de l'iPhone, et la catégorie, le rangement et la durée après ouverture sont reconnus dans les 4 langues. Les prix restent en euros.
 
 ## Dépannage
 

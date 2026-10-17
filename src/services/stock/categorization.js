@@ -1,16 +1,21 @@
 // Kookia — Catégorie et lieu proposés d'après le nom d'un produit.
 
 import { CATEGORY_IDS, categoryFamily } from '../../data/reference/categories.js';
+import * as WI from '../../data/reference/category-words-intl.js';
 import * as W from '../../data/reference/category-words.js';
+import { FOODS } from '../../data/reference/i18n/foods.js';
 import { PRODUCE } from '../../data/reference/produce.js';
 import { nameMatchScore } from '../text/text.js';
 
-/** Fruit ou légume du catalogue correspondant à un nom (« tomates cerises » → Tomates). */
+/** Noms d'un fruit ou légume du catalogue : français, puis anglais, espagnol et portugais. */
+const produceNames = (item) => [...new Set([item.name, ...(FOODS[`fv.${item.name}`] ?? []).slice(1)])];
+
+/** Fruit ou légume du catalogue correspondant à un nom, dans l'une des 4 langues (« tomates cerises » → Tomates). */
 export function produceFor(name) {
   let best = null;
   let bestScore = 0;
   for (const item of PRODUCE) {
-    const score = nameMatchScore(name, item.name);
+    const score = Math.max(...produceNames(item).map((known) => nameMatchScore(name, known)));
     if (score > bestScore) {
       best = item;
       bestScore = score;
@@ -28,6 +33,7 @@ const PHRASE_BY_FIRST = new Map();
 function normalizeWord(raw) {
   const lower = raw.toLowerCase();
   if (/^p[aâ]tés?$/.test(lower)) return 'pateviande';
+  if (/^th?és?$/.test(lower)) return 'thebev'; // « thé », « té » (≠ « the » anglais)
   const plain = lower.replace(/œ/g, 'oe').replace(/æ/g, 'ae').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   const single = plain.length >= 4 ? plain.replace(/[sx]$/, '') : plain;
   return single.length > 4 && single.endsWith('ee') ? single.slice(0, -1) : single; // surgelée → surgele
@@ -60,16 +66,22 @@ function addWords(map, table) {
 addWords(STRONG, W.STRONG_WORDS);
 addWords(WEAK, W.WEAK_WORDS);
 for (const [id, phrases] of Object.entries(W.PHRASES)) phrases.forEach((text) => addPhrase(categoryTokens(text), id));
+// Fruits et légumes du catalogue (et leurs traductions), puis le vocabulaire des autres langues.
 for (const item of PRODUCE) {
-  const tokens = categoryTokens(item.name);
-  if (tokens.length > 1) addPhrase(tokens, item.type);
-  if (!STRONG.has(tokens[0])) STRONG.set(tokens[0], item.type);
+  for (const known of produceNames(item)) {
+    const tokens = categoryTokens(known);
+    if (tokens.length > 1) addPhrase(tokens, item.type);
+    if (tokens.length && !STRONG.has(tokens[0])) STRONG.set(tokens[0], item.type);
+  }
 }
-const wordSet = (text) => new Set(text.split(' ').map(normalizeWord));
-const QUALIFIERS = wordSet(W.QUALIFIER_WORDS);
-const FROZEN = wordSet(W.FROZEN_WORDS);
-const CONTAINERS = wordSet(W.CONTAINER_WORDS);
-const DRIED = wordSet(W.DRIED_WORDS);
+addWords(STRONG, WI.STRONG_WORDS_INTL);
+addWords(WEAK, WI.WEAK_WORDS_INTL);
+for (const [id, phrases] of Object.entries(WI.PHRASES_INTL)) phrases.forEach((text) => addPhrase(categoryTokens(text), id));
+const wordSet = (...texts) => new Set(texts.join(' ').split(' ').map(normalizeWord));
+const QUALIFIERS = wordSet(W.QUALIFIER_WORDS, WI.QUALIFIER_WORDS_INTL);
+const FROZEN = wordSet(W.FROZEN_WORDS, WI.FROZEN_WORDS_INTL);
+const CONTAINERS = wordSet(W.CONTAINER_WORDS, WI.CONTAINER_WORDS_INTL);
+const DRIED = wordSet(W.DRIED_WORDS, WI.DRIED_WORDS_INTL);
 // Produits qu'une boîte ou un bocal fait passer en « Conserves » (pas une confiture en pot).
 const CANNABLE = new Set(['fruits', 'legumes', 'poisson', 'viande', 'volaille', 'legumineuses', 'traiteur', 'feculents', null]);
 

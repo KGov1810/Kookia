@@ -24,7 +24,8 @@ export async function startRecipeGeneration() {
       others,
       shopping: state.shopping,
       filters,
-      servings: state.settings.servings || 2
+      servings: state.settings.servings || 2,
+      langs: store.householdLanguages() // recettes écrites dans la langue de chaque iPhone du foyer
     });
     store.saveRecipes(recipes);
     // Les nouvelles recettes passent en tête de « Toutes », marquées « Nouvelle ».

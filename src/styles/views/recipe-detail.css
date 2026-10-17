@@ -90,3 +90,7 @@
 }
 
 .origin-chip[aria-pressed="true"] { background: var(--herb-soft); border-color: var(--herb); color: var(--herb-strong); }
+
+/* « Claude traduit la recette… » : petit cercle qui tourne, à gauche du texte. */
+.note.translating { display: flex; align-items: center; gap: 10px; }
+.note.translating .spinner { flex: none; width: 18px; height: 18px; border-width: 2px; margin: 0; }

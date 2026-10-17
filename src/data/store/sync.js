@@ -8,6 +8,7 @@ import { purgeHistory } from './history.js';
 import { firebaseConfig } from './household-codes.js';
 import { toProduct, toRecipe, toShoppingItem } from './mappers.js';
 import { stopMovements } from './movements.js';
+import { publishLanguage } from './languages.js';
 import { listenPrices } from './prices.js';
 import { rememberRecipeLinks } from './recipes.js';
 import { partnerName } from './selectors.js';
@@ -58,6 +59,7 @@ export async function start() {
     listenPrices(code)
   ];
   state.connected = true;
+  publishLanguage();
   emit('sync');
 }
 

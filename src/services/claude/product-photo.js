@@ -2,16 +2,18 @@
 
 import { CATEGORY_IDS } from '../../data/reference/categories.js';
 import { addDays, parseISODate, startOfDay, toISODate } from '../dates/dates.js';
+import { language } from '../i18n/i18n.js';
 import { normalizeCategory } from '../stock/categorization.js';
 import { CATEGORY_GUIDE } from './category-guide.js';
 import { callTool } from './client.js';
+import { languageName } from './languages.js';
 
 /** Analyse la photo d'un produit : { isFood, name, category, quantity, expiry } */
 export async function analyzeProduct({ key, model, base64 }) {
   const categoryIds = CATEGORY_IDS;
   const input = await callTool({
     key, model,
-    system: 'Tu identifies des produits alimentaires photographiés pour une application anti-gaspillage française. Sois précis et prudent.',
+    system: 'Tu identifies des produits alimentaires photographiés pour une application anti-gaspillage. Sois précis et prudent.',
     tool: {
       name: 'decrire_produit',
       description: 'Décrit le produit alimentaire visible sur la photo.',
@@ -19,7 +21,7 @@ export async function analyzeProduct({ key, model, base64 }) {
         type: 'object',
         properties: {
           est_alimentaire: { type: 'boolean' },
-          nom: { type: 'string', description: 'Nom court en français : type de produit + marque si visible (ex. Yaourt nature Danone).' },
+          nom: { type: 'string', description: `Nom court en ${languageName(language())} : type de produit + marque si visible (ex. Yaourt nature Danone).` },
           categorie: { type: 'string', enum: categoryIds, description: 'Identifiant de la catégorie, voir la liste des catégories.' },
           quantite: { type: 'string', description: 'Poids, volume ou nombre si visible, sinon chaîne vide.' },
           date_peremption: { type: 'string', description: 'Date DLC/DDM lisible au format AAAA-MM-JJ, sinon chaîne vide.' }

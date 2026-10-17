@@ -53,10 +53,15 @@ function contains(tokens, phrase) {
   return tokens.some((_, i) => phrase.every((t, k) => tokens[i + k] === t));
 }
 
+// Toutes les langues ; les expressions d'abord (« sauce soja » avant « sauce »), sinon dans l'ordre des listes.
+const OPENED_WORDS = [...O.OPENED_WORDS, ...O.OPENED_WORDS_INTL]
+  .map(([text, days]) => [categoryTokens(text), days])
+  .sort((a, b) => b[0].length - a[0].length);
+
 /** Jours de conservation après ouverture (null : pas de date à raccourcir). */
 export function openedDays(product) {
   const tokens = categoryTokens(product.name);
-  const word = O.OPENED_WORDS.find(([text]) => contains(tokens, categoryTokens(text)));
+  const word = OPENED_WORDS.find(([text]) => contains(tokens, text));
   if (word) return word[1];
   return O.OPENED_DAYS_BY_CATEGORY[product.category] ?? null;
 }

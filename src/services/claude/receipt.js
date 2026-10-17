@@ -2,10 +2,12 @@
 
 import { CATEGORY_IDS } from '../../data/reference/categories.js';
 import { LOCATIONS } from '../../data/reference/locations.js';
+import { language } from '../i18n/i18n.js';
 import { cleanPrice, parsePrice } from '../stats/money.js';
 import { normalizeCategory } from '../stock/categorization.js';
 import { CATEGORY_GUIDE } from './category-guide.js';
 import { callTool } from './client.js';
+import { languageName } from './languages.js';
 
 /** Repères des articles de la liste de courses envoyés à Claude : L1, L2… */
 const listRef = (index) => `L${index + 1}`;
@@ -29,7 +31,7 @@ export async function analyzeReceipt({ key, model, images, shopping = [] }) {
 Liste les articles achetés, alimentaires ou non.
 - N'inclus pas : remises, consignes, bons d'achat, sous-totaux, totaux, moyens de paiement, rendu de monnaie.
 - alimentaire : true pour un aliment ou une boisson destinés aux personnes du foyer. false pour tout le reste : hygiène et beauté, entretien et lessive, emballages et sacs (sacs de congélation, film étirable, papier cuisson ou aluminium, sacs poubelle, sacs de caisse), nourriture et litière pour animaux, compléments alimentaires et parapharmacie, fleurs et plantes, charbon, piles, bougies, vaisselle, textile. Article non alimentaire : categorie « autre », lieu « placard ».
-- Développe les abréviations en un nom clair en français (ex. « PDT CONSO 2KG » → nom « Pommes de terre », contenance « 2 kg »).
+- Développe les abréviations en un nom clair en ${languageName(language())} (ex. « PDT CONSO 2KG » → nom « Pommes de terre » en français, contenance « 2 kg »).
 - nombre : quantité achetée de ce produit (ex. ligne « 2 x 1,19 » ou ligne répétée → 2). Regroupe les lignes identiques.
 - contenance : poids ou volume d'une unité s'il est indiqué (« 500 g », « 1 L »), sinon chaîne vide.
 - lieu : où ranger le produit à la maison : « frigo » (produits frais), « congelateur » (surgelés, glaces), « placard » (épicerie, conserves, boissons, produits secs, pain), « fruits » (fruits et légumes qui se gardent hors du frigo : bananes, pommes de terre, oignons…).
@@ -45,7 +47,7 @@ ${CATEGORY_GUIDE}`
   });
   const input = await callTool({
     key, model,
-    system: 'Tu lis des tickets de caisse de supermarchés français pour une application anti-gaspillage. Sois précis ; n\'invente aucun produit.',
+    system: 'Tu lis des tickets de caisse de supermarchés pour une application anti-gaspillage. Sois précis ; n\'invente aucun produit.',
     tool: {
       name: 'lister_produits',
       description: 'Liste les articles du ticket de caisse.',
@@ -57,7 +59,7 @@ ${CATEGORY_GUIDE}`
             items: {
               type: 'object',
               properties: {
-                nom: { type: 'string', description: 'Nom clair en français.' },
+                nom: { type: 'string', description: `Nom clair en ${languageName(language())}.` },
                 texte_ticket: { type: 'string', description: 'Libellé tel qu\'imprimé sur le ticket.' },
                 categorie: { type: 'string', enum: categoryIds, description: 'Identifiant de la catégorie, voir la liste des catégories.' },
                 nombre: { type: 'integer', description: "Nombre d'unités achetées (1 par défaut)." },

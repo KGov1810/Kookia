@@ -14,7 +14,8 @@ export function durationText(days, lang) {
 }
 
 const STOPWORDS = new Set(['de', 'du', 'des', 'la', 'le', 'les', 'au', 'aux', 'a', 'en', 'et', 'un', 'une',
-  'bio', 'avec', 'sans', 'pour', 'sur', 'the', 'and', 'of']);
+  'bio', 'avec', 'sans', 'pour', 'sur', 'the', 'and', 'of', 'with', 'for', 'organic',
+  'del', 'los', 'las', 'con', 'sin', 'para', 'una', 'com', 'sem', 'uma', 'organico']); // pas « dos » : « dos de cabillaud »
 
 /** Mots significatifs d'un nom : sans accents, sans marque entre parenthèses, au singulier. */
 export function nameTokens(name) {

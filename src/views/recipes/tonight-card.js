@@ -16,7 +16,7 @@ export function todayMeal(now = new Date()) {
   if (!plan) return null;
   const today = S.planDayIndex(plan.start);
   const open = plan.slots
-    .map((slot, index) => ({ slot, index, recipe: state.recipes.find((r) => r.id === slot.recipeId) }))
+    .map((slot, index) => ({ slot, index, recipe: S.localRecipe(state.recipes.find((r) => r.id === slot.recipeId)) }))
     .filter(({ slot, recipe }) => slot.day === today && !slot.done && !slot.leftovers && recipe);
   if (!open.length) return null;
   const prefer = now.getHours() < 15 ? 'midi' : 'soir';

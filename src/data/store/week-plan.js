@@ -1,9 +1,11 @@
 // Kookia — Planning de la semaine : un seul document partagé, foyers/{code}/prix/semaine.
 // Rangé dans la collection « prix », déjà autorisée par les règles Firestore : rien à recoller dans Firebase.
-// { start, servings, slots: [{ day, meal, recipeId, leftovers, done }], batch, shopping: [{ name, quantity, added }], strategy }
+// { start, servings, slots: [{ day, meal, recipeId, leftovers, done }], batch, shopping: [{ name, quantity, added }], strategy,
+//   lang, translations: { en: { strategy, batchSteps, shopping: [{ name, quantity }] } } }
 
 import { deleteDoc, setDoc } from 'firebase/firestore';
-import { planDayIndex } from '../../services/claude/week-plan.js';
+import { localPlan } from '../../services/recipes/localize.js';
+import { planDayIndex } from '../../services/recipes/week-dates.js';
 import { countName, logChange } from './history.js';
 import { saveRecipes } from './recipes.js';
 import { addShoppingItem } from './shopping.js';
@@ -19,11 +21,12 @@ function writePlan(plan) {
 }
 
 /** Enregistre un nouveau planning et ses recettes (le précédent est remplacé ; ses recettes restent dans « Mes recettes »). */
-export function saveWeekPlan({ recipes, slots, batch, shopping, strategy, start, servings }) {
+export function saveWeekPlan({ recipes, slots, batch, shopping, strategy, start, servings, lang = 'fr', translations = {} }) {
   if (!canWrite()) return null;
   saveRecipes(recipes, { log: false });
   const plan = {
     start, servings, strategy: strategy ?? '',
+    lang, translations, // strategie, étapes du batch et courses dans les autres langues du foyer
     slots: slots.map((s) => ({ day: s.day, meal: s.meal, recipeId: s.recipeId, leftovers: Boolean(s.leftovers), done: false })),
     batch: batch ?? null,
     shopping: (shopping ?? []).map((item) => ({ name: item.name, quantity: item.quantity ?? '', added: false })),
@@ -66,9 +69,10 @@ export function addPlanShopping(indexes) {
   const plan = state.plan;
   if (!plan || !canWrite()) return 0;
   let added = 0;
+  const local = localPlan(plan).shopping; // ajoutés aux courses dans la langue de cet iPhone
   const shopping = plan.shopping.map((item, i) => {
     if (!indexes.includes(i) || item.added) return item;
-    if (addShoppingItem(item.name, item.quantity)) added += 1;
+    if (addShoppingItem(local[i].name, local[i].quantity)) added += 1;
     return { ...item, added: true };
   });
   writePlan({ ...plan, shopping });

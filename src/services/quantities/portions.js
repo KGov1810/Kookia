@@ -1,5 +1,7 @@
 // Kookia — Quantités d'une recette selon le nombre de personnes.
 
+import { localeTag } from '../i18n/i18n.js';
+
 const FRACTIONS = { '½': 0.5, '¼': 0.25, '¾': 0.75, '⅓': 1 / 3, '⅔': 2 / 3 };
 
 function parseNumber(text) {
@@ -22,7 +24,7 @@ export function parseAmount(text) {
 }
 
 function formatNumber(value) {
-  return String(Math.round(value * 100) / 100).replace('.', ',');
+  return (Math.round(value * 100) / 100).toLocaleString(localeTag(), { maximumFractionDigits: 2, useGrouping: false }); // « 1,5 », « 1.5 » en anglais
 }
 
 /** Arrondi lisible selon l'unité : 437 g → 440 g ; 1,5 oignon → 1 ½ oignon. */

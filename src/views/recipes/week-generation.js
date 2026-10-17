@@ -29,7 +29,7 @@ export async function startWeekGeneration({ start, slots, servings, leftovers, b
     const plan = await S.generateWeekPlan({
       key: state.settings.claudeKey, model: state.settings.model,
       products: stockByUrgency(), shopping: state.shopping, filters: currentFilters(),
-      servings, slots, start, leftovers, batchDay
+      servings, slots, start, leftovers, batchDay, langs: store.householdLanguages()
     });
     if (!plan.slots.length) {
       ui.week.note = { kind: 'warn', text: t('week.noneReceived') };
@@ -66,7 +66,7 @@ export async function replaceSlot(index) {
       key: state.settings.claudeKey, model: state.settings.model,
       priority: stock.filter((p) => !taken.has(p.id) && ['soon', 'check'].includes(store.productStatus(p))),
       others: stock.filter((p) => taken.has(p.id) || !['soon', 'check'].includes(store.productStatus(p))),
-      shopping: state.shopping, filters: currentFilters(), count: 1,
+      shopping: state.shopping, filters: currentFilters(), count: 1, langs: store.householdLanguages(),
       servings: withLeftovers ? plan.servings * 2 : plan.servings,
       extraLines: [
         `Une seule recette, pour le ${S.weekDayLabel(plan.start, slot.day, undefined, 'fr')} (${slot.meal}).`,
@@ -77,7 +77,7 @@ export async function replaceSlot(index) {
     if (!recipe) throw new Error(t('gen.none'));
     store.saveRecipes([recipe], { log: false });
     store.setPlanSlot(index, recipe.id);
-    toast(t('week.newMeal', { title: recipe.title }));
+    toast(t('week.newMeal', { title: S.localRecipe(recipe).title }));
   } catch (error) {
     toast(error?.message || String(error));
   } finally {

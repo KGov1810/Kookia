@@ -1,15 +1,18 @@
 // Kookia — Planning de la semaine par Claude : des recettes pour les repas choisis, en utilisant le stock
 // intelligemment (ce qui périme d'abord, achats partagés, restes du soir, batch cooking) et les courses regroupées.
 
-import { language, localeTag, t } from '../i18n/i18n.js';
 import { filterLines } from '../recipes/recipe-filters.js';
+import { weekDayLabel } from '../recipes/week-dates.js';
 import { callTool } from './client.js';
+import { languageLines, splitLanguages } from './languages.js';
 import { parseRecipe, shoppingLines, stockDescriber } from './recipe-parse.js';
 import { RECIPE_SYSTEM, RECIPE_TOOL } from './recipe-schema.js';
 
 export const MEALS = ['midi', 'soir'];
 
 const RECIPE_ITEM = RECIPE_TOOL.input_schema.properties.recettes.items;
+const SHOPPING_ITEM = { type: 'object', properties: { nom: { type: 'string' }, quantite: { type: 'string' } }, required: ['nom', 'quantite'] };
+const shoppingOf = (list) => (list ?? []).map((c) => ({ name: String(c?.nom ?? '').trim(), quantity: String(c?.quantite ?? '').trim() }));
 
 const WEEK_TOOL = {
   name: 'planifier_semaine',
@@ -49,42 +52,26 @@ const WEEK_TOOL = {
       courses: {
         type: 'array',
         description: 'Tout ce qu\'il faut acheter pour la semaine, regroupé.',
-        items: { type: 'object', properties: { nom: { type: 'string' }, quantite: { type: 'string' } }, required: ['nom', 'quantite'] }
+        items: SHOPPING_ITEM
+      },
+      traductions: {
+        type: 'array',
+        description: 'strategie, étapes du batch et courses dans les autres langues du foyer (vide si une seule langue).',
+        items: {
+          type: 'object',
+          properties: {
+            langue: { type: 'string' },
+            strategie: { type: 'string' },
+            batch_etapes: { type: 'array', items: { type: 'string' } },
+            courses: { type: 'array', items: SHOPPING_ITEM, description: 'Mêmes articles, dans le même ordre.' }
+          },
+          required: ['langue', 'strategie', 'batch_etapes', 'courses']
+        }
       }
     },
     required: ['strategie', 'recettes', 'repas', 'courses']
   }
 };
-
-function dayDate(start, day) {
-  const [y, m, d] = start.split('-').map(Number);
-  return new Date(y, m - 1, d + day);
-}
-
-/** « mercredi 15 octobre » pour le jour d'indice 2 à partir de start (AAAA-MM-JJ) ; lang : 'fr' pour Claude. */
-export function weekDayLabel(start, day, options = { weekday: 'long', day: 'numeric', month: 'long' }, lang) {
-  return dayDate(start, day).toLocaleDateString(localeTag(lang), options);
-}
-
-/** « Du 14 au 20 octobre », « Du 28 septembre au 4 octobre » ; « October 14 – 20 » dans les autres langues. */
-export function weekRangeLabel(start, lang = language()) {
-  const options = { day: 'numeric', month: 'long' };
-  if (lang !== 'fr') {
-    const format = new Intl.DateTimeFormat(localeTag(lang), options);
-    if (format.formatRange) return format.formatRange(dayDate(start, 0), dayDate(start, 6));
-  }
-  const first = weekDayLabel(start, 0, options, lang);
-  const last = weekDayLabel(start, 6, options, lang);
-  const sameMonth = first.split(' ').slice(1).join(' ') === last.split(' ').slice(1).join(' ');
-  return t('week.range', { from: sameMonth ? first.split(' ')[0] : first, to: last }, lang);
-}
-
-/** Jour du planning correspondant à aujourd'hui (0 = premier jour ; négatif avant, 7 et plus après la semaine). */
-export function planDayIndex(start, today = new Date()) {
-  const [y, m, d] = start.split('-').map(Number);
-  const now = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  return Math.round((now - new Date(y, m - 1, d)) / 86_400_000);
-}
 
 function strategyLines({ leftovers, batchDay, start, servings }) {
   const lines = [
@@ -106,7 +93,7 @@ function strategyLines({ leftovers, batchDay, start, servings }) {
  * slots : [{ day: 0..6, meal: 'midi' | 'soir' }] ; start : AAAA-MM-JJ du jour 0 ; batchDay : jour de la séance ou null.
  * Renvoie { strategy, recipes, slots: [{ day, meal, recipeId, leftovers }], batch, shopping: [{ name, quantity }] }.
  */
-export async function generateWeekPlan({ key, model, products, shopping, filters, servings = 2, slots, start, leftovers = false, batchDay = null }) {
+export async function generateWeekPlan({ key, model, products, shopping, filters, servings = 2, slots, start, leftovers = false, batchDay = null, langs = ['fr'] }) {
   const { refs, describe } = stockDescriber();
   const stockLines = products.map(describe);
   const listLines = shoppingLines(shopping);
@@ -130,19 +117,21 @@ export async function generateWeekPlan({ key, model, products, shopping, filters
     ...strategyLines({ leftovers, batchDay, start, servings }).map((l) => `- ${l}`),
     ...filterLines(filters).map((l) => `- ${l}`),
     "- courses : tout ce qu'il faut acheter (source « a_acheter ») pour la semaine, regroupé et additionné (« Crème fraîche » – « 2 × 20 cl »), sans ce qui est déjà au stock ni dans la liste de courses.",
+    ...languageLines(langs, ', strategie, étapes du batch, courses').map((l) => `- ${l}`),
+    ...(langs.length > 1 ? ['- Pour le planning lui-même (strategie, étapes du batch, courses), les traductions vont dans traductions, au niveau du planning.'] : []),
     '',
     "Réponds uniquement avec l'outil planifier_semaine."
   ].join('\n');
 
   const input = await callTool({
     key, model, system: RECIPE_SYSTEM, tool: WEEK_TOOL,
-    content: [{ type: 'text', text: prompt }], maxTokens: 16_000, timeoutMs: 300_000
+    content: [{ type: 'text', text: prompt }], maxTokens: Math.min(32_000, Math.round(16_000 * (1 + 0.75 * (langs.length - 1)))), timeoutMs: 300_000
   });
 
   const now = Date.now();
   const byRef = new Map();
   const recipes = (input.recettes ?? []).map((r, i) => {
-    const recipe = parseRecipe(r, { products, refs, servings, createdAt: now - i });
+    const recipe = parseRecipe(r, { products, refs, servings, createdAt: now - i, langs });
     byRef.set(String(r.ref ?? '').trim().toUpperCase(), recipe.id);
     return recipe;
   });
@@ -163,11 +152,21 @@ export async function generateWeekPlan({ key, model, products, shopping, filters
     steps: (input.batch.etapes ?? []).filter(Boolean),
     recipeIds: (input.batch.recettes ?? []).map((ref) => byRef.get(String(ref).trim().toUpperCase())).filter(Boolean)
   } : null;
+  const { base, others } = splitLanguages(langs);
+  const courses = shoppingOf(input.courses);
+  const kept = (list) => list.filter((_, i) => courses[i]?.name); // mêmes articles, même ordre, dans chaque langue
+  const translations = Object.fromEntries((input.traductions ?? []).filter((tr) => others.includes(tr?.langue)).map((tr) => [tr.langue, {
+    strategy: String(tr.strategie ?? '').trim(),
+    batchSteps: (tr.batch_etapes ?? []).map((s) => String(s ?? '').trim()).filter(Boolean),
+    shopping: kept(shoppingOf(tr.courses))
+  }]));
   return {
+    lang: base,
+    translations,
     strategy: String(input.strategie ?? '').trim(),
     recipes: recipes.filter((r) => planSlots.some((s) => s.recipeId === r.id)),
     slots: planSlots.sort((a, b) => a.day - b.day || MEALS.indexOf(a.meal) - MEALS.indexOf(b.meal)),
     batch,
-    shopping: (input.courses ?? []).map((c) => ({ name: String(c.nom ?? '').trim(), quantity: String(c.quantite ?? '').trim() })).filter((c) => c.name)
+    shopping: kept(courses)
   };
 }

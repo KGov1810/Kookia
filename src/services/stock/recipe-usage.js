@@ -3,8 +3,15 @@
 import { parseAmount } from '../quantities/portions.js';
 import { parseWeight } from '../quantities/weights.js';
 
-const SPOONS = [[/^(c\.?\s*à\s*s(oupe)?\.?|cuill[eè]res?\s*à\s*soupe|cas)$/i, 15], [/^(c\.?\s*à\s*c(afé)?\.?|cuill[eè]res?\s*à\s*café|cac)$/i, 5]];
-const MASS_VOLUME = [[/^(g|gr|grammes?)$/i, 'g', 1], [/^(kg|kilos?)$/i, 'g', 1000], [/^ml$/i, 'ml', 1], [/^cl$/i, 'ml', 10], [/^(l|litres?)$/i, 'ml', 1000]];
+// Cuillères et unités, aussi en anglais, espagnol et portugais (recettes écrites dans la langue de l'iPhone).
+const SPOONS = [
+  [/^(c\.?\s*à\s*s(oupe)?\.?|cuill[eè]res?\s*à\s*soupe|cas|tbsps?\.?|tablespoons?|cdas?\.?|cucharadas?|colher(es)?\s*de\s*sopa)$/i, 15],
+  [/^(c\.?\s*à\s*c(afé)?\.?|cuill[eè]res?\s*à\s*café|cac|tsps?\.?|teaspoons?|cdtas?\.?|cucharaditas?|colher(es)?\s*de\s*ch[aá])$/i, 5]
+];
+const MASS_VOLUME = [
+  [/^(g|gr|grammes?|grams?|gramos?|gramas?)$/i, 'g', 1], [/^(kg|kilos?|kilogramos?|quilos?)$/i, 'g', 1000],
+  [/^ml$/i, 'ml', 1], [/^cl$/i, 'ml', 10], [/^(l|litres?|liters?|litros?)$/i, 'ml', 1000]
+];
 
 /**
  * Unités du produit utilisées par l'ingrédient (portions comprises), ou null si ce n'est pas calculable

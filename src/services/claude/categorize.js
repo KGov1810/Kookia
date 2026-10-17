@@ -13,7 +13,7 @@ export async function categorizeProduct({ key, name }) {
   const input = await callTool({
     key,
     model: CATEGORIZE_MODEL,
-    system: 'Tu ranges les courses alimentaires d\'un foyer français. Réponds avec l\'outil, sans rien inventer.',
+    system: 'Tu ranges les courses alimentaires d\'un foyer (noms en français, anglais, espagnol ou portugais). Réponds avec l\'outil, sans rien inventer.',
     tool: {
       name: 'ranger_produit',
       description: 'Donne la catégorie et le lieu de rangement habituel du produit.',

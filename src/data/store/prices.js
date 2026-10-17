@@ -56,6 +56,8 @@ export function listenPrices(code) {
     state.prices = memo?.data().prices ?? {};
     // Même collection : la mémoire des catégories et rangements corrigés (placements.js).
     state.placements = snapshot.docs.find((d) => d.id === 'categories')?.data().entries ?? {};
+    // Et les langues des iPhone du foyer (languages.js) : Claude écrit dans chacune.
+    state.languages = snapshot.docs.find((d) => d.id === 'langues')?.data().members ?? {};
     // Et le planning de la semaine (week-plan.js) : l'écran se met à jour sur les deux iPhone.
     const plan = snapshot.docs.find((d) => d.id === 'semaine')?.data() ?? null;
     if (JSON.stringify(plan) !== JSON.stringify(state.plan)) {

@@ -1,6 +1,7 @@
 // Kookia — Consignes et format de réponse des recettes.
 
 import { ORIGINS } from '../../data/reference/origins.js';
+import { TRANSLATION_ITEM } from './languages.js';
 
 export const RECIPE_SYSTEM = `Tu es un chef cuisinier français spécialisé dans la cuisine anti-gaspillage du quotidien, pour un foyer de deux personnes.
 Règles :
@@ -11,11 +12,11 @@ Règles :
 - Pense aussi aux produits présents depuis longtemps (placard, congélateur) pour éviter qu'ils soient oubliés. Un produit du congélateur doit être décongelé : indique-le dans les étapes.
 - Sécurité alimentaire : une date limite (DLC) dépassée interdit le produit ; un produit dont seule la DDM est dépassée ne peut être utilisé que s'il s'agit d'une DDM (épicerie sèche, conserves, biscuits, pâtes…) après vérification de son aspect, et tu le signales dans le résumé. N'utilise jamais une viande, un poisson, un produit laitier frais ou un plat traiteur dont la date est dépassée.
 - Temps réalistes (préparation + cuisson). Respecte le nombre de personnes demandé ; en batch cooking, prévois 2 à 3 repas pour ce nombre de personnes et indique le total dans portions.
-- Pour chaque ingrédient, donne la quantité en texte (quantite) et, si elle est chiffrable, sa valeur numérique (valeur) et son unité (unite : g, kg, ml, cl, L, c. à soupe, c. à café, ou le nom de l'unité comme « pot », vide pour des pièces). valeur = 0 si non chiffrable (« une pincée »).
+- Pour chaque ingrédient, donne la quantité en texte (quantite) et, si elle est chiffrable, sa valeur numérique (valeur) et son unité (unite : g, kg, ml, cl, L, c. à soupe, c. à café, ou le nom de l'unité comme « pot », vide pour des pièces ; dans une autre langue, ses unités usuelles : tbsp, tsp, cda, cdta, colher de sopa…). valeur = 0 si non chiffrable (« une pincée »).
 - regime : « vegan » si aucun produit d'origine animale, « vegetarien » si ni viande ni poisson ni fruits de mer (œufs et laitages autorisés), sinon « omnivore ». Sois strict (bouillon, gélatine, anchois comptent).
 - calories_par_portion : estimation réaliste des kilocalories d'une portion.
 - conservation_jours : durée réaliste au réfrigérateur en boîte hermétique (0 si le plat se mange tout de suite) ; précise dans conseils_conservation comment conserver, réchauffer, et si le plat se congèle.
-- Étapes courtes et claires, une action par étape, en français.`;
+- Étapes courtes et claires, une action par étape, dans la langue demandée.`;
 
 export const RECIPE_TOOL = {
   name: 'proposer_recettes',
@@ -55,7 +56,8 @@ export const RECIPE_TOOL = {
                 required: ['nom', 'quantite', 'valeur', 'unite', 'source', 'ref_stock']
               }
             },
-            etapes: { type: 'array', items: { type: 'string' } }
+            etapes: { type: 'array', items: { type: 'string' } },
+            traductions: { type: 'array', items: TRANSLATION_ITEM, description: 'La même recette dans les autres langues du foyer (vide si une seule langue).' }
           },
           required: ['titre', 'resume', 'difficulte', 'temps_total_minutes', 'temps_preparation_minutes',
             'portions', 'regime', 'origine', 'calories_par_portion', 'batch_cooking', 'conservation_jours', 'conseils_conservation',

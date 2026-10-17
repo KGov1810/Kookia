@@ -2,6 +2,7 @@
 
 import * as store from '../../data/store/index.js';
 import { state } from '../../data/store/state.js';
+import * as S from '../../services/index.js';
 import { rerenderKeepScroll } from '../app/router.js';
 import { ui } from '../app/ui-state.js';
 import { openProductPicker } from './product-picker.js';
@@ -14,7 +15,7 @@ import { addWeekShopping, openWeekShopping } from './week-shopping-sheet.js';
 import { openBatchSheet, openSlotSheet } from './week-slot-sheet.js';
 
 function cook(id) {
-  const recipe = state.recipes.find((r) => r.id === id);
+  const recipe = S.localRecipe(state.recipes.find((r) => r.id === id));
   if (recipe) cookRecipe(recipe);
 }
 

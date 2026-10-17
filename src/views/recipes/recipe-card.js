@@ -17,8 +17,9 @@ function stockLine(inFridge, missing) {
 }
 
 /** Carte d'une recette : grande vignette du plat, titre, temps, origine, produits à consommer vite, ce qui manque. */
-export function recipeCard(recipe, availability = store.recipeAvailability(recipe, ui.priority)) {
+export function recipeCard(raw, availability = store.recipeAvailability(raw, ui.priority)) {
   const { inFridge, missing, urgentUsed } = availability;
+  const recipe = S.localRecipe(raw); // textes dans la langue de l'iPhone
   const origin = R.originOf(recipe.origin);
   return html`
     <button class="recipe-card" data-action="open-recipe" data-id="${recipe.id}">
