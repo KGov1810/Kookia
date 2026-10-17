@@ -45,7 +45,7 @@ test("Recettes compatibles, codes-barres, caméra, reconnexion", async () => {
   log($('#sync-line').textContent === 'Actualisation…', `Retour au premier plan : « ${$('#sync-line').textContent} »`);
   await tick(40);
   log(globalThis.__db.network.join(',') === 'off,on', 'Connexion Firestore coupée puis rétablie (reconnexion forcée)');
-  log($('#sync-line').textContent === 'Synchronisé', `Puis : « ${$('#sync-line').textContent} »`);
+  log($('#sync-line').textContent.startsWith('Synchronisé'), `Puis : « ${$('#sync-line').textContent} »`);
   // L'autre iPhone supprime « Lait », mais cet iPhone ne l'a pas encore su (connexion en retard)
   globalThis.__db.docs.delete(C0 + 'lait');
   await click($$('.tick').find((b) => b.getAttribute('aria-label').endsWith('Lait')), 30);

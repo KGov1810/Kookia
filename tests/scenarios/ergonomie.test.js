@@ -53,8 +53,8 @@ test('Ergonomie : recettes, glisser, courses, réglages', async () => {
 
   console.log('\n— Stock : bandeau compact et glisser —');
   await click('.tab[data-tab="frigo"]');
-  log($('.alert-card').textContent.includes('1 produit à consommer vite') && !$('.alert-card').textContent.includes('Yaourts') && $('.alert-card').textContent.includes('Idées recettes'), 'Bandeau : un nombre et « Idées recettes », sans répéter les produits');
-  log(row('Lait UHT').querySelector('.product-meta').textContent.trim() === '1 L' && row('Lait UHT').querySelector('.where'), 'Ligne courte : icône du lieu et « 1 L »');
+  log($('.alert-card').textContent.includes('1 produit à sauver') && !$('.alert-card').textContent.includes('Yaourts') && $('.alert-card').textContent.includes('Idées recettes'), 'Bandeau : un nombre et « Idées recettes », sans répéter les produits');
+  log(row('Lait UHT').querySelector('.product-meta').textContent.trim() === '1 L, au placard' && row('Lait UHT').querySelector('.where'), 'Ligne courte : « 1 L, au placard »');
   await swipe('Yaourts', 130);
   log(product('Yaourts').count === 2 && $('#toast').textContent.includes('Yaourts : il en reste 2') && !sheet(), 'Glisser à droite : un yaourt consommé, Annuler proposé, pas de fiche ouverte');
   await click('#toast button', 40);

@@ -162,8 +162,8 @@ test("Régimes, portions, calories, ticket de caisse", async () => {
   const titles = $$('h2.section').map((h) => h.childNodes[0].textContent.trim());
   log(titles[0] === 'Date à compléter', `Section « Date à compléter » en premier (${titles.join(' | ')})`);
   const laitRow = $$('.product').find((r) => r.textContent.includes('Lait'));
-  log(laitRow.querySelector('.days.pending b').textContent === '?' && laitRow.querySelector('.product-meta').textContent === '2 × 1 L', 'Compteur « ? », ligne courte « 2 × 1 L » (la section dit « Date à compléter »)');
-  log($('[data-badge="frigo"]').textContent === '1' && text().includes('1 produit à consommer vite'), 'Pastille et bannière ne comptent pas les produits sans date');
+  log(laitRow.querySelector('.days.pending b').textContent === '?' && laitRow.querySelector('.product-meta').textContent === '2 × 1 L, au frigo', 'Compteur « ? », ligne courte « 2 × 1 L, au frigo » (la section dit « Date à compléter »)');
+  log($('[data-badge="frigo"]').textContent === '1' && text().includes('1 produit à sauver'), 'Pastille et bannière ne comptent pas les produits sans date');
   await click(laitRow.querySelector('.product-main'), 400);
   log(sheet().textContent.includes('Pas encore de date') && sheet().querySelector('.read-date [data-action="date-photo"]') && sheet().querySelector('[name="expiry"]').value === '', 'Fiche : date vide et invitation à la compléter');
   await click(sheet().querySelector('[data-action="quick"][data-days="7"]'));

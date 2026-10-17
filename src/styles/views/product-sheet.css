@@ -15,8 +15,6 @@
 
 .product-hero .thumb { width: 72px; height: 72px; border-radius: 22px; font-size: 40px; }
 
-.product-hero .thumb .count { font-size: 13px; right: 4px; bottom: 4px; }
-
 .hero-text { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 
 .product-hero h1 { margin: 0; font: 800 25px/1.1 var(--font-round); letter-spacing: -.3px; overflow-wrap: anywhere; }

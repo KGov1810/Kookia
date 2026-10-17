@@ -15,12 +15,10 @@
 
 .chip i.expired { color: var(--tomato); }
 
-.filter-chip { gap: 6px; border: 1px solid var(--line); background: var(--surface); font-weight: 700; min-height: 44px; padding: 0 14px; }
+.filter-chip { gap: 6px; border: 1px solid var(--line); background: var(--surface); font-size: 14px; font-weight: 700; min-height: 44px; padding: 0 14px; }
 
-.filter-chip svg { width: 18px; height: 18px; }
-
-.filter-chip i { font-style: normal; font-weight: 700; color: var(--muted); font-size: 13px; }
+.filter-chip i { font-style: normal; font-weight: 600; color: var(--muted); font-size: 14px; }
 
 .filter-chip[aria-pressed="true"] { background: var(--herb-fill); border-color: var(--herb-fill); color: var(--on-accent); }
 
-.filter-chip[aria-pressed="true"] i, .filter-chip[aria-pressed="true"] svg { color: var(--on-accent); opacity: .85; }
+.filter-chip[aria-pressed="true"] i { color: var(--on-accent); opacity: .75; }

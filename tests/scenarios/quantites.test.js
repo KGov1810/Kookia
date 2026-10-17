@@ -37,7 +37,7 @@ test("Nombre d'unités et quantités des courses", async () => {
   const pdt = docs(P0).find((d) => d.name === 'Pommes de terre');
   log(pdt?.count === 2 && pdt.quantity === '2 kg', `Enregistré : count ${pdt?.count}, quantité « ${pdt?.quantity} »`);
   const row = () => $$('.product').find((r) => r.textContent.includes('Pommes de terre'));
-  log(row().textContent.includes('2 × 2 kg') && row().querySelector('.thumb .count').textContent === '×2', 'Liste : « 2 × 2 kg » et pastille ×2');
+  log(row().querySelector('.product-meta').textContent.startsWith('2 × 2 kg') && !row().querySelector('.thumb .count'), 'Liste : « 2 × 2 kg » écrit sur la ligne (sans pastille sur la vignette)');
 
   // Rond « consommé » : une unité à la fois
   await click(row().querySelector('.consume'), 30);

@@ -9,6 +9,7 @@ import { toProduct, toRecipe, toShoppingItem } from './mappers.js';
 import { stopMovements } from './movements.js';
 import { listenPrices } from './prices.js';
 import { rememberRecipeLinks } from './recipes.js';
+import { partnerName } from './selectors.js';
 import { emit, state } from './state.js';
 
 let unsubscribers = [];
@@ -123,5 +124,6 @@ export function syncLabel() {
   if (!state.connected || (state.fromCache && !state.lastSync)) return 'Connexion…';
   if (state.fromCache) return state.pending ? 'Hors ligne, envoi en attente' : 'Hors ligne';
   if (state.pending) return 'Envoi en cours…';
-  return 'Synchronisé';
+  const partner = partnerName();
+  return partner ? `Synchronisé avec ${partner}` : 'Synchronisé';
 }

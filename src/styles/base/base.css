@@ -50,13 +50,14 @@ h1 {
   margin: 0;
 }
 
+/* Titre de section, le nombre juste après (« Périmés 1 »). */
 h2.section {
-  font: 700 20px/1.2 var(--font-round);
-  margin: 26px 4px 10px;
-  display: flex; align-items: baseline; justify-content: space-between; gap: 8px;
+  font: 700 19px/1.2 var(--font-round);
+  margin: 24px 4px 10px;
+  display: flex; align-items: baseline; justify-content: flex-start; gap: 6px;
 }
 
-h2.section small { font: 500 15px var(--font); color: var(--muted); }
+h2.section small { font: 600 14px var(--font); color: var(--muted); }
 
 h2.section.expired { color: var(--tomato); }
 
@@ -88,6 +89,6 @@ body.onboarding #toast { bottom: calc(var(--safe-bottom) + 20px); }
 body.scanning .tabbar,
 body.scanning .sheet-backdrop { visibility: hidden; }
 
-h2.section.pending { color: var(--herb-strong); }
+h2.section.pending { color: var(--ink); }
 
 h2.section.old { color: var(--apricot); }

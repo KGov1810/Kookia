@@ -2,7 +2,7 @@
 
 import { html, raw } from '../../components/html.js';
 import { I } from '../../components/icons.js';
-import { LOCATION_ICON, dayCounter, thumb } from '../../components/product-visuals.js';
+import { dayCounter, thumb } from '../../components/product-visuals.js';
 import { toast } from '../../components/toast.js';
 import * as R from '../../data/reference/index.js';
 import * as store from '../../data/store/index.js';
@@ -47,14 +47,19 @@ export function fridgeList() {
   });
 }
 
-/** Ligne d'un produit : l'essentiel seulement (entamé, lieu en vue « Tout », quantité) ; la date est dans le compteur. */
+// Lieu en toutes lettres sur la ligne, en vue « Tout » : « 250 g, au frigo ».
+const WHERE = { frigo: 'au frigo', congelateur: 'au congélateur', placard: 'au placard', fruits: 'fruits et légumes' };
+
+/** Ligne d'un produit : l'essentiel seulement (entamé, quantité, lieu en vue « Tout ») ; la date est dans le compteur. */
 function productRow(product) {
   const opened = S.isOpened(product);
-  const meta = [
+  const location = product.location || 'frigo';
+  const parts = [
     opened ? `Entamé, reste ${S.remainingLabel(S.remainingOf(product))}` : '', // en tête : ne pas le couper
     S.quantityLabel(product)
-  ].filter(Boolean).join(' · ');
-  const where = ui.location ? '' : html`<span class="where" title="${R.locationOf(product.location).label}">${LOCATION_ICON[product.location]?.() ?? ''}</span>`;
+  ].filter(Boolean);
+  const where = ui.location ? '' : html`<span class="where" title="${R.locationOf(location).label}">${parts.length ? ', ' : ''}${WHERE[location]}</span>`;
+  const meta = parts.join(', ');
   return html`
     <div class="product" data-id="${product.id}">
       <div class="swipe-under" aria-hidden="true">
@@ -68,7 +73,7 @@ function productRow(product) {
         <button class="consume" data-action="consume" data-id="${product.id}" aria-label="${(product.count ?? 1) > 1 ? `Consommé : un ${product.name} de moins (il en reste ${product.count - 1})` : `Consommé : ${opened ? 'finir' : 'retirer'} ${product.name} du stock`}"></button>
         <button class="product-main" data-action="edit" data-id="${product.id}">
           ${thumb(product)}
-          <span class="product-text"><span class="product-name">${product.name}</span>${meta || where ? html`<span class="product-meta">${where}${opened ? openedGauge(product) : ''}${meta}</span>` : ''}</span>
+          <span class="product-text"><span class="product-name">${product.name}</span>${meta || where ? html`<span class="product-meta">${opened ? openedGauge(product) : ''}${meta}${where}</span>` : ''}</span>
           ${dayCounter(product)}
         </button>
       </div>

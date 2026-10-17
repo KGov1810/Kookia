@@ -2,7 +2,6 @@
 
 import { html, setHTML } from '../../components/html.js';
 import { I } from '../../components/icons.js';
-import { LOCATION_ICON } from '../../components/product-visuals.js';
 import { errorNote, syncLine } from '../../components/status.js';
 import * as R from '../../data/reference/index.js';
 import * as store from '../../data/store/index.js';
@@ -38,18 +37,19 @@ export const fridgeView = {
   }
 };
 
-/** Bandeau compact : combien sont à consommer vite (le détail est juste en dessous) + idées recettes. */
+/** Bandeau compact : combien de produits sont à sauver (le détail est juste en dessous) + idées recettes. */
 function fridgeAlert() {
   const urgent = store.urgentProducts();
   if (!urgent.length) return '';
   const expired = urgent.filter((p) => store.productStatus(p) === 'expired').length;
-  const title = expired === urgent.length
+  const all = expired === urgent.length;
+  const title = all
     ? `${S.plural(urgent.length, 'produit')} périmé${urgent.length > 1 ? 's' : ''}`
-    : `${S.plural(urgent.length, 'produit')} à consommer vite`;
-  const detail = expired && expired < urgent.length ? `Dont ${expired} périmé${expired > 1 ? 's' : ''}, à vérifier` : '';
+    : `${S.plural(urgent.length, 'produit')} à sauver`;
+  const detail = all ? 'À vérifier avant de les jeter' : expired ? `Dont ${expired} périmé${expired > 1 ? 's' : ''}, à vérifier` : 'Tout est encore bon';
   return html`
-    <button class="alert-card ${expired === urgent.length ? 'expired' : ''}" data-action="go-recipes">
-      <span><strong>${title}</strong>${detail ? html`<small>${detail}</small>` : ''}</span>
+    <button class="alert-card ${all ? 'expired' : ''}" data-action="go-recipes">
+      <span><strong>${title}</strong><small>${detail}</small></span>
       <em>${I.sparkle}Idées recettes</em>
     </button>`;
 }
@@ -66,6 +66,6 @@ function locationFilter() {
   const chips = [{ id: '', label: 'Tout' }, ...R.LOCATIONS];
   return chips.map((loc) => {
     const count = store.productsIn(loc.id).length;
-    return html`<button class="chip filter-chip" data-action="set-location" data-value="${loc.id}" aria-pressed="${String(ui.location === loc.id)}">${loc.id ? LOCATION_ICON[loc.id]() : ''}${loc.label}<i>${count}</i></button>`;
+    return html`<button class="chip filter-chip" data-action="set-location" data-value="${loc.id}" aria-pressed="${String(ui.location === loc.id)}">${loc.label}<i>${count}</i></button>`;
   });
 }

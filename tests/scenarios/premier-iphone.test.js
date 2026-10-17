@@ -52,7 +52,7 @@ test("Premier iPhone : connexion, foyer, stock, courses, recettes", async () => 
   await click(sheet().querySelector('[data-action="save"]'), 350);
   log(text().includes('Yaourt nature') && $('.days.soon'), 'Produit affiché avec compteur orange');
   log($('.days.soon b').textContent === '1' && $('.days.soon small').textContent === 'jour', 'Compteur : 1 jour');
-  log(text().includes('1 produit à consommer vite'), 'Bannière « 1 produit à consommer vite »');
+  log(text().includes('1 produit à sauver'), 'Bannière « 1 produit à sauver »');
   log($('[data-badge="frigo"]').textContent === '1' && !$('[data-badge="frigo"]').hidden, 'Pastille onglet Frigo = 1');
 
   // ---- Deux autres produits : un périmé, un lointain (via quick +1 mois)

@@ -16,13 +16,13 @@ const TINT = {
   laitier: 'blue', boisson: 'blue', surgele: 'blue'
 };
 
+/** Vignette : la photo du produit, sinon l'emoji de sa catégorie sur une tuile teintée (le nombre est écrit à côté). */
 export function thumb(product) {
   const src = product.image || product.imageUrl;
-  const count = (product.count ?? 1) > 1 ? html`<b class="count" aria-hidden="true">×${product.count}</b>` : '';
   const tint = TINT[product.category] ? `tint-${TINT[product.category]}` : '';
   return src
-    ? html`<span class="thumb"><img src="${src}" alt="" loading="lazy">${count}</span>`
-    : html`<span class="thumb ${tint}">${R.category(product.category).emoji}${count}</span>`;
+    ? html`<span class="thumb"><img src="${src}" alt="" loading="lazy"></span>`
+    : html`<span class="thumb ${tint}">${R.category(product.category).emoji}</span>`;
 }
 
 /** Catégories regroupées par rayon (une ancienne catégorie reste affichée si le produit l'a encore). */

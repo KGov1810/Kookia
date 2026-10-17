@@ -55,3 +55,19 @@ export function badgeCount() {
 export function hasClaudeKey() {
   return Boolean(state.settings.claudeKey);
 }
+
+/**
+ * Prénom de l'autre personne du foyer, d'après ce qu'elle a ajouté (stock et courses) ; '' si inconnu.
+ * Le plus fréquent l'emporte, à égalité le plus récent.
+ */
+export function partnerName() {
+  const me = (state.settings.userName || '').trim().toLowerCase();
+  const seen = new Map();
+  for (const item of [...state.products, ...state.shopping]) {
+    const name = (item.addedBy || '').trim();
+    if (!name || name.toLowerCase() === me) continue;
+    const entry = seen.get(name) ?? { count: 0, last: 0 };
+    seen.set(name, { count: entry.count + 1, last: Math.max(entry.last, item.createdAt || 0) });
+  }
+  return [...seen].sort((a, b) => b[1].count - a[1].count || b[1].last - a[1].last)[0]?.[0] ?? '';
+}
