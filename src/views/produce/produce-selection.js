@@ -8,8 +8,31 @@ import * as store from '../../data/store/index.js';
 import { t } from '../../services/i18n/i18n.js';
 import * as S from '../../services/index.js';
 
+/** Ligne de la sélection ; rangement : celui corrigé auparavant, sinon l'habitude du produit (au frais ou non). */
 export function newEntry(item) {
-  return { item, count: 0, weight: '', unit: 'kg', priceText: '', priceTouched: false, suggested: false };
+  const location = store.rememberedPlacement({ name: S.produceName(item.name) }).location ?? item.place;
+  const cold = S.keptCold({ name: item.name, location });
+  return { item, count: 0, weight: '', unit: 'kg', priceText: '', priceTouched: false, suggested: false, location, cold };
+}
+
+/** « Au frigo » / « Hors du frigo » sur une ligne : le frigo devient le bac fruits & légumes hors du frigo, et inversement. */
+export function setEntryCold(entry, cold) {
+  entry.cold = cold;
+  if (!cold && entry.location === 'frigo') entry.location = 'fruits';
+}
+
+function entryDays(entry) {
+  return S.estimateFreshDays(entry.item.name, entry.location, entry.item.type ?? '', entry.cold);
+}
+
+/** Choix au frais ou non (pas pour le congélateur) et durée estimée qui le suit. */
+function coldLine(entry, name) {
+  if (entry.location === 'congelateur') return '';
+  return html`
+    <div class="segmented cold-choice small" role="group" aria-label="${t('produce.coldAria', { name })}">
+      ${[[true, 'cold.fridge'], [false, 'cold.room']].map(([cold, key]) => html`
+        <button data-action="set-line-cold" data-name="${entry.item.name}" data-value="${cold ? 'frigo' : 'ambiant'}" aria-pressed="${String(entry.cold === cold)}">${t(key)}</button>`)}
+    </div>`;
 }
 
 /** Poids total tapé, avec son unité (« 1,2 kg ») ; '' si vide ; null si le chiffre est illisible. */
@@ -45,13 +68,14 @@ export function selectionLines(entries) {
     const hint = lineHint(entry);
     return html`
       <div class="produce-line">
-        <div class="field"><span class="label-stack">${item.emoji} ${name}<small>${t('produce.keeps', { place: S.placeName(item.place), duration: S.durationText(item.days) })}</small></span>
+        <div class="field"><span class="label-stack">${item.emoji} ${name}<small>${t('produce.keeps', { place: S.placeName(entry.location), duration: S.durationText(entryDays(entry)) })}</small></span>
           <div class="stepper small">
             <button data-action="minus" data-name="${item.name}" aria-label="${t('produce.less', { name })}">−</button>
             <output>${count}</output>
             <button data-action="plus" data-name="${item.name}" aria-label="${t('produce.more', { name })}">+</button>
           </div>
         </div>
+        ${coldLine(entry, name)}
         <div class="produce-extra">
           ${unitInput({ amount: entry.weight, unit: entry.unit, units: S.PRODUCE_UNITS, dataset: { name: item.name }, inputData: { field: 'weight' },
             label: t('produce.weightAria', { name }), placeholder: t('produce.weight') })}
@@ -120,7 +144,7 @@ export function toProduct(entry) {
   const name = S.produceName(item.name); // enregistré dans la langue de l'iPhone ; la catégorie se devine du nom français
   const price = S.parsePrice(entry.priceText);
   const memo = store.rememberedPlacement({ name });
-  const location = memo.location ?? item.place;
+  const { location, cold } = entry; // rangement de la ligne (corrigé auparavant, ou choisi au frais ou non)
   const category = memo.category ?? item.type ?? S.guessCategory(item.name) ?? 'legumes';
   return {
     id: crypto.randomUUID(),
@@ -129,7 +153,8 @@ export function toProduct(entry) {
     quantity: S.weightPerPiece(weightText(entry) ?? '', count) ?? '',
     count,
     location,
-    ...dates(location, category, S.estimateFreshDays(item.name, location, category)),
+    ...(location === 'fruits' ? { cold } : {}),
+    ...dates(location, category, S.estimateFreshDays(item.name, location, category, cold)),
     unitPrice: price === null ? null : S.cleanPrice(price / count)
   };
 }

@@ -27,6 +27,10 @@
 
 .produce-line .field { border-top: 0; }
 
+/* Au frigo ou hors du frigo, sous le nom (la durée estimée en dépend). */
+.produce-line .cold-choice { margin: 0 16px 10px; }
+.produce-line .cold-choice button { min-height: 34px; font-size: 13px; }
+
 .produce-extra { display: flex; gap: 8px; padding: 0 16px 10px; }
 
 .produce-extra input {

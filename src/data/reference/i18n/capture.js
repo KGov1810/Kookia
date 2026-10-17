@@ -50,6 +50,7 @@ export const CAPTURE = {
   'produce.addCustom': ['Ajouter « {name} »', 'Add "{name}"', 'Agregar "{name}"', 'Adicionar "{name}"'],
   'produce.addItem': ['Ajouter {name}', 'Add {name}', 'Agregar {name}', 'Adicionar {name}'],
   'produce.added': [['{n} produit ajouté (dates estimées)', '{n} produits ajoutés (dates estimées)'], ['{n} product added (estimated dates)', '{n} products added (estimated dates)'], ['{n} producto agregado (fechas estimadas)', '{n} productos agregados (fechas estimadas)'], ['{n} produto adicionado (datas estimadas)', '{n} produtos adicionados (datas estimadas)']],
+  'produce.coldAria': ['{name} rangé au frigo ou non', '{name} kept in the fridge or not', '{name} en el refrigerador o no', '{name} na geladeira ou não'],
   'produce.keeps': ['{place}, se garde ≈ {duration}', '{place}, keeps ≈ {duration}', '{place}, se conserva ≈ {duration}', '{place}, dura ≈ {duration}'],
   'produce.less': ['Un {name} de moins', 'One less {name}', 'Un {name} menos', 'Um {name} a menos'],
   'produce.more': ['Un {name} de plus', 'One more {name}', 'Un {name} más', 'Um {name} a mais'],

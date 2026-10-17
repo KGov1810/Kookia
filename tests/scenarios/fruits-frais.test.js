@@ -53,5 +53,20 @@ test('Fruits et légumes : durée selon le rangement au frais ou non', async () 
   await click(sheet().querySelector('.sheet-head [data-action="save"]'), 80);
   const fraises = [...globalThis.__db.docs.entries()].find(([k, v]) => k.startsWith(F + 'produits/') && v.name === 'Fraises')?.[1];
   log(fraises?.location === 'fruits' && fraises.cold === false && fraises.expiry === iso(1), `Fraises hors du frigo : 1 jour (${fraises?.expiry})`);
+
+  // Grille « Fruits et légumes » : un choix au frigo / hors du frigo par ligne.
+  await click('.nav-add'); await click('.menu-item[data-action="produce"]', 80);
+  await click(sheet().querySelector('.produce-chip[data-name="Pommes"]'));
+  await click(sheet().querySelector('.produce-chip[data-name="Carottes"]'));
+  const line = (name) => [...sheet().querySelectorAll('.produce-line')].find((l) => l.querySelector(`[data-name="${name}"]`));
+  const linePressed = (name) => line(name).querySelector('.cold-choice [aria-pressed="true"]')?.dataset.value;
+  log(linePressed('Pommes') === 'ambiant' && linePressed('Carottes') === 'frigo' && line('Pommes').textContent.includes('se garde ≈ 14 jours'), 'Grille : pommes hors du frigo (14 jours), carottes au frigo, d\'office');
+  await click(line('Pommes').querySelector('[data-action="set-line-cold"][data-value="frigo"]'));
+  await click(line('Carottes').querySelector('[data-action="set-line-cold"][data-value="ambiant"]'));
+  log(line('Pommes').textContent.includes('se garde ≈ 45 jours') && line('Carottes').textContent.includes('Fruits & légumes, se garde ≈ 5 jours'), 'Choix changés : la durée affichée suit');
+  await click(sheet().querySelector('.sheet-body [data-action="confirm"]'), 350);
+  const saved = (name) => [...globalThis.__db.docs.entries()].filter(([k]) => k.startsWith(F + 'produits/')).map(([, v]) => v).find((v) => v.name === name && v.createdAt > added + day);
+  log(saved('Pommes')?.location === 'fruits' && saved('Pommes').cold === true && saved('Pommes').expiry === iso(45), `Pommes : fruits & légumes au frigo, 45 jours (${JSON.stringify(saved('Pommes'))})`);
+  log(saved('Carottes')?.location === 'fruits' && saved('Carottes').cold === false && saved('Carottes').expiry === iso(5), 'Carottes : fruits & légumes hors du frigo, 5 jours');
   log(!P.errors.length, `Aucune erreur JS ${P.errors.join(' ')}`);
 });

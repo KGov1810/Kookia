@@ -9,7 +9,7 @@ import * as store from '../../data/store/index.js';
 import { t } from '../../services/i18n/i18n.js';
 import * as S from '../../services/index.js';
 import { simplify } from '../../services/text/text.js';
-import { newEntry, onSelectionInput, selectionError, selectionLines, setEntryUnit, suggestLinePrice, toProduct } from './produce-selection.js';
+import { newEntry, onSelectionInput, selectionError, selectionLines, setEntryCold, setEntryUnit, suggestLinePrice, toProduct } from './produce-selection.js';
 
 /** Grille de fruits et légumes courants : chaque toucher ajoute 1 ; lieu et date estimée automatiques, poids et prix facultatifs. */
 export function openProduceSheet() {
@@ -41,6 +41,12 @@ export function openProduceSheet() {
       plus: (el) => {
         const entry = picked.get(el.dataset.name);
         if (entry) setCount(entry, entry.count + 1);
+      },
+      'set-line-cold': (el) => {
+        const entry = picked.get(el.dataset.name);
+        if (!entry) return;
+        setEntryCold(entry, el.dataset.value === 'frigo');
+        sheet.update();
       },
       'set-unit': (el) => {
         const entry = picked.get(el.dataset.name);
