@@ -67,3 +67,5 @@
 .section-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 18px 4px 8px; }
 
 .section-row h2.section { margin: 0; justify-content: flex-start; gap: 6px; }
+
+.section-row .link { font-size: 14px; font-weight: 700; }

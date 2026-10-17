@@ -11,7 +11,8 @@ import { state } from '../../data/store/state.js';
 import * as S from '../../services/index.js';
 import { showTab } from '../app/router.js';
 
-function proposal(item) {
+/** Ce que « Tout ranger » propose pour un article : catégorie, lieu habituel, dernier prix. */
+export function proposal(item) {
   const { name, quantity, count } = S.fromShoppingEntry(item);
   const memo = store.rememberedPlacement({ name });
   const category = memo.category ?? S.guessCategory(name) ?? 'autre';

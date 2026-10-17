@@ -111,8 +111,8 @@ test("Stock de toute la maison : lieux, dates, congélation, ticket", async () =
   await click('.tab[data-tab="courses"]');
   await type('#new-item', 'Riz');
   $('#add-item').dispatchEvent(new w.Event('submit', { bubbles: true, cancelable: true })); await tick();
-  log(text().includes('Riz : ajouté. En stock : 1 au placard, à vérifier avant d\'acheter.'), 'Ajout « Riz » : avertissement « déjà 1 au placard »');
-  log($$('.shop-item').find((r) => r.textContent.includes('Riz'))?.querySelector('.in-stock')?.textContent === 'En stock : 1 au placard', 'Article : « En stock : 1 au placard »');
+  log(text().includes('Riz : ajouté. Il en reste 1 au placard, à vérifier avant d\'acheter.'), 'Ajout « Riz » : avertissement « il en reste 1 au placard »');
+  log($$('.shop-item').find((r) => r.textContent.includes('Riz'))?.querySelector('.in-stock')?.textContent === 'Il en reste 1 au placard', 'Article : « Il en reste 1 au placard »');
 
   console.log('\n— Recettes : tout le stock —');
   let prompt = '';

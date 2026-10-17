@@ -1,5 +1,11 @@
 /* Kookia — Écran Courses. */
 
+/* Sous le titre : le résumé de la liste ; le point de couleur n'apparaît qu'hors ligne ou en erreur. */
+.top .sync.summary:not([data-state="offline"]):not([data-state="error"])::before { display: none; }
+
+/* Petit écran : seulement l'icône du ticket (le libellé reste lu par VoiceOver). */
+@media (max-width: 359px) { .top-row .head-pill { width: 44px; padding: 0; justify-content: center; } .top-row .head-pill span { display: none; } }
+
 .add-item {
   display: flex; align-items: center; gap: 8px; margin: 0; height: 52px; padding: 0 4px 0 16px;
   border-radius: 26px; background: var(--head-field);
@@ -11,41 +17,51 @@
 
 .add-item button svg { stroke-width: 2.4; }
 
-.shop-item {
-  display: flex; align-items: center; gap: 2px; background: var(--surface); border-radius: 16px;
-  padding: 4px 4px 4px 6px; box-shadow: var(--shadow);
-}
+/* Les articles d'une section dans une seule carte, séparés par un filet. */
+.shop-group { background: var(--surface); border-radius: 20px; padding: 0 4px; box-shadow: var(--shadow); }
+
+.shop-item { display: flex; align-items: center; gap: 4px; min-height: 62px; border-top: 1px solid var(--line); }
+
+.shop-item:first-child { border-top: 0; }
+
+.shop-item.checked { min-height: 58px; }
 
 .tick { width: 44px; height: 44px; display: grid; place-items: center; flex: none; }
 
 .tick span {
-  width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--line);
-  display: grid; place-items: center; color: transparent;
+  width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--circle);
+  display: grid; place-items: center; color: transparent; transition: background-color 150ms ease, border-color 150ms ease;
 }
 
 .tick span svg { width: 16px; height: 16px; stroke-width: 3; }
 
 .shop-item.checked .tick span { background: var(--herb-fill); border-color: var(--herb-fill); color: var(--on-accent); }
 
-.shop-text { flex: 1; min-width: 0; text-align: left; display: flex; flex-direction: column; padding: 8px 0; min-height: 48px; justify-content: center; }
+.shop-text { flex: 1; min-width: 0; text-align: left; display: flex; flex-direction: column; gap: 2px; padding: 8px 0; min-height: 48px; justify-content: center; }
 
-.shop-text small { color: var(--muted); font-size: 14px; }
+.shop-text > span { font-size: 16px; font-weight: 700; }
 
-.shop-item.checked .shop-text > span { text-decoration: line-through; color: var(--muted); }
+.shop-text small { color: var(--muted); font-size: 13px; font-weight: 600; }
+
+.shop-text small.in-stock { color: var(--apricot); }
+
+.shop-item.checked .shop-text > span { text-decoration: line-through; color: var(--muted); font-weight: 600; }
 
 .qty-pill {
-  flex: none; max-width: 36%; padding: 6px 11px; border-radius: 999px;
-  background: var(--herb-soft); color: var(--herb-strong); font-weight: 700; font-size: 15px;
+  flex: none; max-width: 36%; min-width: 34px; height: 28px; padding: 0 8px; border-radius: 14px;
+  background: var(--bg); color: var(--ink); font-weight: 800; font-size: 14px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
-.shop-item.checked .qty-pill { background: var(--surface-2); color: var(--muted); }
+.shop-where { flex: none; font-size: 13px; color: var(--muted); }
 
-.shop-item { padding-right: 4px; gap: 6px; }
+.shop-item .icon-btn { flex: none; color: var(--muted); }
 
-.shop-text small.in-stock { color: var(--apricot); font-weight: 600; }
+.shop-item.checked .icon-btn { color: var(--herb); }
 
-.put-away { margin-top: 12px; }
+.put-away { margin-top: 14px; min-height: 56px; border-radius: 28px; }
+
+.put-away-hint { text-align: center; margin: 8px 8px 0; font-size: 13px; }
 
 .put-away-line { align-items: center; }
 

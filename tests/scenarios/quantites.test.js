@@ -72,7 +72,7 @@ test("Nombre d'unités et quantités des courses", async () => {
   $('#add-item').dispatchEvent(new w.Event('submit', { bubbles: true, cancelable: true })); await tick();
   log(docs(C0).find((d) => d.name === 'Farine 1 kg')?.quantity === '2', '« 2 farine 1 kg » : « Farine 1 kg », nombre 2 (le poids reste dans le nom)');
   log($('#new-item').value === '', 'Champ vidé après ajout');
-  log($('.qty-pill')?.textContent === '2', 'Nombre affiché en pastille');
+  log($('.qty-pill')?.textContent === '× 2', 'Nombre affiché en pastille « × 2 »');
   await type('#new-item', '6');
   $('#add-item').dispatchEvent(new w.Event('submit', { bubbles: true, cancelable: true })); await tick();
   log(text().includes('Indiquez l\'article') && !docs(C0).some((d) => d.name === '6'), 'Un nombre seul n\'ajoute rien');

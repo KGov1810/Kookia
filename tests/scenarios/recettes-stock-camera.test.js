@@ -38,6 +38,7 @@ test("Recettes compatibles, codes-barres, caméra, reconnexion", async () => {
   log(!text().includes('undefined') && $$('.shop-item').length === 0 || true, '');
   await click('.tab[data-tab="courses"]');
   log($$('.shop-item').length === 1 && text().includes('Lait'), 'Ancien article « fantôme » (sans nom) masqué');
+  await click('.tab[data-tab="frigo"]'); // l'état de la synchro est sous le titre du Stock
   globalThis.__db.network.length = 0;
   Object.defineProperty(w.document, 'visibilityState', { value: 'visible', configurable: true });
   w.document.dispatchEvent(new w.Event('visibilitychange'));
@@ -46,6 +47,7 @@ test("Recettes compatibles, codes-barres, caméra, reconnexion", async () => {
   await tick(40);
   log(globalThis.__db.network.join(',') === 'off,on', 'Connexion Firestore coupée puis rétablie (reconnexion forcée)');
   log($('#sync-line').textContent.startsWith('Synchronisé'), `Puis : « ${$('#sync-line').textContent} »`);
+  await click('.tab[data-tab="courses"]');
   // L'autre iPhone supprime « Lait », mais cet iPhone ne l'a pas encore su (connexion en retard)
   globalThis.__db.docs.delete(C0 + 'lait');
   await click($$('.tick').find((b) => b.getAttribute('aria-label').endsWith('Lait')), 30);
