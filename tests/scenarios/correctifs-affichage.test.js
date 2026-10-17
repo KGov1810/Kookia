@@ -38,7 +38,9 @@ test("Quantité numérique, réglages et styles", async () => {
   console.log('\n— Réglages et styles —');
   await click('.tab[data-tab="frigo"]'); await click('[data-action="open-settings"]');
   log($('#kcal-max').textContent === '400 kcal', 'Recette légère : « 400 kcal » (plus de texte coupé)');
-  log([...$('#model').options].map((o) => o.textContent).join(' | ') === 'Sonnet 5.5 (conseillé) | Haiku 4.5 (économique)', 'Noms de modèles raccourcis');
+  await click('[data-action="open-advanced"]');
+  log([...$('#model').options].map((o) => o.textContent).join(' | ') === 'Sonnet 5.5 (conseillé) | Haiku 4.5 (économique)', 'Noms de modèles raccourcis (Avancé)');
+  await click('[data-action="close-advanced"]');
   const css = readAllCss();
   const rule = (sel) => { const i = css.lastIndexOf(`${sel} {`); return i < 0 ? '' : css.slice(i, css.indexOf('}', i)); };
   log(/flex: none/.test(rule('.field input.switch')) && /width: 51px/.test(rule('.field input.switch')) && /min-height: 0/.test(rule('.field input.switch')), 'Interrupteurs : taille fixe 51 × 31 px, plus étirés');

@@ -28,6 +28,8 @@ export const ui = {
   recipeMode: 'idees',  // écran Recettes : « idees » (5 recettes) ou « semaine » (planning)
   week: { busy: '', note: null, slotBusy: -1, showPast: false }, // génération du planning, repas remplacé, jours passés affichés
   stats: { period: DEFAULT_STATS_PERIOD, month: '', what: '', location: '', person: '', table: false }, // écran Statistiques
+  settingsPage: '', // '' = Réglages, 'advanced' = sous-page « Avancé »
+  editName: false,  // prénom en cours de modification (carte du bandeau)
   onboarding: { text: '', joinText: '', name: '', invite: '', message: null, busy: false }
 };
 

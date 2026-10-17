@@ -5,7 +5,9 @@ import { toast } from '../../components/toast.js';
 import * as store from '../../data/store/index.js';
 import { state } from '../../data/store/state.js';
 import { updateAppBadge } from '../app/chrome.js';
-import { inviteMessage, settingsView } from './settings-view.js';
+import { rerenderKeepScroll } from '../app/router.js';
+import { ui } from '../app/ui-state.js';
+import { inviteMessage, renderProfile, settingsView } from './settings-view.js';
 
 /** Actions des boutons (attribut data-action). */
 export const settingsActions = {
@@ -33,6 +35,26 @@ export const settingsActions = {
     }
   },
   reconnect: () => store.reconnect(),
+  'open-advanced': () => {
+    ui.settingsPage = 'advanced';
+    rerenderKeepScroll();
+    window.scrollTo(0, 0);
+  },
+  'close-advanced': () => {
+    ui.settingsPage = '';
+    rerenderKeepScroll();
+  },
+  'edit-name': () => {
+    ui.editName = true;
+    renderProfile();
+    document.getElementById('name-input')?.focus();
+  },
+  'done-name': () => {
+    const value = document.getElementById('name-input')?.value.trim() ?? '';
+    ui.editName = false;
+    if (value && value !== state.settings.userName) store.updateSettings({ userName: value });
+    renderProfile();
+  },
   'set-theme': (el) => store.updateSettings({ theme: el.dataset.value }),
   'enable-badge': async () => {
     try {

@@ -7,66 +7,16 @@ import * as R from '../../data/reference/index.js';
 import * as store from '../../data/store/index.js';
 import { state } from '../../data/store/state.js';
 import * as S from '../../services/index.js';
+import { ui } from '../app/ui-state.js';
 
 function alertText(days) {
   return days === 0 ? 'le jour même' : `${S.plural(days, 'jour')} avant`;
 }
 
+/** Réglages, ou la sous-page « Avancé » (modèle, synchronisation, à propos). */
 export const settingsView = {
   render() {
-    const s = state.settings;
-    return html`
-      <header class="top"><button class="back" data-action="open-stock">${I.chevron}Stock</button><div class="top-row"><h1>Réglages</h1></div></header>
-
-      <section class="group">
-        <h2>Profil</h2>
-        <label class="field"><span>Votre prénom</span><input data-setting="userName" value="${s.userName}" placeholder="Prénom" autocomplete="given-name"></label>
-      </section>
-
-      <section class="group">
-        <h2>Apparence</h2>
-        <div class="segmented theme-switch" id="theme-switch" role="group" aria-label="Thème"></div>
-        <div class="field"><span class="label-stack">Animations<small>Plus douces si l'iPhone le demande</small></span><span class="muted">Automatique</span></div>
-      </section>
-
-      <section class="group">
-        <h2>Alertes de péremption</h2>
-        <div class="field"><span>Prévenir</span>
-          <div class="stepper">
-            <button data-action="alert-minus" aria-label="Un jour de moins">−</button>
-            <output id="alert-days">${alertText(s.alertDays)}</output>
-            <button data-action="alert-plus" aria-label="Un jour de plus">+</button>
-          </div>
-        </div>
-        <div id="badge-row"></div>
-      </section>
-      <p class="hint">Une app web ne peut pas envoyer de rappel une fois fermée : programmez « Vérifier le stock » chaque jour dans l'app Rappels.</p>
-
-      <section class="group">
-        <h2>Recettes et photos (Claude)</h2>
-        <div id="claude-key"></div>
-        <div class="field"><span class="label-stack">Recette légère<small>Maximum par portion (filtre « Léger »)</small></span>
-          <div class="stepper">
-            <button data-action="kcal-minus" aria-label="50 kcal de moins">−</button>
-            <output id="kcal-max">${s.lightMaxKcal || 500} kcal</output>
-            <button data-action="kcal-plus" aria-label="50 kcal de plus">+</button>
-          </div>
-        </div>
-      </section>
-      <p class="hint">La clé sert aux recettes, au ticket de caisse et à la reconnaissance en photo. Créez-la sur console.anthropic.com (quelques centimes par usage) ; elle reste sur cet iPhone.</p>
-
-      <section class="group"><h2>Foyer partagé</h2><div id="household"></div></section>
-
-      <details class="group advanced" ${state.error ? raw('open') : ''}>
-        <summary>Avancé<small>Modèle, synchronisation, à propos</small></summary>
-        <label class="field"><span>Modèle Claude</span>
-          <select id="model">${R.MODELS.map((m) => html`<option value="${m.id}" ${m.id === s.model ? raw('selected') : ''}>${m.label}</option>`)}</select>
-        </label>
-        <div id="sync-details"></div>
-        <button class="row-button" data-action="reconnect">${I.refresh}Se reconnecter</button>
-        <div class="field"><span>Données produits</span><a href="https://world.openfoodfacts.org" target="_blank" rel="noopener">Open Food Facts</a></div>
-        <p class="plain hint">Base collaborative sous licence ODbL.</p>
-      </details>`;
+    return ui.settingsPage === 'advanced' ? advancedPage() : mainPage();
   },
   mounted() {
     this.update('settings');
@@ -84,10 +34,12 @@ export const settingsView = {
       <div class="field"><span>État</span><span class="muted">${store.syncLabel()}</span></div>
       <div class="field"><span>Dernière synchro</span><span class="muted">${time}</span></div>
       ${state.error ? html`<p class="note error">${state.error}</p>` : ''}`);
+    if (['products', 'shopping', 'sync'].includes(what) && !ui.editName) renderProfile(); // « Foyer partagé avec Marie »
     if (what !== 'settings') return; // ne pas effacer un champ en cours de saisie
+    if (!ui.editName) renderProfile();
     setHTML('#claude-key', s.claudeKey
       ? html`
-        <div class="field"><span>Clé API</span><span class="muted">enregistrée (…${s.claudeKey.slice(-4)})</span></div>
+        <div class="field"><span>Clé API</span><span class="muted">Enregistrée, finit par ${s.claudeKey.slice(-4)}</span></div>
         <button class="row-button danger" data-action="delete-key">${I.trash}Supprimer la clé</button>`
       : html`
         <label class="field stack"><span>Clé API</span><input id="key-input" type="password" placeholder="sk-ant-…" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
@@ -101,6 +53,94 @@ export const settingsView = {
       : html`<p class="plain hint">Aucun foyer.</p>`);
   }
 };
+
+function mainPage() {
+  const s = state.settings;
+  return html`
+    <header class="top"><button class="back" data-action="open-stock">${I.chevron}Stock</button><div class="top-row"><h1>Réglages</h1></div>
+      <div class="profile-card" id="profile-card"></div></header>
+    <div class="settings-page">
+      <h2 class="section">Apparence</h2>
+      <section class="group">
+        <div class="segmented theme-switch" id="theme-switch" role="group" aria-label="Thème"></div>
+        <div class="field"><span class="label-stack">Animations<small>Plus douces si l'iPhone le demande</small></span><span class="value">Automatique</span></div>
+      </section>
+
+      <h2 class="section">Alertes de péremption</h2>
+      <section class="group">
+        <div class="field"><span>Prévenir</span>
+          <div class="stepper">
+            <button data-action="alert-minus" aria-label="Un jour de moins">−</button>
+            <output id="alert-days">${alertText(s.alertDays)}</output>
+            <button data-action="alert-plus" aria-label="Un jour de plus">+</button>
+          </div>
+        </div>
+        <div id="badge-row"></div>
+      </section>
+      <p class="hint">Une app web ne peut pas envoyer de rappel une fois fermée : programmez « Vérifier le stock » chaque jour dans l'app Rappels.</p>
+
+      <h2 class="section">Recettes et photos (Claude)</h2>
+      <section class="group">
+        <div id="claude-key"></div>
+        <div class="field"><span class="label-stack">Recette légère<small>Maximum par portion (filtre « Léger »)</small></span>
+          <div class="stepper">
+            <button data-action="kcal-minus" aria-label="50 kcal de moins">−</button>
+            <output id="kcal-max">${s.lightMaxKcal || 500} kcal</output>
+            <button data-action="kcal-plus" aria-label="50 kcal de plus">+</button>
+          </div>
+        </div>
+      </section>
+      <p class="hint">La clé sert aux recettes, au ticket de caisse et à la reconnaissance en photo. Créez-la sur console.anthropic.com (quelques centimes par usage) ; elle reste sur cet iPhone.</p>
+
+      <h2 class="section">Foyer partagé</h2>
+      <section class="group"><div id="household"></div></section>
+
+      <button class="group advanced-row" data-action="open-advanced">
+        <span class="label-stack">Avancé<small>Modèle, synchronisation, à propos${state.error ? ' · erreur de synchronisation' : ''}</small></span>${I.chevron}
+      </button>
+    </div>`;
+}
+
+function advancedPage() {
+  const s = state.settings;
+  return html`
+    <header class="top"><button class="back" data-action="close-advanced">${I.chevron}Réglages</button><div class="top-row"><h1>Avancé</h1></div></header>
+    <div class="settings-page">
+      <h2 class="section">Claude</h2>
+      <section class="group">
+        <label class="field"><span>Modèle Claude</span>
+          <select id="model">${R.MODELS.map((m) => html`<option value="${m.id}" ${m.id === s.model ? raw('selected') : ''}>${m.label}</option>`)}</select>
+        </label>
+      </section>
+      <h2 class="section">Synchronisation</h2>
+      <section class="group">
+        <div id="sync-details"></div>
+        <button class="row-button" data-action="reconnect">${I.refresh}Se reconnecter</button>
+      </section>
+      <h2 class="section">À propos</h2>
+      <section class="group">
+        <div class="field"><span>Données produits</span><a href="https://world.openfoodfacts.org" target="_blank" rel="noopener">Open Food Facts</a></div>
+        <p class="plain hint">Base collaborative sous licence ODbL.</p>
+      </section>
+    </div>`;
+}
+
+/** Profil dans le bandeau : l'initiale, le prénom et avec qui le foyer est partagé ; « Modifier » change le prénom. */
+export function renderProfile() {
+  const s = state.settings;
+  const name = s.userName.trim();
+  const partner = store.partnerName();
+  const sub = !s.householdCode ? 'Aucun foyer' : partner ? `Foyer partagé avec ${partner}` : 'Invitez l\'autre iPhone dans « Foyer partagé »';
+  setHTML('#profile-card', ui.editName
+    ? html`
+      <span class="avatar big" aria-hidden="true">${name.charAt(0).toUpperCase() || '?'}</span>
+      <input data-setting="userName" id="name-input" value="${name}" placeholder="Votre prénom" autocomplete="given-name" enterkeyhint="done" aria-label="Votre prénom">
+      <button class="head-pill" data-action="done-name">OK</button>`
+    : html`
+      <span class="avatar big" aria-hidden="true">${name.charAt(0).toUpperCase() || '?'}</span>
+      <span class="profile-text"><b>${name || 'Sans prénom'}</b><small>${sub}</small></span>
+      <button class="head-pill" data-action="edit-name" aria-label="Modifier le prénom">Modifier</button>`);
+}
 
 /** Clair, Sombre ou Automatique (comme l'iPhone) : choix propre à cet iPhone. */
 function themeSwitch(theme = 'auto') {

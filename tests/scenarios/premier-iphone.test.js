@@ -115,8 +115,11 @@ test("Premier iPhone : connexion, foyer, stock, courses, recettes", async () => 
   await type('#key-input', 'abc'); await click('[data-action="save-key"]');
   log(text().includes('ne ressemble pas'), 'Clé invalide refusée');
   await type('#key-input', 'sk-ant-test-1234'); await click('[data-action="save-key"]');
-  log(text().includes('enregistrée (…1234)'), 'Clé enregistrée');
-  log(text().includes('Synchronisé'), `Synchro : ${$('#sync-details').textContent.replace(/\s+/g, ' ').trim()}`);
+  log(text().includes('Enregistrée, finit par 1234'), 'Clé enregistrée');
+  await click('[data-action="open-advanced"]');
+  log($('#sync-details').textContent.includes('Synchronisé'), `Avancé → synchro : ${$('#sync-details').textContent.replace(/\s+/g, ' ').trim()}`);
+  await click('[data-action="close-advanced"]');
+  log($('h1').textContent === 'Réglages' && $('#profile-card').textContent.includes('Marie'), 'Retour aux Réglages ; prénom dans le bandeau');
 
   const myCards = () => $$('.list').at(-1).querySelectorAll('.recipe-card').length;
   // ---- Recettes (Claude simulé)

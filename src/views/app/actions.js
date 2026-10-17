@@ -8,6 +8,7 @@ import { shoppingActions } from '../shopping/shopping-actions.js';
 import { statsActions } from '../stats/stats-actions.js';
 import { stockActions } from '../stock/stock-actions.js';
 import { showTab } from './router.js';
+import { ui } from './ui-state.js';
 
 let actions = null;
 
@@ -21,7 +22,7 @@ export function getAction(name) {
     ...settingsActions,
     ...onboardingActions,
     'open-history': () => openHistory(),
-    'open-settings': () => showTab('reglages'),
+    'open-settings': () => { ui.settingsPage = ''; ui.editName = false; showTab('reglages'); },
     'open-stock': () => showTab('frigo')
   };
   return actions[name];

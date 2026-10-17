@@ -102,7 +102,14 @@ test('Ergonomie : recettes, glisser, courses, réglages', async () => {
 
   console.log('\n— Réglages : Avancé replié —');
   await click('.tab[data-tab="frigo"]'); await click('[data-action="open-settings"]');
-  const advanced = $('details.advanced');
-  log(advanced && !advanced.open && advanced.querySelector('#model') && advanced.querySelector('[data-action="reconnect"]'), 'Modèle, synchronisation et à propos dans « Avancé », replié');
+  log($('[data-action="open-advanced"]') && !$('#model'), 'Réglages : « Avancé » en une ligne, modèle et synchro à part');
+  await click('[data-action="open-advanced"]');
+  log($('h1').textContent === 'Avancé' && $('#model') && $('[data-action="reconnect"]') && $('[data-action="close-advanced"]'), 'Sous-page « Avancé » : modèle, synchronisation, à propos, retour');
+  await click('[data-action="close-advanced"]');
+  // Le prénom se modifie dans le bandeau.
+  await click('[data-action="edit-name"]');
+  $('#name-input').value = 'Kev';
+  await click('[data-action="done-name"]');
+  log(JSON.parse(w.localStorage.getItem('frigo.settings.v1')).userName === 'Kev' && $('#profile-card b').textContent === 'Kev', 'Prénom modifié depuis le bandeau');
   log(!P.errors.length, `Aucune erreur JS ${P.errors.join(' ')}`);
 });
