@@ -2,7 +2,8 @@
 
 import { BREAD_DAYS, LONG_LIFE_BREAD_WORDS, PACKAGED_BREAD_WORDS } from '../../data/reference/bread.js';
 import { FREEZER_MONTHS } from '../../data/reference/categories.js';
-import { DAY, addMonths, parseISODate, startOfDay, toISODate } from '../dates/dates.js';
+import { UNKNOWN_PRODUCE_DAYS } from '../../data/reference/produce.js';
+import { DAY, addDays, addMonths, parseISODate, startOfDay, toISODate } from '../dates/dates.js';
 import { produceFor } from './categorization.js';
 
 export function dateKindOf(product) {
@@ -40,10 +41,28 @@ export function estimatedByDefault(category, name) {
   return category === 'boulangerie' && breadDays(name) !== null;
 }
 
-/** Durée de conservation estimée (jours) d'un produit frais sans date imprimée. */
-export function estimateFreshDays(name, location = 'frigo', category = '') {
+/**
+ * Au frais : au frigo, ou rangé avec les fruits et légumes dans le frigo. Pour « Fruits & légumes », le choix
+ * fait dans la fiche (cold), sinon l'habitude du produit (carottes au frigo, bananes hors du frigo).
+ */
+export function keptCold(product) {
+  if (product.location === 'frigo') return true;
+  if (product.location !== 'fruits') return false;
+  return typeof product.cold === 'boolean' ? product.cold : produceFor(product.name)?.place === 'frigo';
+}
+
+/** Durée de conservation estimée (jours) d'un produit frais sans date imprimée, au frais ou non. */
+export function estimateFreshDays(name, location = 'frigo', category = '', cold = keptCold({ name, location })) {
   if (category === 'boulangerie' && breadDays(name) !== null) return breadDays(name);
-  return produceFor(name)?.days ?? (location === 'fruits' ? 7 : 5);
+  const item = produceFor(name);
+  if (item) return cold ? item.fridgeDays : item.roomDays;
+  return cold ? UNKNOWN_PRODUCE_DAYS.fridge : UNKNOWN_PRODUCE_DAYS.room;
+}
+
+/** Date estimée d'un produit en stock, comptée depuis son ajout, pour son rangement actuel. */
+export function estimatedExpiry(product) {
+  const added = startOfDay(new Date(product.createdAt || Date.now()));
+  return toISODate(addDays(added, estimateFreshDays(product.name, product.location, product.category, keptCold(product))));
 }
 
 export function ageInDays(product, today = new Date()) {

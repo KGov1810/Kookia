@@ -77,7 +77,7 @@ test("Stock de toute la maison : lieux, dates, congélation, ticket", async () =
   const bananes = docs(P0).find((d) => d.name === 'Bananes');
   const topi = docs(P0).find((d) => d.name === 'topinambour');
   log(bananes?.count === 2 && bananes.location === 'fruits' && bananes.dateKind === 'estimee' && bananes.expiry === iso(5), 'Bananes : 2, fruits & légumes, date estimée (5 jours)');
-  log(topi?.location === 'fruits' && topi.expiry === iso(7) && !docs(P0).some((d) => d.name === 'Carottes'), 'Topinambour : 7 jours par défaut ; carottes non ajoutées');
+  log(topi?.location === 'fruits' && topi.expiry === iso(5) && !docs(P0).some((d) => d.name === 'Carottes'), 'Topinambour : 5 jours par défaut (hors du frigo) ; carottes non ajoutées');
   log(row('Bananes').querySelector('.days b').textContent === '≈5', 'Compteur estimé : « ≈5 »');
 
   console.log('\n— Saisie : lieu et type de date —');

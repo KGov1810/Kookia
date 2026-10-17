@@ -49,7 +49,7 @@ export function applyCategory(ctx, category, rememberedLocation = null) {
 function refreshDate(ctx, changed) {
   const { p, view } = ctx;
   if (S.dateKindOf(p) === 'estimee' && !view.dateTouched) {
-    p.expiry = S.isoInDays(S.estimateFreshDays(p.name, p.location, p.category));
+    p.expiry = S.isoInDays(S.estimateFreshDays(p.name, p.location, p.category, S.keptCold(p)));
     changed = true;
   }
   if (S.dateKindOf(p) === 'congele') p.expiry = S.freezerLimit(p.category, p.frozenAt);

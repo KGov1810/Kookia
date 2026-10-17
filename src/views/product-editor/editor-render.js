@@ -31,6 +31,20 @@ function nameField(ctx) {
   return isNew ? html`<div class="name-row">${thumb(p)}${input}</div>` : html`<label class="field name-field"><span>${t('editor.name')}</span>${input}</label>`;
 }
 
+/** Fruits & légumes : au frigo ou hors du frigo (la durée estimée en dépend). */
+function coldChoice(p) {
+  if (p.location !== 'fruits') return '';
+  const cold = S.keptCold(p);
+  const item = S.produceFor(p.name);
+  const hint = item ? t('cold.hint', { fridge: S.durationText(item.fridgeDays), room: S.durationText(item.roomDays) }) : '';
+  return html`
+    <div class="segmented cold-choice" role="group" aria-label="${t('cold.aria')}">
+      ${[['frigo', 'cold.fridge'], ['ambiant', 'cold.room']].map(([value, key]) => html`
+        <button data-action="set-cold" data-value="${value}" aria-pressed="${String(cold === (value === 'frigo'))}">${t(key)}</button>`)}
+    </div>
+    ${hint ? html`<p class="hint cold-hint">${hint}</p>` : ''}`;
+}
+
 export function renderEditor(ctx) {
   const { p, view, isNew } = ctx;
   return html`
@@ -65,6 +79,7 @@ export function renderEditor(ctx) {
       <div class="location-grid" role="group" aria-label="${t('stock.place')}">
         ${R.LOCATIONS.map((loc) => html`<button data-action="set-loc" data-value="${loc.id}" aria-pressed="${String(p.location === loc.id)}">${S.placeName(loc.id)}</button>`)}
       </div>
+      ${coldChoice(p)}
       ${!isNew && p.addedBy ? html`<p class="hint added-by">${t('editor.addedBy', { name: p.addedBy })}</p>` : ''}
     </div>
     ${view.busy ? html`<div class="busy"><span class="spinner"></span><p>${view.busy}</p></div>` : ''}`;

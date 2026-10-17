@@ -33,6 +33,12 @@ export const PRODUCT = {
   'editor.alreadyInList': ['Déjà dans la liste de courses.', 'Already on the shopping list.', 'Ya está en la lista de compras.', 'Já está na lista de compras.'],
   'editor.nowInStock': ['{name} : {n} en stock', '{name}: {n} in stock', '{name}: {n} en inventario', '{name}: {n} no estoque'],
 
+  // Fruits & légumes : au frigo ou non
+  'cold.aria': ['Fruits et légumes rangés au frigo ou non', 'Fruit and veg kept in the fridge or not', 'Frutas y verduras en el refrigerador o no', 'Frutas e verduras na geladeira ou não'],
+  'cold.fridge': ['Au frigo', 'In the fridge', 'En el refri', 'Na geladeira'],
+  'cold.room': ['Hors du frigo', 'Out of the fridge', 'Fuera del refri', 'Fora da geladeira'],
+  'cold.hint': ['Se garde ≈ {fridge} au frigo, {room} hors du frigo.', 'Keeps ≈ {fridge} in the fridge, {room} out of it.', 'Se conserva ≈ {fridge} en el refrigerador, {room} fuera.', 'Dura ≈ {fridge} na geladeira, {room} fora.'],
+
   // Gros boutons et choix du nombre
   'units.consume': ['Consommé', 'Used', 'Consumido', 'Consumido'],
   'units.freeze': ['Congeler', 'Freeze', 'Congelar', 'Congelar'],

@@ -43,7 +43,7 @@ export function createEditorContext({ product = null, draft = null, mode = 'manu
 export function setKind(ctx, kind) {
   const { p, view, isNew } = ctx;
   p.dateKind = kind;
-  if (kind === 'estimee' && !view.dateTouched) p.expiry = S.isoInDays(S.estimateFreshDays(p.name, p.location, p.category));
+  if (kind === 'estimee' && !view.dateTouched) p.expiry = S.isoInDays(S.estimateFreshDays(p.name, p.location, p.category, S.keptCold(p)));
   if (kind === 'congele') {
     p.frozenAt = S.hasDate(p.frozenAt) ? p.frozenAt : S.isoInDays(0);
     p.expiry = S.freezerLimit(p.category, p.frozenAt);
@@ -54,11 +54,35 @@ export function setKind(ctx, kind) {
 
 export function setLocation(ctx, location) {
   const { p, view } = ctx;
+  const previous = { ...p };
   p.location = location;
   const kinds = R.KINDS_BY_LOCATION[location];
   if (!kinds.includes(S.dateKindOf(p))) {
     view.dateTouched = false;
     setKind(ctx, kinds[0]);
+  } else {
+    followEstimate(ctx, previous);
+  }
+}
+
+/** Fruits & légumes : rangés au frigo ou non (la date estimée suit). */
+export function setCold(ctx, cold) {
+  const previous = { ...ctx.p };
+  ctx.p.cold = cold;
+  followEstimate(ctx, previous);
+}
+
+/**
+ * Date estimée qui suit le rangement (au frais ou non), tant qu'elle n'a pas été changée à la main :
+ * nouveau produit, depuis aujourd'hui ; produit en stock, depuis son ajout, si sa date était encore l'estimation.
+ */
+function followEstimate(ctx, previous) {
+  const { p, view, isNew } = ctx;
+  if (S.dateKindOf(p) !== 'estimee' || S.keptCold(p) === S.keptCold(previous)) return;
+  if (isNew) {
+    if (!view.dateTouched) p.expiry = S.isoInDays(S.estimateFreshDays(p.name, p.location, p.category, S.keptCold(p)));
+  } else if (p.expiry === S.estimatedExpiry(previous)) {
+    p.expiry = S.estimatedExpiry(p); // date jamais changée à la main (ni avant, ni dans cette fiche)
   }
 }
 

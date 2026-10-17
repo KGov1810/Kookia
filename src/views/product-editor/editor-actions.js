@@ -10,7 +10,7 @@ import { openingActions } from './editor-opening.js';
 import { setQuantityUnit } from './editor-quantity.js';
 import { handleBarcode, handleDatePhoto, handleProductPhoto } from './editor-recognition.js';
 import { persist } from './editor-save.js';
-import { setKind, setLocation } from './editor-state.js';
+import { setCold, setKind, setLocation } from './editor-state.js';
 import { unitsActions } from './editor-units.js';
 
 /** Actions des boutons de la fiche, liées au produit en cours. */
@@ -36,6 +36,10 @@ export function editorActions(ctx) {
       view.locationTouched = true;
       view.userLocation = true; // choisi à la main : retenu à l'enregistrement
       setLocation(ctx, el.dataset.value);
+      ctx.sheet.update();
+    },
+    'set-cold': (el) => {
+      setCold(ctx, el.dataset.value === 'frigo');
       ctx.sheet.update();
     },
     'set-kind': (el) => {

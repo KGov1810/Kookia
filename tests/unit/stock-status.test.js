@@ -35,7 +35,7 @@ test('Statuts, libellés et compteurs du stock', async () => {
   check(S.freezerLimit('viande', iso(2026, 8, 31)) === iso(2027, 2, 28), 'fin de mois gérée (31 août + 6 mois → 28 février)');
   check(S.produceFor('tomates cerises')?.name === 'Tomates' && S.produceFor('Banane')?.name === 'Bananes' && S.produceFor('Pomme de terre')?.name === 'Pommes de terre', 'catalogue : tomates cerises, banane, pomme de terre');
   check(S.produceFor('Pommes')?.name === 'Pommes', '« Pommes » ≠ « Pommes de terre »');
-  check(S.estimateFreshDays('Carottes', 'frigo') === 21 && S.estimateFreshDays('Topinambour', 'fruits') === 7, 'durées : carottes 21 j, inconnu 7 j');
+  check(S.estimateFreshDays('Carottes', 'frigo') === 21 && S.estimateFreshDays('Topinambour', 'fruits') === 5 && S.estimateFreshDays('Topinambour', 'frigo') === 7, 'durées : carottes 21 j, inconnu 5 j hors du frigo, 7 j au frigo');
   // Prompt
   check(S.promptStock({ dateKind: 'aucune', location: 'placard', createdAt: ms(2026, 2, 1) }, today) === 'au placard depuis 8 mois (pas de date)', 'prompt placard');
   check(S.promptStock({ dateKind: 'congele', location: 'congelateur', frozenAt: iso(2026, 6, 1), expiry: iso(2026, 12, 1) }, today).includes('(à décongeler)'), 'prompt congelé');

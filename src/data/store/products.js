@@ -43,6 +43,8 @@ export function saveProduct(product, { log = true, purchase = log } = {}) {
     quantity: (product.quantity ?? '').trim(),
     count,
     location: product.location || 'frigo',
+    // Fruits & légumes : rangés au frigo ou non, si on l'a choisi (sinon l'habitude du produit).
+    ...(product.location === 'fruits' && typeof product.cold === 'boolean' ? { cold: product.cold } : {}),
     dateKind: dateKindOf(product),
     frozenAt: product.frozenAt || '',
     barcode: product.barcode || '',

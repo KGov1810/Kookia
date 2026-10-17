@@ -54,6 +54,9 @@
 }
 
 .location-grid button[aria-pressed="true"] { border: 2px solid var(--herb); background: var(--herb-soft); color: var(--herb); font-weight: 800; }
+/* Fruits & légumes : au frigo ou hors du frigo, sous les lieux. */
+.cold-choice { margin-top: 10px; }
+.cold-hint { margin: 8px 4px 0; }
 
 .location-grid button:active { transform: scale(.97); }
 

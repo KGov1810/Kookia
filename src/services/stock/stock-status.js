@@ -5,7 +5,7 @@ import { daysUntil, expiryLabel, formatDate, hasDate } from '../dates/dates.js';
 import { t } from '../i18n/i18n.js';
 import { capitalize, placeAt } from '../i18n/labels.js';
 import { durationText } from '../text/text.js';
-import { ageInDays, dateKindOf } from './stock-dates.js';
+import { ageInDays, dateKindOf, keptCold } from './stock-dates.js';
 
 /**
  * 'pending' (date à compléter) | 'expired' (date limite dépassée) | 'check' (date estimée ou « de préférence »
@@ -99,7 +99,8 @@ export function stockCounter(product, alertDays = 2, today = new Date()) {
 
 /** Situation transmise à Claude, ex. « au placard depuis 8 mois ». */
 export function promptStock(product, today = new Date()) {
-  const at = locationOf(product.location).at;
+  const fruits = product.location === 'fruits';
+  const at = `${locationOf(product.location).at}${fruits ? (keptCold(product) ? ' (au frigo)' : ' (hors du frigo)') : ''}`;
   const kind = dateKindOf(product);
   if (kind === 'aucune') return `${at} depuis ${durationText(ageInDays(product, today), 'fr')} (pas de date)`;
   if (!hasDate(product.expiry)) return `${at}, date de péremption non renseignée`;

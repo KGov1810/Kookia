@@ -20,6 +20,7 @@ export function toProduct(id, d) {
     remaining: Number(d.count) > 1 ? 1 : remainingOf(d), // part restante d'un produit entamé (1 : intact)
     openedAt: d.openedAt ?? '',
     location: d.location || 'frigo',   // anciens produits : au frigo
+    cold: typeof d.cold === 'boolean' ? d.cold : null, // Fruits & légumes : au frigo (true) ou non (false), null : selon le produit
     dateKind: d.dateKind || 'dlc',     // anciens produits : date limite imprimée
     frozenAt: d.frozenAt ?? '',
     barcode: d.barcode ?? '',

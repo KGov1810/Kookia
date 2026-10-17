@@ -129,7 +129,7 @@ export function toProduct(entry) {
     quantity: S.weightPerPiece(weightText(entry) ?? '', count) ?? '',
     count,
     location,
-    ...dates(location, category, item.days),
+    ...dates(location, category, S.estimateFreshDays(item.name, location, category)),
     unitPrice: price === null ? null : S.cleanPrice(price / count)
   };
 }
