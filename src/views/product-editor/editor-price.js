@@ -3,14 +3,15 @@
 import { html, raw } from '../../components/html.js';
 import { lastKnownPrice } from '../../data/store/prices.js';
 import * as S from '../../services/index.js';
+import { t } from '../../services/i18n/i18n.js';
 
 /** Texte sous le champ : origine du prix proposé et total pour plusieurs unités. */
 export function priceHint(ctx) {
   const { p, view } = ctx;
   const parts = [];
-  if (view.priceSuggested) parts.push('Dernier prix payé, à vérifier.');
+  if (view.priceSuggested) parts.push(t('price.lastPaid'));
   const count = p.count ?? 1;
-  if (count > 1 && p.unitPrice !== null) parts.push(`Soit ${S.formatEuro(S.lineAmount(p.unitPrice, count))} pour ${count}.`);
+  if (count > 1 && p.unitPrice !== null) parts.push(t('price.total', { total: S.formatEuro(S.lineAmount(p.unitPrice, count)), n: count }));
   return parts.join(' ');
 }
 
@@ -18,8 +19,8 @@ export function priceField(ctx) {
   const { view } = ctx;
   const hint = priceHint(ctx);
   return html`
-    <label class="field price-field"><span>Prix à l'unité</span>
-      <input name="price" value="${view.priceText}" inputmode="decimal" placeholder="Facultatif" autocomplete="off" enterkeyhint="done" aria-label="Prix à l'unité, en euros"><b aria-hidden="true">€</b>
+    <label class="field price-field"><span>${t('price.unit')}</span>
+      <input name="price" value="${view.priceText}" inputmode="decimal" placeholder="${t('price.optional')}" autocomplete="off" enterkeyhint="done" aria-label="${t('price.aria')}"><b aria-hidden="true">€</b>
     </label>
     <p class="hint inset price-hint" ${hint ? '' : raw('hidden')}>${hint}</p>`;
 }

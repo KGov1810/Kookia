@@ -4,18 +4,18 @@
 import { html } from '../../components/html.js';
 import { I } from '../../components/icons.js';
 import { dayCounter, thumb } from '../../components/product-visuals.js';
-import * as R from '../../data/reference/index.js';
 import * as store from '../../data/store/index.js';
 import { state } from '../../data/store/state.js';
 import * as S from '../../services/index.js';
+import { t } from '../../services/i18n/i18n.js';
 import { openingRow } from './editor-opening.js';
 import { unitsBox, unitsTile } from './editor-units.js';
 
-const DATE_LINE = { dlc: 'À consommer jusqu\'au', ddm: 'De préférence avant le', estimee: 'Estimé jusqu\'au' };
+const DATE_LINE = ['dlc', 'ddm', 'estimee']; // date en toutes lettres : line.dlc, line.ddm, line.estimee
 
 /** Vignette, nom en grand et étiquettes : lieu, catégorie, contenance. */
 function hero(product) {
-  const chips = [R.locationOf(product.location).label, R.category(product.category).label, S.quantityLabel(product)].filter(Boolean);
+  const chips = [S.placeName(product.location), S.categoryName(product.category), S.quantityLabel(product)].filter(Boolean);
   return html`
     <div class="product-hero">
       ${thumb(product)}
@@ -29,8 +29,10 @@ function hero(product) {
 function openedText(product) {
   const remaining = S.remainingOf(product);
   if (remaining >= 1) return '';
-  const when = product.openedAt ? ` le ${S.formatDate(product.openedAt, { day: 'numeric', month: 'short' })}` : '';
-  return `Entamé${when}, il en reste ${S.remainingLabel(remaining)}`;
+  const rest = S.remainingLabel(remaining);
+  return product.openedAt
+    ? t('editor.openedOn', { date: S.formatDate(product.openedAt, { day: 'numeric', month: 'short' }), rest })
+    : t('editor.openedRest', { rest });
 }
 
 /**
@@ -42,16 +44,15 @@ function statusCard(product) {
   if (status === 'pending') {
     return html`
       <div class="status-card read-date">
-        <div class="status-text"><p class="status-title">Pas encore de date</p><small class="expiry-status pending">Elle est sur l'emballage.</small></div>
-        <button class="pill-btn strong" data-action="date-photo">${I.camera}Lire la date</button>
+        <div class="status-text"><p class="status-title">${t('editor.noDate')}</p><small class="expiry-status pending">${t('editor.onPackage')}</small></div>
+        <button class="pill-btn strong" data-action="date-photo">${I.camera}${t('editor.readDate')}</button>
       </div>`;
   }
   const kind = S.dateKindOf(product);
   const opened = openedText(product);
-  const dated = DATE_LINE[kind] && S.hasDate(product.expiry);
-  const title = dated
-    ? `${opened && kind !== 'ddm' ? 'À finir avant le' : DATE_LINE[kind]} ${S.formatDate(product.expiry, { weekday: 'long', day: 'numeric', month: 'long' })}`
-    : S.stockLabel(product);
+  const dated = DATE_LINE.includes(kind) && S.hasDate(product.expiry);
+  const date = dated ? S.formatDate(product.expiry, { weekday: 'long', day: 'numeric', month: 'long' }) : '';
+  const title = dated ? t(opened && kind !== 'ddm' ? 'line.finish' : `line.${kind}`, { date }) : S.stockLabel(product);
   const detail = dated ? opened || S.stockLabel(product) : opened;
   return html`
     <div class="status-card">
@@ -84,7 +85,7 @@ export function topActions(ctx) {
       </div>
       ${unitsBox(ctx)}
       ${openingRow(ctx)}
-      <button class="row-card" data-action="to-shopping">${I.cart}<span>Remettre sur la liste de courses</span>${I.chevron}</button>
+      <button class="row-card" data-action="to-shopping">${I.cart}<span>${t('editor.backToList')}</span>${I.chevron}</button>
     </div>
-    <h2 class="section">Modifier</h2>`;
+    <h2 class="section">${t('editor.edit')}</h2>`;
 }

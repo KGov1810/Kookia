@@ -2,9 +2,9 @@
 // (Fermer, OK ou toucher hors de la fiche), avec « Annuler » ; un nouveau produit attend « Ajouter ».
 
 import { toast } from '../../components/toast.js';
-import * as R from '../../data/reference/index.js';
 import * as store from '../../data/store/index.js';
 import * as S from '../../services/index.js';
+import { t } from '../../services/i18n/i18n.js';
 import { priceIsInvalid } from './editor-price.js';
 
 /** État de la fiche à l'ouverture : sert à savoir si quelque chose a changé. */
@@ -20,9 +20,9 @@ function changed(ctx) {
 /** Ce qui empêche d'enregistrer, en clair (vide si tout va bien). */
 function problemOf(ctx) {
   const { p } = ctx;
-  if (!p.name.trim()) return 'Indiquez un nom.';
-  if (p.expiry && !S.parseISODate(p.expiry)) return 'Indiquez une date de péremption valide.';
-  if (priceIsInvalid(ctx)) return 'Indiquez un prix valide, par exemple 2,49 (ou laissez le champ vide).';
+  if (!p.name.trim()) return t('save.needName');
+  if (p.expiry && !S.parseISODate(p.expiry)) return t('save.badDate');
+  if (priceIsInvalid(ctx)) return t('save.badPrice');
   return '';
 }
 
@@ -47,8 +47,8 @@ export function persist(ctx, { force = true } = {}) {
   store.saveProduct(p);
   rememberChoices(ctx);
   if (shoppingItemId) store.deleteShoppingItems([shoppingItemId], { reason: 'rangement' });
-  if (isNew) toast(`${p.name.trim()} : ajouté ${R.locationOf(p.location).at}`);
-  else toast('Modifications enregistrées', 'Annuler', () => previous && store.saveProduct(previous));
+  if (isNew) toast(t('save.added', { name: p.name.trim(), at: S.placeAt(p.location) }));
+  else toast(t('save.saved'), t('common.cancel'), () => previous && store.saveProduct(previous));
   return true;
 }
 
@@ -58,7 +58,7 @@ export function autoSave(ctx) {
   const problem = problemOf(ctx);
   if (problem) {
     ctx.saved = true;
-    toast(`Modification non enregistrée : ${problem.charAt(0).toLowerCase()}${problem.slice(1)}`);
+    toast(t('save.notSaved', { problem: `${problem.charAt(0).toLocaleLowerCase()}${problem.slice(1)}` }));
     return;
   }
   persist(ctx, { force: false });

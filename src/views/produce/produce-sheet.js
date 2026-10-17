@@ -7,6 +7,7 @@ import { toast } from '../../components/toast.js';
 import * as R from '../../data/reference/index.js';
 import * as store from '../../data/store/index.js';
 import * as S from '../../services/index.js';
+import { t } from '../../services/i18n/i18n.js';
 import { simplify } from '../../services/text/text.js';
 import { newEntry, onSelectionInput, selectionError, selectionLines, setEntryUnit, suggestLinePrice, toProduct } from './produce-selection.js';
 
@@ -55,7 +56,7 @@ export function openProduceSheet() {
         }
         entries.forEach((entry) => store.saveProduct(toProduct(entry)));
         sheet.close();
-        toast(`${S.plural(entries.length, 'produit ajouté', 'produits ajoutés')} (dates estimées)`);
+        toast(t('produce.added', { n: entries.length }));
       }
     },
     onInput: (event) => {
@@ -74,10 +75,14 @@ export function openProduceSheet() {
 
   function grid() {
     const q = simplify(query.trim());
-    const items = R.PRODUCE.filter((x) => !q || simplify(x.name).includes(q));
-    const custom = q && !R.PRODUCE.some((x) => simplify(x.name) === q)
-      ? html`<button class="produce-chip custom" data-action="add" data-name="${query.trim()}">${I.plus}Ajouter « ${query.trim()} »</button>` : '';
-    return html`${items.map((x) => html`<button class="produce-chip" data-action="add" data-name="${x.name}" aria-label="Ajouter ${x.name}"><span aria-hidden="true">${x.emoji}</span>${x.name}${picked.get(x.name) ? html`<b>${picked.get(x.name).count}</b>` : ''}</button>`)}${custom}`;
+    const names = (x) => [simplify(x.name), simplify(S.produceName(x.name))]; // français ou langue de l'iPhone
+    const items = R.PRODUCE.filter((x) => !q || names(x).some((n) => n.includes(q)));
+    const custom = q && !R.PRODUCE.some((x) => names(x).includes(q))
+      ? html`<button class="produce-chip custom" data-action="add" data-name="${query.trim()}">${I.plus}${t('produce.addCustom', { name: query.trim() })}</button>` : '';
+    return html`${items.map((x) => {
+      const name = S.produceName(x.name);
+      return html`<button class="produce-chip" data-action="add" data-name="${x.name}" aria-label="${t('produce.addItem', { name })}"><span aria-hidden="true">${x.emoji}</span>${name}${picked.get(x.name) ? html`<b>${picked.get(x.name).count}</b>` : ''}</button>`;
+    })}${custom}`;
   }
 
   function render() {
@@ -85,21 +90,21 @@ export function openProduceSheet() {
     const total = entries.length;
     return html`
       <header class="sheet-head">
-        <button class="link" data-action="close">Annuler</button>
-        <h2>Fruits et légumes</h2>
-        <button class="link strong" data-action="confirm" ${total ? '' : raw('disabled')}>Ajouter</button>
+        <button class="link" data-action="close">${t('common.cancel')}</button>
+        <h2>${t('produce.title')}</h2>
+        <button class="link strong" data-action="confirm" ${total ? '' : raw('disabled')}>${t('editor.add')}</button>
       </header>
       <div class="sheet-body">
         ${error ? html`<p class="note warn">${error}</p>` : ''}
         ${total ? html`
           <section class="group">
-            <h2>Sélection</h2>
-            <p class="hint inset">Poids et prix facultatifs, pour toute la ligne : par exemple 1,2 kg et 3,58 € pour 6 pommes. Tapez le chiffre, puis touchez g ou kg.</p>
+            <h2>${t('produce.selection')}</h2>
+            <p class="hint inset">${t('produce.weightHint')}</p>
             ${selectionLines(entries)}
           </section>
-          <button class="primary" data-action="confirm">${I.check}Ajouter ${S.plural(total, 'produit')} au stock</button>` : html`
-          <p class="hint">Touchez ce que vous avez acheté (plusieurs fois pour en ajouter plusieurs). Le lieu et une date de conservation estimée sont choisis automatiquement ; modifiables ensuite.</p>`}
-        <label class="search produce-search">${I.search}<input name="produce-search" type="search" placeholder="Chercher ou taper un nom" value="${query}" autocomplete="off" aria-label="Chercher un fruit ou un légume"></label>
+          <button class="primary" data-action="confirm">${I.check}${t('produce.addN', { n: total })}</button>` : html`
+          <p class="hint">${t('produce.tapHint')}</p>`}
+        <label class="search produce-search">${I.search}<input name="produce-search" type="search" placeholder="${t('produce.search')}" value="${query}" autocomplete="off" aria-label="${t('produce.searchAria')}"></label>
         <div class="produce-grid" id="produce-results">${grid()}</div>
       </div>`;
   }

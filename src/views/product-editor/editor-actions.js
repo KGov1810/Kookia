@@ -4,6 +4,7 @@ import { pickImage } from '../../components/platform.js';
 import { toast } from '../../components/toast.js';
 import * as store from '../../data/store/index.js';
 import * as S from '../../services/index.js';
+import { t } from '../../services/i18n/i18n.js';
 import { openScanner } from '../scanner/scanner.js';
 import { openingActions } from './editor-opening.js';
 import { setQuantityUnit } from './editor-quantity.js';
@@ -56,7 +57,7 @@ export function editorActions(ctx) {
       ctx.sheet.update();
     },
     'to-shopping': () => {
-      view.info = store.addShoppingItem(p.name, S.quantityLabel(p)) ? 'Ajouté à la liste de courses.' : 'Déjà dans la liste de courses.';
+      view.info = store.addShoppingItem(p.name, S.quantityLabel(p)) ? t('editor.addedToList') : t('editor.alreadyInList');
       view.error = '';
       ctx.sheet.update();
     },
@@ -66,7 +67,7 @@ export function editorActions(ctx) {
       const count = (same.count ?? 1) + (p.count ?? 1);
       store.addUnits(same, p.count ?? 1, p.unitPrice);
       if (shoppingItemId) store.deleteShoppingItems([shoppingItemId], { reason: 'rangement' });
-      toast(`${same.name} : ${count} en stock`);
+      toast(t('editor.nowInStock', { name: same.name, n: count }));
       ctx.sheet.close();
     },
     ...unitsActions(ctx),

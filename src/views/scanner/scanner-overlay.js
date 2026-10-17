@@ -1,6 +1,7 @@
 // Kookia — Scanner : écran plein (vidéo, cadre, messages, saisie des chiffres).
 
 import { fmt, html } from '../../components/html.js';
+import { t } from '../../services/i18n/i18n.js';
 
 /** Crée l'écran du scanner et renvoie ses éléments, avec l'état de la caméra. */
 export function createScannerOverlay(onCode) {
@@ -9,18 +10,18 @@ export function createScannerOverlay(onCode) {
   overlay.innerHTML = fmt(html`
     <video playsinline muted autoplay></video>
     <div class="scan-frame" aria-hidden="true"></div>
-    <div class="scan-top"><button data-action="close">Annuler</button></div>
+    <div class="scan-top"><button data-action="close">${t('common.cancel')}</button></div>
     <div class="scan-bottom">
-      <p class="scan-hint" role="status">Ouverture de la caméra…</p>
+      <p class="scan-hint" role="status">${t('scan.opening')}</p>
       <div class="scan-actions" hidden>
-        <button class="scan-start" data-action="start-video">Démarrer la caméra</button>
-        <button class="scan-retry" data-action="retry">Réessayer</button>
+        <button class="scan-start" data-action="start-video">${t('scan.start')}</button>
+        <button class="scan-retry" data-action="retry">${t('scan.retry')}</button>
       </div>
       <form class="scan-manual">
-        <input inputmode="numeric" pattern="[0-9]*" placeholder="Ou tapez les chiffres" autocomplete="off" aria-label="Chiffres du code-barres">
-        <button type="submit">OK</button>
+        <input inputmode="numeric" pattern="[0-9]*" placeholder="${t('scan.typeDigits')}" autocomplete="off" aria-label="${t('scan.digits')}">
+        <button type="submit">${t('common.ok')}</button>
       </form>
-      <button class="scan-photo" data-action="photo">Photographier le code-barres</button>
+      <button class="scan-photo" data-action="photo">${t('scan.photo')}</button>
     </div>`);
 
   const video = overlay.querySelector('video');

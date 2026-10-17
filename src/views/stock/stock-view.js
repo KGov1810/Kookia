@@ -7,6 +7,7 @@ import * as R from '../../data/reference/index.js';
 import * as store from '../../data/store/index.js';
 import { state } from '../../data/store/state.js';
 import * as S from '../../services/index.js';
+import { t } from '../../services/i18n/i18n.js';
 import { ui } from '../app/ui-state.js';
 import { fridgeList } from './stock-list.js';
 
@@ -14,13 +15,13 @@ export const fridgeView = {
   render() {
     return html`
       <header class="top">
-        <div class="top-row"><div><h1>Stock</h1><p class="sync" id="sync-line"></p></div>
-          <div class="top-actions"><button class="icon-btn" data-action="open-history" aria-label="Historique des changements">${I.history}</button>${settingsButton()}</div></div>
-        <label class="search" id="search-box">${I.search}<input id="search" type="search" placeholder="Rechercher un produit" value="${ui.search}" autocomplete="off" enterkeyhint="search" aria-label="Rechercher un produit"></label>
+        <div class="top-row"><div><h1>${t('tab.stock')}</h1><p class="sync" id="sync-line"></p></div>
+          <div class="top-actions"><button class="icon-btn" data-action="open-history" aria-label="${t('stock.history')}">${I.history}</button>${settingsButton()}</div></div>
+        <label class="search" id="search-box">${I.search}<input id="search" type="search" placeholder="${t('stock.search')}" value="${ui.search}" autocomplete="off" enterkeyhint="search" aria-label="${t('stock.search')}"></label>
         <div id="fridge-alert"></div>
       </header>
       <div id="fridge-error"></div>
-      <div class="chips location-filter" id="location-filter" role="group" aria-label="Lieu de rangement"></div>
+      <div class="chips location-filter" id="location-filter" role="group" aria-label="${t('stock.place')}"></div>
       <div id="fridge-list"></div>`;
   },
   mounted() {
@@ -43,29 +44,27 @@ function fridgeAlert() {
   if (!urgent.length) return '';
   const expired = urgent.filter((p) => store.productStatus(p) === 'expired').length;
   const all = expired === urgent.length;
-  const title = all
-    ? `${S.plural(urgent.length, 'produit')} périmé${urgent.length > 1 ? 's' : ''}`
-    : `${S.plural(urgent.length, 'produit')} à sauver`;
+  const title = t(all ? 'stock.allExpired' : 'stock.toSave', { n: urgent.length });
   const check = urgent.filter((p) => store.productStatus(p) === 'check').length;
-  const parts = [expired ? `${expired} périmé${expired > 1 ? 's' : ''}` : '', check ? `${check} à vérifier` : ''].filter(Boolean);
-  const detail = all ? 'À vérifier avant de les jeter' : parts.length ? `Dont ${parts.join(', ')}` : 'Tout est encore bon';
+  const parts = [expired ? t('stock.nExpired', { n: expired }) : '', check ? t('stock.nCheck', { n: check }) : ''].filter(Boolean);
+  const detail = all ? t('stock.checkBeforeThrowing') : parts.length ? t('stock.including', { list: parts.join(', ') }) : t('stock.allGood');
   return html`
     <button class="alert-card ${all ? 'expired' : ''}" data-action="go-recipes">
       <span><strong>${title}</strong><small>${detail}</small></span>
-      <em>${I.sparkle}Idées recettes</em>
+      <em>${I.sparkle}${t('stock.recipeIdeas')}</em>
     </button>`;
 }
 
 /** Réglages : l'initiale du prénom, en haut du Stock (la barre du bas garde les 4 onglets et le +). */
 function settingsButton() {
   const initial = state.settings.userName.trim().charAt(0).toUpperCase();
-  return html`<button class="avatar" data-action="open-settings" aria-label="Réglages">${initial || I.sliders}</button>`;
+  return html`<button class="avatar" data-action="open-settings" aria-label="${t('settings.title')}">${initial || I.sliders}</button>`;
 }
 
 /** Filtre par lieu : Tout, Frigo, Congélateur, Placard, Fruits & légumes (avec le nombre de produits). */
 function locationFilter() {
   if (!state.products.length) return '';
-  const chips = [{ id: '', label: 'Tout' }, ...R.LOCATIONS];
+  const chips = [{ id: '', label: t('stock.all') }, ...R.LOCATIONS.map((l) => ({ id: l.id, label: S.placeName(l.id) }))];
   return chips.map((loc) => {
     const count = store.productsIn(loc.id).length;
     return html`<button class="chip filter-chip" data-action="set-location" data-value="${loc.id}" aria-pressed="${String(ui.location === loc.id)}">${loc.label}<i>${count}</i></button>`;

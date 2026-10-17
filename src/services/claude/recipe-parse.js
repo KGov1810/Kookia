@@ -17,7 +17,7 @@ export function stockDescriber() {
     const ref = `P${refs.size + 1}`;
     refs.set(ref, p.id);
     const parts = [`[${ref}] ${p.name}`];
-    if (quantityLabel(p)) parts.push(`quantité : ${quantityLabel(p)}`);
+    if (quantityLabel(p, 'fr')) parts.push(`quantité : ${quantityLabel(p, 'fr')}`);
     parts.push(category(p.category).label.toLowerCase(), promptStock(p));
     if (isOpened(p)) parts.push(`entamé, il en reste ${remainingLabel(remainingOf(p))} : à finir en priorité`);
     return `- ${parts.join(' – ')}`;

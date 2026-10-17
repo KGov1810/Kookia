@@ -6,6 +6,7 @@ import { unitInput } from '../../components/unit-input.js';
 import * as R from '../../data/reference/index.js';
 import * as store from '../../data/store/index.js';
 import * as S from '../../services/index.js';
+import { t } from '../../services/i18n/i18n.js';
 
 export function newEntry(item) {
   return { item, count: 0, weight: '', unit: 'kg', priceText: '', priceTouched: false, suggested: false };
@@ -19,7 +20,7 @@ function weightText(entry) {
 /** Prix proposé : dernier prix payé par pièce × nombre, tant que le prix n'a pas été tapé. */
 export function suggestLinePrice(entry) {
   if (entry.priceTouched) return;
-  const last = store.lastKnownPrice({ name: entry.item.name });
+  const last = store.lastKnownPrice({ name: S.produceName(entry.item.name) });
   entry.priceText = last === null ? '' : S.priceInputValue(last * entry.count);
   entry.suggested = last !== null;
 }
@@ -28,33 +29,33 @@ export function suggestLinePrice(entry) {
 export function lineHint(entry) {
   const parts = [];
   const weight = weightText(entry);
-  if (weight === null) parts.push('poids illisible : tapez un nombre, par exemple 1,2');
-  else if (weight && entry.count > 1) parts.push(`${S.formatWeight(S.parseWeight(weight))} au total, ≈ ${S.weightPerPiece(weight, entry.count)} pièce`);
+  if (weight === null) parts.push(t('produce.badWeight'));
+  else if (weight && entry.count > 1) parts.push(t('produce.totalWeight', { total: S.formatWeight(S.parseWeight(weight)), each: S.weightPerPiece(weight, entry.count) }));
   const price = S.parsePrice(entry.priceText);
-  if (entry.priceText.trim() && price === null) parts.push('prix illisible : écrivez par exemple 3,58');
-  else if (price !== null && entry.count > 1) parts.push(`${S.formatEuro(price / entry.count)} pièce`);
-  if (entry.suggested && price !== null) parts.push('dernier prix payé, à vérifier');
-  const text = parts.join(' · ');
-  return text ? text.charAt(0).toUpperCase() + text.slice(1) : '';
+  if (entry.priceText.trim() && price === null) parts.push(t('produce.badPrice'));
+  else if (price !== null && entry.count > 1) parts.push(t('produce.each', { price: S.formatEuro(price / entry.count) }));
+  if (entry.suggested && price !== null) parts.push(t('produce.lastPrice'));
+  return S.capitalize(parts.join(' · '));
 }
 
 export function selectionLines(entries) {
   return entries.map((entry) => {
     const { item, count } = entry;
+    const name = S.produceName(item.name);
     const hint = lineHint(entry);
     return html`
       <div class="produce-line">
-        <div class="field"><span class="label-stack">${item.emoji} ${item.name}<small>${R.locationOf(item.place).label}, se garde ≈ ${S.durationText(item.days)}</small></span>
+        <div class="field"><span class="label-stack">${item.emoji} ${name}<small>${t('produce.keeps', { place: S.placeName(item.place), duration: S.durationText(item.days) })}</small></span>
           <div class="stepper small">
-            <button data-action="minus" data-name="${item.name}" aria-label="Un ${item.name} de moins">−</button>
+            <button data-action="minus" data-name="${item.name}" aria-label="${t('produce.less', { name })}">−</button>
             <output>${count}</output>
-            <button data-action="plus" data-name="${item.name}" aria-label="Un ${item.name} de plus">+</button>
+            <button data-action="plus" data-name="${item.name}" aria-label="${t('produce.more', { name })}">+</button>
           </div>
         </div>
         <div class="produce-extra">
           ${unitInput({ amount: entry.weight, unit: entry.unit, units: S.PRODUCE_UNITS, dataset: { name: item.name }, inputData: { field: 'weight' },
-            label: `Poids total de ${item.name} (chiffre)`, placeholder: 'Poids total' })}
-          <label class="produce-price"><input data-field="price" data-name="${item.name}" value="${entry.priceText}" inputmode="decimal" placeholder="Prix payé" autocomplete="off" enterkeyhint="done" aria-label="Prix payé pour ${item.name}, en euros"><b aria-hidden="true">€</b></label>
+            label: t('produce.weightAria', { name }), placeholder: t('produce.weight') })}
+          <label class="produce-price"><input data-field="price" data-name="${item.name}" value="${entry.priceText}" inputmode="decimal" placeholder="${t('produce.price')}" autocomplete="off" enterkeyhint="done" aria-label="${t('produce.priceAria', { name })}"><b aria-hidden="true">€</b></label>
         </div>
         <p class="hint produce-hint" data-hint="${item.name}" ${hint ? '' : raw('hidden')}>${hint}</p>
       </div>`;
@@ -93,10 +94,10 @@ export function setEntryUnit(entry, unit, panel) {
 export function selectionError(entries) {
   for (const entry of entries) {
     if (entry.priceText.trim() && S.parsePrice(entry.priceText) === null) {
-      return `Prix illisible pour ${entry.item.name} : écrivez par exemple 3,58 (ou laissez vide).`;
+      return t('produce.badPriceFor', { name: S.produceName(entry.item.name) });
     }
     if (weightText(entry) === null) {
-      return `Poids illisible pour ${entry.item.name} : tapez un nombre, par exemple 1,2 (ou laissez vide).`;
+      return t('produce.badWeightFor', { name: S.produceName(entry.item.name) });
     }
   }
   return '';
@@ -116,13 +117,14 @@ function dates(location, category, days) {
 /** Produit à enregistrer : poids et prix ramenés à une pièce, rangement corrigé auparavant s'il existe. */
 export function toProduct(entry) {
   const { item, count } = entry;
+  const name = S.produceName(item.name); // enregistré dans la langue de l'iPhone ; la catégorie se devine du nom français
   const price = S.parsePrice(entry.priceText);
-  const memo = store.rememberedPlacement({ name: item.name });
+  const memo = store.rememberedPlacement({ name });
   const location = memo.location ?? item.place;
   const category = memo.category ?? item.type ?? S.guessCategory(item.name) ?? 'legumes';
   return {
     id: crypto.randomUUID(),
-    name: item.name,
+    name,
     category,
     quantity: S.weightPerPiece(weightText(entry) ?? '', count) ?? '',
     count,

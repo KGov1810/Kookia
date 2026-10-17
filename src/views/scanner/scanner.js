@@ -4,6 +4,7 @@ import { pickImage } from '../../components/platform.js';
 import * as S from '../../services/index.js';
 import { begin, stopCamera } from './scanner-camera.js';
 import { createScannerOverlay, say, showActions } from './scanner-overlay.js';
+import { t } from '../../services/i18n/i18n.js';
 
 /**
  * Plein écran caméra. L'app gère la caméra elle-même et surveille l'image :
@@ -28,9 +29,9 @@ export function openScanner(onCode) {
       // Lancée dans le geste de l'utilisateur, la vidéo est toujours acceptée par iOS.
       sc.video.play().then(() => {
         showActions(sc, false, false);
-        say(sc, 'Placez le code-barres dans le cadre');
+        say(sc, t('scan.place'));
       }).catch(() => {
-        say(sc, 'La caméra ne démarre pas. Touchez « Réessayer » ou tapez les chiffres.');
+        say(sc, t('scan.wontStart'));
         showActions(sc, false, true);
       });
     }
@@ -38,15 +39,15 @@ export function openScanner(onCode) {
       stopCamera(sc); // libère la caméra pour l'appareil photo d'iOS
       pickImage({ camera: true }).then(async (file) => {
         if (!file) {
-          say(sc, 'Photo annulée. Touchez « Réessayer » pour relancer la caméra, ou tapez les chiffres.');
+          say(sc, t('scan.photoCancelled'));
           showActions(sc, false, true);
           return;
         }
-        say(sc, 'Lecture du code-barres…');
+        say(sc, t('scan.reading'));
         const code = await S.decodeBarcodeFromImage(file).catch(() => null);
         if (code) finish(sc, code);
         else {
-          say(sc, 'Code-barres illisible sur la photo. Tapez les chiffres, ou touchez « Réessayer ».');
+          say(sc, t('scan.unreadable'));
           showActions(sc, false, true);
         }
       });
@@ -57,7 +58,7 @@ export function openScanner(onCode) {
     event.preventDefault();
     const digits = event.target.querySelector('input').value.replace(/\D/g, '');
     if (digits.length >= 8) finish(sc, digits);
-    else say(sc, 'Un code-barres compte 8 ou 13 chiffres.');
+    else say(sc, t('scan.length'));
   });
 
   begin(sc);

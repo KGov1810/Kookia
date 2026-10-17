@@ -1,14 +1,16 @@
 // Kookia — Texte : pluriels, durées, mots significatifs, ressemblance de noms.
 
+import { t } from '../i18n/i18n.js';
+
 export function plural(count, singular, pluralForm) {
   return `${count} ${count > 1 ? (pluralForm ?? `${singular}s`) : singular}`;
 }
 
-/** « 3 jours », « 5 mois », « 2 ans ». */
-export function durationText(days) {
-  if (days < 60) return plural(days, 'jour');
-  if (days < 730) return `${Math.round(days / 30.4)} mois`;
-  return plural(Math.floor(days / 365), 'an');
+/** « 3 jours », « 5 mois », « 2 ans » (lang : 'fr' pour les textes envoyés à Claude). */
+export function durationText(days, lang) {
+  if (days < 60) return t('dur.days', { n: days }, lang);
+  if (days < 730) return t('dur.months', { n: Math.round(days / 30.4) }, lang);
+  return t('dur.years', { n: Math.floor(days / 365) }, lang);
 }
 
 const STOPWORDS = new Set(['de', 'du', 'des', 'la', 'le', 'les', 'au', 'aux', 'a', 'en', 'et', 'un', 'une',

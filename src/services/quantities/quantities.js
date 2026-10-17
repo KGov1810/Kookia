@@ -1,13 +1,14 @@
 // Kookia — Quantités : nombre d'unités, poids, quantité des courses.
 
+import { t } from '../i18n/i18n.js';
 import { parseAmount } from './portions.js';
 
-/** « 2 × 2 kg », « 3 unités », « 500 g » (une seule unité). */
-export function quantityLabel(product) {
+/** « 2 × 2 kg », « 3 unités », « 500 g » (une seule unité) ; lang : 'fr' pour Claude. */
+export function quantityLabel(product, lang) {
   const count = Math.max(1, Math.round(Number(product?.count) || 1));
   const size = String(product?.quantity ?? '').trim();
   if (count === 1) return size;
-  return size ? `${count} × ${size}` : `${count} unités`;
+  return size ? `${count} × ${size}` : t('qty.units', { n: count }, lang);
 }
 
 const UNIT_WORDS = 'sachets?|paquets?|pots?|bo[iî]tes?|bouteilles?|briques?|packs?|filets?|barquettes?|unit[ée]s?|pi[eè]ces?|tranches?|canettes?|conserves?|bocaux|bocal';

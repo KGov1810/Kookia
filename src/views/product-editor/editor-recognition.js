@@ -5,6 +5,7 @@ import * as store from '../../data/store/index.js';
 import { hasClaudeKey } from '../../data/store/selectors.js';
 import { state } from '../../data/store/state.js';
 import * as S from '../../services/index.js';
+import { t } from '../../services/i18n/i18n.js';
 import { applyKnownPrice } from './editor-price.js';
 import { applyReadDate, setLocation } from './editor-state.js';
 
@@ -30,16 +31,16 @@ export function handleBarcode(ctx, code) {
   const { p, view } = ctx;
   const digits = String(code).replace(/\D/g, '');
   if (!digits) return;
-  return run(ctx, 'Recherche du produit…', async () => {
+  return run(ctx, t('rec.searching'), async () => {
     p.barcode = digits;
     let info;
     try {
       info = await S.lookupBarcode(digits);
     } catch {
-      throw new Error('Recherche impossible (connexion internet ?). Saisissez le nom à la main.');
+      throw new Error(t('rec.offline'));
     }
     if (!info) {
-      view.error = `Code ${digits} inconnu d'Open Food Facts : saisissez le nom ou prenez le produit en photo.`;
+      view.error = t('rec.unknownCode', { code: digits });
       return;
     }
     p.name = info.name;
@@ -61,13 +62,13 @@ export function handleBarcode(ctx, code) {
     view.sameProductId = state.products.find((x) => x.id !== p.id && x.barcode
       && S.normalizeBarcode(x.barcode) === S.normalizeBarcode(digits))?.id ?? null;
     applyKnownPrice(ctx);
-    view.info = 'Produit trouvé. Indiquez le nombre et la date de péremption (ou touchez « Lire la date »).';
+    view.info = t('rec.found');
   });
 }
 
 export function handleProductPhoto(ctx, file) {
   const { p, view } = ctx;
-  const message = hasClaudeKey() ? 'Claude analyse la photo…' : "Lecture de la date… (le premier usage télécharge l'outil de lecture)";
+  const message = t(hasClaudeKey() ? 'rec.analyzing' : 'rec.readingDate');
   return run(ctx, message, async () => {
     p.image = await S.thumbnail(file);
     p.imageUrl = '';
@@ -75,7 +76,7 @@ export function handleProductPhoto(ctx, file) {
       const { base64 } = await S.resizeImage(file, 1568, 0.8);
       const result = await S.analyzeProduct({ ...claude(), base64 });
       if (!result.isFood) {
-        view.error = 'Claude ne reconnaît pas de produit alimentaire sur cette photo.';
+        view.error = t('rec.notFood');
         return;
       }
       if (result.name) p.name = result.name;
@@ -93,17 +94,17 @@ export function handleProductPhoto(ctx, file) {
       }
       if (result.expiry) {
         applyReadDate(ctx, result.expiry);
-        view.info = "Produit et date reconnus : vérifiez-les avant d'enregistrer.";
+        view.info = t('rec.productAndDate');
       } else {
-        view.info = 'Produit reconnu. Date illisible : touchez « Lire la date » pour la photographier de près, ou saisissez-la.';
+        view.info = t('rec.productNoDate');
       }
     } else {
       const date = S.parseExpiryDate(await S.recognizeText(file));
       if (date) {
         applyReadDate(ctx, date);
-        view.info = `Date lue : ${longDate(date)}. Vérifiez-la, puis saisissez le nom du produit.`;
+        view.info = t('rec.dateThenName', { date: longDate(date) });
       } else {
-        view.info = "Sans clé Claude, la photo ne permet pas d'identifier le produit : saisissez son nom ou scannez le code-barres.";
+        view.info = t('rec.noKeyPhoto');
       }
     }
   });
@@ -111,21 +112,21 @@ export function handleProductPhoto(ctx, file) {
 
 export function handleDatePhoto(ctx, file) {
   const { view } = ctx;
-  return run(ctx, hasClaudeKey() ? 'Claude lit la date…' : "Lecture de la date… (le premier usage télécharge l'outil de lecture)", async () => {
+  return run(ctx, t(hasClaudeKey() ? 'rec.claudeReadsDate' : 'rec.readingDate'), async () => {
     let date = null;
-    let by = '';
+    let byClaude = false;
     if (hasClaudeKey()) {
       const { base64 } = await S.resizeImage(file, 1568, 0.85);
       date = (await S.analyzeProduct({ ...claude(), base64 })).expiry;
-      by = ' par Claude';
+      byClaude = true;
     } else {
       date = S.parseExpiryDate(await S.recognizeText(file));
     }
     if (date) {
       applyReadDate(ctx, date);
-      view.info = `Date lue${by} : ${longDate(date)}. Vérifiez-la.`;
+      view.info = t(byClaude ? 'rec.dateReadClaude' : 'rec.dateRead', { date: longDate(date) });
     } else {
-      view.error = 'Date illisible. Essayez une photo plus nette et bien éclairée, ou saisissez-la.';
+      view.error = t('rec.dateUnreadable');
     }
   });
 }

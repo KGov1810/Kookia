@@ -5,6 +5,7 @@ import { toast } from '../../components/toast.js';
 import * as R from '../../data/reference/index.js';
 import * as store from '../../data/store/index.js';
 import * as S from '../../services/index.js';
+import { t } from '../../services/i18n/i18n.js';
 import { flushEdits } from './editor-save.js';
 import { price } from './editor-units.js';
 
@@ -17,8 +18,8 @@ function changesText(product) {
   if (S.isOpened(product)) return '';
   const changes = S.openingChanges(product);
   return [
-    changes.expiry ? `à finir avant le ${S.formatDate(changes.expiry, { day: 'numeric', month: 'long' })}` : '',
-    changes.location ? `rangé ${R.locationOf(changes.location).at}` : ''
+    changes.expiry ? t('opening.finishBy', { date: S.formatDate(changes.expiry, { day: 'numeric', month: 'long' }) }) : '',
+    changes.location ? t('opening.storedAt', { at: S.placeAt(changes.location) }) : ''
   ].filter(Boolean).join(' · ');
 }
 
@@ -32,14 +33,14 @@ export function openingRow(ctx) {
   const opened = remaining < 1;
   const count = product.count ?? 1;
   const effect = changesText(product);
-  const note = [count > 1 && !opened ? `1 sur ${count}, mis à part` : '', effect ? `à l'ouverture : ${effect}` : ''].filter(Boolean).join(' · ');
+  const note = [count > 1 && !opened ? t('opening.oneOf', { n: count }) : '', effect ? t('opening.effect', { effect }) : ''].filter(Boolean).join(' · ');
   return html`
-    <div class="opening-row" role="group" aria-label="Combien en reste-t-il ?">
-      <span class="opening-label">${opened ? 'Il en reste' : 'Entamé ? Il en reste'}</span>
+    <div class="opening-row" role="group" aria-label="${t('opening.aria')}">
+      <span class="opening-label">${t(opened ? 'opening.label' : 'opening.question')}</span>
       <span class="opening-choices">
-        ${R.REMAINING_CHOICES.map((value) => html`<button class="chip" data-action="set-remaining" data-value="${value}" ${value >= remaining ? raw('disabled') : ''} aria-pressed="${String(opened && Math.abs(value - remaining) < 0.02)}" aria-label="Il en reste ${S.remainingLabel(value)}">${S.remainingLabel(value)}</button>`)}
+        ${R.REMAINING_CHOICES.map((value) => html`<button class="chip" data-action="set-remaining" data-value="${value}" ${value >= remaining ? raw('disabled') : ''} aria-pressed="${String(opened && Math.abs(value - remaining) < 0.02)}" aria-label="${t('opening.choice', { rest: S.remainingLabel(value) })}">${S.remainingLabel(value)}</button>`)}
       </span>
-      ${note ? html`<small class="opening-effect">${note.charAt(0).toUpperCase()}${note.slice(1)}.</small>` : ''}
+      ${note ? html`<small class="opening-effect">${S.capitalize(note)}.</small>` : ''}
     </div>`;
 }
 
@@ -54,7 +55,8 @@ export function openingActions(ctx) {
       ctx.view.take = null;
       ctx.sheet.close();
       if (!done.before.length) return;
-      toast(`${product.name} : entamé, reste ${S.remainingLabel(remaining)}${effect ? ` · ${effect}` : ''}`, 'Annuler', () => store.undoTake(done));
+      const message = t('opening.toast', { name: product.name, rest: S.remainingLabel(remaining) });
+      toast(`${message}${effect ? ` · ${effect}` : ''}`, t('common.cancel'), () => store.undoTake(done));
     }
   };
 }

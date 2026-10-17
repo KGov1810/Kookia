@@ -3,6 +3,7 @@
 import { html } from '../../components/html.js';
 import { markUnit, unitInput } from '../../components/unit-input.js';
 import * as S from '../../services/index.js';
+import { t } from '../../services/i18n/i18n.js';
 
 /**
  * État du champ, recalculé si le poids a changé ailleurs (code-barres, photo) :
@@ -33,9 +34,9 @@ function store(ctx) {
 export function quantityField(ctx) {
   const state = qty(ctx);
   return html`
-    <div class="field unit-field"><span>Poids ou contenance</span>
+    <div class="field unit-field"><span>${t('qty.field')}</span>
       ${unitInput({ name: 'quantity', amount: state.amount, unit: state.legacy ? null : unitOf(ctx), units: S.QUANTITY_UNITS,
-        dataset: { unitfor: 'quantity' }, label: 'Poids ou contenance (chiffre)', placeholder: '500' })}
+        dataset: { unitfor: 'quantity' }, label: t('qty.fieldNumber'), placeholder: '500' })}
     </div>`;
 }
 

@@ -7,6 +7,7 @@ import * as R from '../../data/reference/index.js';
 import * as store from '../../data/store/index.js';
 import { hasClaudeKey } from '../../data/store/selectors.js';
 import * as S from '../../services/index.js';
+import { t } from '../../services/i18n/i18n.js';
 import { dateSection } from './editor-date-section.js';
 import { priceField } from './editor-price.js';
 import { quantityField } from './editor-quantity.js';
@@ -16,27 +17,27 @@ import { topActions } from './editor-top-actions.js';
 function captureButtons() {
   return html`
     <div class="capture">
-      <button data-action="scan">${I.barcode}Code-barres</button>
-      <button data-action="photo">${I.camera}Photo du produit</button>
-      <button data-action="date-photo">${I.calendar}Lire la date</button>
+      <button data-action="scan">${I.barcode}${t('editor.barcode')}</button>
+      <button data-action="photo">${I.camera}${t('editor.productPhoto')}</button>
+      <button data-action="date-photo">${I.calendar}${t('editor.readDate')}</button>
     </div>
-    ${hasClaudeKey() ? '' : html`<p class="hint">Sans clé Claude (Réglages), la photo sert seulement à lire la date. Le code-barres reste le moyen le plus fiable d'identifier un produit.</p>`}`;
+    ${hasClaudeKey() ? '' : html`<p class="hint">${t('editor.noKeyHint')}</p>`}`;
 }
 
 /** Nom : avec la vignette pour un nouveau produit (elle suit la catégorie), en ligne de liste sinon. */
 function nameField(ctx) {
   const { p, isNew } = ctx;
-  const input = html`<input name="name" value="${p.name}" placeholder="${isNew ? 'Nom (ex. Yaourt nature)' : 'Nom du produit'}" autocomplete="off" enterkeyhint="done" aria-label="Nom du produit">`;
-  return isNew ? html`<div class="name-row">${thumb(p)}${input}</div>` : html`<label class="field name-field"><span>Nom</span>${input}</label>`;
+  const input = html`<input name="name" value="${p.name}" placeholder="${t(isNew ? 'editor.namePlaceholder' : 'editor.productName')}" autocomplete="off" enterkeyhint="done" aria-label="${t('editor.productName')}">`;
+  return isNew ? html`<div class="name-row">${thumb(p)}${input}</div>` : html`<label class="field name-field"><span>${t('editor.name')}</span>${input}</label>`;
 }
 
 export function renderEditor(ctx) {
   const { p, view, isNew } = ctx;
   return html`
     <header class="sheet-head editor-head">
-      <button class="link" data-action="close">${isNew ? 'Annuler' : 'Fermer'}</button>
-      ${isNew ? html`<h2>Nouveau produit</h2>` : html`<small class="saved-note">Enregistré automatiquement</small>`}
-      <button class="link strong" data-action="save" ${p.name.trim() ? '' : raw('disabled')}>${isNew ? 'Ajouter' : 'OK'}</button>
+      <button class="link" data-action="close">${t(isNew ? 'common.cancel' : 'common.close')}</button>
+      ${isNew ? html`<h2>${t('editor.new')}</h2>` : html`<small class="saved-note">${t('editor.autosaved')}</small>`}
+      <button class="link strong" data-action="save" ${p.name.trim() ? '' : raw('disabled')}>${t(isNew ? 'editor.add' : 'common.ok')}</button>
     </header>
     <div class="sheet-body editor-body">
       ${view.info ? html`<p class="note ok">${view.info}</p>` : ''}
@@ -44,27 +45,27 @@ export function renderEditor(ctx) {
       ${isNew ? html`${sameProductNote(ctx)}${captureButtons()}` : topActions(ctx)}
       <section class="group edit-list">
         ${nameField(ctx)}
-        <label class="field"><span>Catégorie</span>
+        <label class="field"><span>${t('editor.category')}</span>
           <select name="category">${categoryOptions(p.category)}</select>
         </label>
         ${dateSection(ctx)}
-        <div class="field"><span>Nombre</span>
+        <div class="field"><span>${t('editor.count')}</span>
           <div class="stepper">
-            <button data-action="count-minus" aria-label="Un de moins" ${(p.count ?? 1) <= 1 ? raw('disabled') : ''}>−</button>
+            <button data-action="count-minus" aria-label="${t('editor.oneLess')}" ${(p.count ?? 1) <= 1 ? raw('disabled') : ''}>−</button>
             <output aria-live="polite">${p.count ?? 1}</output>
-            <button data-action="count-plus" aria-label="Un de plus">+</button>
+            <button data-action="count-plus" aria-label="${t('editor.oneMore')}">+</button>
           </div>
         </div>
         ${quantityField(ctx)}
-        ${(p.count ?? 1) > 1 && p.quantity.trim() ? html`<p class="hint inset">En stock : ${S.quantityLabel(p)}</p>` : ''}
+        ${(p.count ?? 1) > 1 && p.quantity.trim() ? html`<p class="hint inset">${t('editor.inStock', { qty: S.quantityLabel(p) })}</p>` : ''}
         ${priceField(ctx)}
-        ${p.image || p.imageUrl ? html`<button class="row-button danger" data-action="remove-photo">${I.trash}Retirer la photo</button>` : ''}
+        ${p.image || p.imageUrl ? html`<button class="row-button danger" data-action="remove-photo">${I.trash}${t('editor.removePhoto')}</button>` : ''}
       </section>
-      <h2 class="section">Rangement</h2>
-      <div class="location-grid" role="group" aria-label="Lieu de rangement">
-        ${R.LOCATIONS.map((loc) => html`<button data-action="set-loc" data-value="${loc.id}" aria-pressed="${String(p.location === loc.id)}">${loc.label}</button>`)}
+      <h2 class="section">${t('editor.storage')}</h2>
+      <div class="location-grid" role="group" aria-label="${t('stock.place')}">
+        ${R.LOCATIONS.map((loc) => html`<button data-action="set-loc" data-value="${loc.id}" aria-pressed="${String(p.location === loc.id)}">${S.placeName(loc.id)}</button>`)}
       </div>
-      ${!isNew && p.addedBy ? html`<p class="hint added-by">Ajouté par ${p.addedBy}</p>` : ''}
+      ${!isNew && p.addedBy ? html`<p class="hint added-by">${t('editor.addedBy', { name: p.addedBy })}</p>` : ''}
     </div>
     ${view.busy ? html`<div class="busy"><span class="spinner"></span><p>${view.busy}</p></div>` : ''}`;
 }
@@ -76,8 +77,8 @@ export function sameProductNote(ctx) {
   if (!same) return '';
   return html`
     <div class="note ok same-product">
-      <span>Déjà ${R.locationOf(same.location).at} : ${same.name} (${S.quantityLabel(same) || '1'}, ${S.stockShort(same)}).</span>
-      <button class="secondary" data-action="add-to-same">Ajouter ${p.count ?? 1} à ce produit</button>
-      <small>Même date de péremption ? Ajoutez-le à l'existant. Sinon, enregistrez-le à part.</small>
+      <span>${t('editor.same', { at: S.placeAt(same.location), name: same.name, qty: S.quantityLabel(same) || '1', short: S.stockShort(same) })}</span>
+      <button class="secondary" data-action="add-to-same">${t('editor.addToSame', { n: p.count ?? 1 })}</button>
+      <small>${t('editor.sameHint')}</small>
     </div>`;
 }

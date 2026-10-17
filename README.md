@@ -73,6 +73,7 @@ Une app web ne peut pas envoyer de notification une fois fermée. Créez un rapp
 - **Open Food Facts** est incomplet, et la lecture de date sans Claude est moins fiable.
 - **Sécurité** : toute personne qui a l'invitation peut voir et modifier vos données.
 - **Une app par iPhone** : utilisez toujours celle de l'écran d'accueil, pas Safari.
+- **Langues** : les Réglages, la barre du bas, le Stock, la fiche produit, les fruits et légumes et le scanner sont traduits ; les autres écrans suivront. Les noms des produits restent ceux saisis, scannés ou lus (un fruit ou légume choisi dans la liste prend le nom de la langue de l'iPhone).
 
 ## Dépannage
 

@@ -32,10 +32,10 @@ export function thumb(product) {
 
 /** Catégories regroupées par rayon (une ancienne catégorie reste affichée si le produit l'a encore). */
 export function categoryOptions(current) {
-  const legacy = R.CATEGORY_IDS.includes(current) ? '' : html`<option value="${current}" selected>${R.category(current).emoji} ${R.category(current).label}</option>`;
-  return html`${legacy}${R.CATEGORY_GROUPS.map((group) => html`<optgroup label="${group}">${R.CATEGORIES
+  const legacy = R.CATEGORY_IDS.includes(current) ? '' : html`<option value="${current}" selected>${R.category(current).emoji} ${S.categoryName(current)}</option>`;
+  return html`${legacy}${R.CATEGORY_GROUPS.map((group) => html`<optgroup label="${S.groupName(group)}">${R.CATEGORIES
     .filter((c) => c.group === group)
-    .map((c) => html`<option value="${c.id}" ${c.id === current ? raw('selected') : ''}>${c.emoji} ${c.label}</option>`)}</optgroup>`)}`;
+    .map((c) => html`<option value="${c.id}" ${c.id === current ? raw('selected') : ''}>${c.emoji} ${S.categoryName(c.id)}</option>`)}</optgroup>`)}`;
 }
 
 /** Le compteur façon magnet de frigo : jours ou mois restants, ou ancienneté pour les produits secs. */
@@ -47,12 +47,13 @@ export function dayCounter(product) {
 /** Version très courte, pour les pastilles : « J-3 », « auj. », « 8 mois ici »… */
 export function shortExpiry(product) {
   const c = S.stockCounter(product, state.settings.alertDays);
-  if (c.cls === 'pending') return 'date ?';
-  if (c.label.endsWith('ici')) return `${c.number} ${c.label}`;
-  if (c.label.includes('passé')) return store.productStatus(product) === 'expired' ? 'périmé' : 'à vérifier';
-  if (c.label === 'dernier jour') return 'auj.';
-  if (c.label === 'mois') return `${c.approx ? '≈' : ''}${c.number} mois`;
-  return `${c.approx ? '≈' : ''}${c.number} j`;
+  const approx = c.approx ? '≈' : '';
+  if (c.unit === 'date') return S.t('chip.dateUnknown');
+  if (c.unit === 'here') return `${c.number} ${c.label}`;
+  if (c.unit === 'past') return S.t(store.productStatus(product) === 'expired' ? 'chip.expired' : 'chip.check');
+  if (c.unit === 'last') return S.t('chip.today');
+  if (c.unit === 'months') return S.t('chip.months', { approx, n: c.number });
+  return S.t('chip.days', { approx, n: c.number });
 }
 
 export function longDate(iso) {

@@ -3,6 +3,7 @@
 import * as S from '../../services/index.js';
 import { say, showActions } from './scanner-overlay.js';
 import { finish } from './scanner.js';
+import { t } from '../../services/i18n/i18n.js';
 
 /** Coupe la caméra et invalide la session en cours (analyse, surveillance). */
 export function stopCamera(sc) {
@@ -23,7 +24,7 @@ export async function begin(sc) {
   stopCamera(sc);
   const current = sc.session;
   showActions(sc, false, false);
-  say(sc, 'Ouverture de la caméra…');
+  say(sc, t('scan.opening'));
   try {
     const opened = await S.startCamera(sc.video);
     if (current !== sc.session || sc.finished) {
@@ -34,25 +35,25 @@ export async function begin(sc) {
   } catch (error) {
     if (current !== sc.session || sc.finished) return;
     if (error?.name === 'NotAllowedError' || error?.name === 'SecurityError') {
-      say(sc, "Accès à la caméra refusé. Autorisez-le dans Réglages de l'iPhone > Safari > Caméra, puis touchez « Réessayer ». Vous pouvez aussi taper les chiffres.");
+      say(sc, t('scan.denied'));
     } else {
-      say(sc, 'Caméra indisponible. Touchez « Réessayer », photographiez le code-barres ou tapez les chiffres.');
+      say(sc, t('scan.unavailable'));
     }
     showActions(sc, false, true);
     return;
   }
 
   if (!sc.camera.playing) {
-    say(sc, 'Touchez « Démarrer la caméra » pour afficher l\'image.');
+    say(sc, t('scan.tapStart'));
     showActions(sc, true, false);
   } else {
-    say(sc, 'Placez le code-barres dans le cadre');
+    say(sc, t('scan.place'));
   }
 
   // Surveillance : pas d'image au bout de 4 s → on le dit clairement.
   sc.watchdog = setTimeout(() => {
     if (current !== sc.session || sc.finished || isShowingImage(sc)) return;
-    say(sc, "La caméra ne s'affiche pas. Touchez « Démarrer la caméra » ; si l'écran reste noir, « Réessayer », ou fermez complètement l'app et rouvrez-la.");
+    say(sc, t('scan.notShowing'));
     showActions(sc, true, true);
   }, 4000);
 
@@ -60,7 +61,7 @@ export async function begin(sc) {
     sc.decode = sc.decode ?? await S.createBarcodeDecoder();
   } catch {
     if (current === sc.session) {
-      say(sc, 'Lecteur de code-barres non téléchargé (connexion ?). Tapez les chiffres sous le code-barres.');
+      say(sc, t('scan.noReader'));
     }
     return;
   }
@@ -83,7 +84,7 @@ export async function scanLoop(sc, current) {
     const pixel = sc.context.getImageData(Math.floor(sc.canvas.width / 2), Math.floor(sc.canvas.height / 2), 1, 1).data;
     sc.darkFrames = pixel[0] + pixel[1] + pixel[2] < 6 ? sc.darkFrames + 1 : 0;
     if (sc.darkFrames === 20) {
-      say(sc, "L'image reste noire. Touchez « Réessayer » ; si rien ne change, fermez complètement l'app (balayez-la vers le haut) et rouvrez-la.");
+      say(sc, t('scan.black'));
       showActions(sc, false, true);
     }
 

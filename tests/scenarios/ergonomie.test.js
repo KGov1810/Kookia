@@ -115,6 +115,12 @@ test('Ergonomie : recettes, glisser, courses, réglages', async () => {
   const setLang = async (value) => { $('#language').value = value; $('#language').dispatchEvent(new w.Event('change', { bubbles: true })); await tick(); };
   await setLang('en');
   log($('h1').textContent === 'Settings' && $('.tab[data-tab="courses"] span').textContent === 'Groceries' && w.document.documentElement.lang === 'en' && JSON.parse(w.localStorage.getItem('frigo.settings.v1')).language === 'en', 'Anglais : Réglages et barre du bas traduits, choix gardé sur l\'iPhone');
+  await click('.tab[data-tab="frigo"]');
+  log($('#search').placeholder === 'Search for a product' && $('h2.section.soon')?.textContent.startsWith('Use soon') && $$('.filter-chip').some((c) => c.textContent.startsWith('Fridge')), 'Anglais : Stock traduit (recherche, « Use soon », « Fridge »)');
+  await click('.product[data-id="yaourt"] [data-action="edit"]');
+  log(sheet().textContent.includes('Use by') && sheet().querySelector('.tile-consume').textContent === 'Used' && sheet().textContent.includes('Storage') && sheet().querySelector('.days').getAttribute('aria-label') === 'Expires tomorrow', 'Anglais : fiche produit traduite (« Use by », « Used », « Storage »)');
+  await click('.sheet [data-action="close"]');
+  await click('[data-action="open-settings"]');
   await setLang('pt');
   log($('h1').textContent === 'Ajustes' && $('.tab[data-tab="stock"], .tab[data-tab="frigo"]').textContent.includes('Estoque'), 'Portugais : « Ajustes », « Estoque »');
   await setLang('');

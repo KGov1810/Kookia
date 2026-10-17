@@ -2,5 +2,10 @@
 
 import { COMMON } from './common.js';
 import { SETTINGS } from './settings.js';
+import { PLACES } from './places.js';
+import { FOODS } from './foods.js';
+import { STOCK } from './stock.js';
+import { PRODUCT } from './product.js';
+import { CAPTURE } from './capture.js';
 
-export const STRINGS = { ...COMMON, ...SETTINGS };
+export const STRINGS = { ...COMMON, ...SETTINGS, ...PLACES, ...FOODS, ...STOCK, ...PRODUCT, ...CAPTURE };

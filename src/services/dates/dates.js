@@ -1,6 +1,6 @@
 // Kookia — Dates au format AAAA-MM-JJ (heure locale).
 
-import { localeTag } from '../i18n/i18n.js';
+import { localeTag, t } from '../i18n/i18n.js';
 
 export const DAY = 86_400_000;
 
@@ -68,12 +68,12 @@ export function statusOf(iso, alertDays, today = new Date()) {
 }
 
 export function expiryLabel(iso, today = new Date()) {
-  if (!hasDate(iso)) return 'Date à compléter';
+  if (!hasDate(iso)) return t('status.pending');
   const days = daysUntil(iso, today);
-  if (days < -1) return `Périmé depuis ${-days} jours`;
-  if (days === -1) return 'Périmé depuis hier';
-  if (days === 0) return "Expire aujourd'hui";
-  if (days === 1) return 'Expire demain';
-  if (days <= 30) return `Expire dans ${days} jours`;
-  return `Jusqu'au ${formatDate(iso, { day: 'numeric', month: 'long', year: 'numeric' })}`;
+  if (days < -1) return t('status.expiredDays', { n: -days });
+  if (days === -1) return t('status.expiredYesterday');
+  if (days === 0) return t('status.today');
+  if (days === 1) return t('status.tomorrow');
+  if (days <= 30) return t('status.inDays', { n: days });
+  return t('status.until', { date: formatDate(iso, { day: 'numeric', month: 'long', year: 'numeric' }) });
 }
