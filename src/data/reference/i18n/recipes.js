@@ -65,6 +65,9 @@ export const RECIPES = {
   'difficulty.moyen': ['Moyen', 'Medium', 'Media', 'Média'],
   'difficulty.difficile': ['Difficile', 'Hard', 'Difícil', 'Difícil'],
   'time.any': ['Peu importe', 'Any', 'Cualquiera', 'Tanto faz'],
+  'time.min': ['{n} min', '{n} min', '{n} min', '{n} min'],
+  'time.h': ['{h} h', '{h} hr', '{h} h', '{h} h'],
+  'time.hm': ['{h} h {m}', '{h} hr {m} min', '{h} h {m} min', '{h} h {m} min'],
 
   // Origines
   'origin.monde': ['Tour du monde', 'Around the world', 'Vuelta al mundo', 'Volta ao mundo'],

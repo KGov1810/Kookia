@@ -2,6 +2,7 @@
 
 import { originOf } from '../../data/reference/origins.js';
 import { daysUntil, hasDate } from '../dates/dates.js';
+import { t } from '../i18n/i18n.js';
 import { nameTokens } from '../text/text.js';
 
 /** Nombre maximal d'ingrédients à acheter par recette. */
@@ -52,11 +53,12 @@ export function lacksTagsFor(recipe, filters) {
   return Boolean(filters.origins?.length) && !recipe.origin;
 }
 
-export function formatMinutes(minutes) {
-  if (minutes < 60) return `${Math.max(0, minutes)} min`;
+/** « 45 min », « 1 h 15 », « 2 h » (« 1 hr 15 min » en anglais). */
+export function formatMinutes(minutes, lang) {
+  if (minutes < 60) return t('time.min', { n: Math.max(0, minutes) }, lang);
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
-  return m ? `${h} h ${String(m).padStart(2, '0')}` : `${h} h`;
+  return m ? t('time.hm', { h, m: String(m).padStart(2, '0') }, lang) : t('time.h', { h }, lang);
 }
 
 export function filterLines(filters) {

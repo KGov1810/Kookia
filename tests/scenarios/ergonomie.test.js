@@ -120,6 +120,12 @@ test('Ergonomie : recettes, glisser, courses, réglages', async () => {
   await click('.product[data-id="yaourt"] [data-action="edit"]');
   log(sheet().textContent.includes('Use by') && sheet().querySelector('.tile-consume').textContent === 'Used' && sheet().textContent.includes('Storage') && sheet().querySelector('.days').getAttribute('aria-label') === 'Expires tomorrow', 'Anglais : fiche produit traduite (« Use by », « Used », « Storage »)');
   await click('.sheet [data-action="close"]');
+  await click('.tab[data-tab="recettes"]');
+  log($('h1').textContent === 'Recipes' && text().includes('Use first') && text().includes('Suggest 5 recipes') && text().includes('My recipes') && $('[data-action="recipe-tab"][data-value="toutes"]')?.textContent.startsWith('All'), 'Anglais : Recettes traduites (« Use first », « Suggest 5 recipes », « My recipes »)');
+  await click('[data-action="recipe-mode"][data-value="semaine"]');
+  log(text().includes('Plan the week'), 'Anglais : Semaine traduite (« Plan the week »)');
+  await click('[data-action="recipe-mode"][data-value="idees"]');
+  await click('.tab[data-tab="frigo"]');
   await click('[data-action="open-settings"]');
   await setLang('pt');
   log($('h1').textContent === 'Ajustes' && $('.tab[data-tab="stock"], .tab[data-tab="frigo"]').textContent.includes('Estoque'), 'Portugais : « Ajustes », « Estoque »');

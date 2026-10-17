@@ -71,6 +71,9 @@ h2.section .today-badge { font: 800 12px/1.2 var(--font); color: var(--on-cta); 
 .slot-line { display: flex; align-items: center; gap: 12px; }
 
 .week-slot .meal { flex: none; width: 40px; font-size: 13px; font-weight: 700; color: var(--herb); }
+/* « Almuerzo », « Almoço » : colonne plus large, pour que les vignettes restent alignées. */
+html:lang(es) .week-slot .meal { width: 58px; }
+html:lang(pt) .week-slot .meal { width: 48px; }
 
 .week-recipe { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; text-align: left; }
 
