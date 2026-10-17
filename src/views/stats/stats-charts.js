@@ -2,6 +2,7 @@
 
 import { html, raw } from '../../components/html.js';
 import * as R from '../../data/reference/index.js';
+import { t } from '../../services/i18n/i18n.js';
 import * as S from '../../services/index.js';
 import { ui } from '../app/ui-state.js';
 import { periodPhrase } from './stats-summary.js';
@@ -13,14 +14,14 @@ function share(value, max) {
 }
 
 function monthSentence(row) {
-  return `${S.monthLabel(row.month, { long: true })} : ${S.formatEuro(row.spent)} dépensés, dont ${S.formatEuro(row.wasted)} jetés`;
+  return t('spent.sentence', { month: S.monthLabel(row.month, { long: true }), spent: S.formatEuro(row.spent), wasted: S.formatEuro(row.wasted) });
 }
 
 /** « 129,00 € dépensés en octobre, dont 3,00 € jetés » (le montant en gras ; l'année si ce n'est pas celle-ci). */
 function monthDetail(row) {
-  const long = S.monthLabel(row.month, { long: true }).toLowerCase();
-  const month = row.month.startsWith(String(new Date().getFullYear())) ? long.replace(/ \d{4}$/, '') : long;
-  return html`<p class="month-detail" aria-live="polite"><b>${S.formatEuro(row.spent)}</b> dépensés en ${month}, dont ${S.formatEuro(row.wasted)} jetés</p>`;
+  const month = S.inSentence(S.monthLabel(row.month, { long: true, year: !row.month.startsWith(String(new Date().getFullYear())) }));
+  const [before, after] = t('spent.detail', { month, wasted: S.formatEuro(row.wasted) }).split('{spent}');
+  return html`<p class="month-detail" aria-live="polite">${before}<b>${S.formatEuro(row.spent)}</b>${after}</p>`;
 }
 
 /** Graduations « rondes » de l'axe : 0, 50, 100, 150 € pour un maximum de 129 €. */
@@ -40,18 +41,18 @@ function niceTicks(max) {
 export function monthSection(movements, allMovements, summary) {
   const total = html`<p class="stats-spent"><strong>${S.formatEuro(summary.spent)}</strong> <span>${periodPhrase(ui.stats.period)}</span></p>`;
   if (ui.stats.period === 'mois') {
-    return html`<section class="group stats-months"><div class="months-head"><h2>Dépensé ce mois-ci</h2></div>${total}</section>`;
+    return html`<section class="group stats-months"><div class="months-head"><h2>${t('spent.thisMonth')}</h2></div>${total}</section>`;
   }
   const months = S.periodMonths(ui.stats.period, allMovements);
   const rows = S.monthlyTotals(movements, months);
   const ticks = niceTicks(Math.max(0, ...rows.map((r) => r.spent)));
   const top = ticks.at(-1);
   const picked = rows.find((r) => r.month === ui.stats.month) ?? rows.at(-1);
-  const toggle = html`<button class="pill-btn outline" data-action="stats-table" aria-pressed="${String(ui.stats.table)}">${ui.stats.table ? 'Graphique' : 'Tableau'}</button>`;
+  const toggle = html`<button class="pill-btn outline" data-action="stats-table" aria-pressed="${String(ui.stats.table)}">${t(ui.stats.table ? 'spent.chart' : 'spent.table')}</button>`;
   const chart = html`
     <div class="month-plot">
-      ${ticks.map((t) => html`<span class="month-tick" style="${raw(`bottom: calc(26px + ${(t / top) * 100} * (100% - 26px) / 100)`)}" aria-hidden="true"><i>${t ? `${String(t).replace('.', ',')} €` : '0'}</i></span>`)}
-      <div class="month-chart" role="group" aria-label="Dépensé par mois">
+      ${ticks.map((tick) => html`<span class="month-tick" style="${raw(`bottom: calc(26px + ${(tick / top) * 100} * (100% - 26px) / 100)`)}" aria-hidden="true"><i>${tick ? S.formatEuro(tick).replace(/[.,]00(?=\D|$)/, '') : '0'}</i></span>`)}
+      <div class="month-chart" role="group" aria-label="${t('spent.byMonth')}">
         ${rows.map((row) => html`
           <button class="month-col" data-action="stats-month" data-value="${row.month}" aria-pressed="${String(row === picked)}" aria-label="${monthSentence(row)}">
             <span class="bars" aria-hidden="true"><i class="spent" style="${raw(`height: ${row.spent > 0 ? Math.max(2, (row.spent / top) * 100) : 0}%`)}"></i></span>
@@ -61,12 +62,12 @@ export function monthSection(movements, allMovements, summary) {
     </div>`;
   const table = html`
     <table class="month-table">
-      <thead><tr><th scope="col">Mois</th><th scope="col">Dépensé</th><th scope="col">Jeté</th></tr></thead>
+      <thead><tr><th scope="col">${t('spent.month')}</th><th scope="col">${t('spent.spent')}</th><th scope="col">${t('spent.wasted')}</th></tr></thead>
       <tbody>${[...rows].reverse().map((row) => html`<tr><th scope="row">${S.monthLabel(row.month, { long: true })}</th><td>${S.formatEuro(row.spent)}</td><td>${S.formatEuro(row.wasted)}</td></tr>`)}</tbody>
     </table>`;
   return html`
     <section class="group stats-months">
-      <div class="months-head"><h2>Dépensé par mois</h2>${toggle}</div>
+      <div class="months-head"><h2>${t('spent.byMonth')}</h2>${toggle}</div>
       ${total}
       ${ui.stats.table ? table : html`${monthDetail(picked)}${chart}`}
     </section>`;
@@ -78,15 +79,17 @@ export function categorySection(movements) {
   if (!rows.length) return '';
   const max = Math.max(...rows.map((r) => r.spent));
   return html`
-    <h2 class="section">Dépenses par catégorie</h2>
+    <h2 class="section">${t('spent.byCategory')}</h2>
     <section class="group stats-categories">
       ${rows.map((row) => {
         const cat = R.category(row.category);
+        const name = S.categoryName(cat.id);
+        const wasted = row.wasted ? t('spent.catWasted', { wasted: S.formatEuro(row.wasted) }) : '';
         return html`
-          <button class="cat-row" data-action="stats-category" data-value="cat:${cat.id}" aria-label="${cat.label} : ${S.formatEuro(row.spent)} dépensés${row.wasted ? `, ${S.formatEuro(row.wasted)} jetés` : ''}. Filtrer sur cette catégorie">
-            <span class="cat-head"><span>${cat.emoji} ${cat.label}</span><b>${S.formatEuro(row.spent)}</b></span>
+          <button class="cat-row" data-action="stats-category" data-value="cat:${cat.id}" aria-label="${t('spent.catAria', { category: name, spent: S.formatEuro(row.spent), wasted })}">
+            <span class="cat-head"><span>${cat.emoji} ${name}</span><b>${S.formatEuro(row.spent)}</b></span>
             <span class="cat-bar" aria-hidden="true"><i style="${raw(`width: ${share(row.spent, max)}%`)}"></i></span>
-            ${row.wasted ? html`<small class="cat-waste">Jeté : ${S.formatEuro(row.wasted)}</small>` : ''}
+            ${row.wasted ? html`<small class="cat-waste">${t('spent.catWaste', { wasted: S.formatEuro(row.wasted) })}</small>` : ''}
           </button>`;
       })}
     </section>`;

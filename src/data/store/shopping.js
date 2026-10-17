@@ -3,7 +3,7 @@
 import { setDoc, updateDoc, writeBatch } from 'firebase/firestore';
 import { sanitizeCount, splitItemName, toShoppingEntry } from '../../services/quantities/quantities.js';
 import { db } from './connection.js';
-import { logChange } from './history.js';
+import { countName, logChange } from './history.js';
 import { state } from './state.js';
 import { canWrite, ref, write } from './writes.js';
 
@@ -31,7 +31,7 @@ export function addShoppingItem(name, quantity = '', { updateQuantity = false, l
     return false;
   }
   const id = crypto.randomUUID();
-  if (log) logChange({ scope: 'courses', action: 'ajout', name: trimmed, itemId: id, details: [amount ? `quantité : ${amount}` : ''] });
+  if (log) logChange({ scope: 'courses', action: 'ajout', name: trimmed, itemId: id, details: [amount ? { k: 'hist.qty', p: { qty: amount } } : ''] });
   write(setDoc(ref('courses', id), {
     name: trimmed, quantity: amount, checked: false, addedBy: state.settings.userName, createdAt: Date.now()
   }));
@@ -47,8 +47,9 @@ export function updateShoppingItem(id, patch, { log = true } = {}) {
   const item = state.shopping.find((i) => i.id === id);
   if (log && item) {
     const changes = [];
-    if (data.name !== undefined && data.name !== item.name) changes.push(`Nom : ${item.name} → ${data.name}`);
-    if (data.quantity !== undefined && data.quantity !== (item.quantity ?? '')) changes.push(`Quantité : ${item.quantity || '—'} → ${data.quantity || '—'}`);
+    const change = (field, from, to) => changes.push({ k: 'hist.change', p: { field: { k: `hfield.${field}` }, from, to } });
+    if (data.name !== undefined && data.name !== item.name) change('name', item.name, data.name);
+    if (data.quantity !== undefined && data.quantity !== (item.quantity ?? '')) change('shopQty', item.quantity || '—', data.quantity || '—');
     if (changes.length) logChange({ scope: 'courses', action: 'modification', name: data.name ?? item.name, itemId: id, details: changes });
   }
   if (Object.keys(data).length) write(updateDoc(ref('courses', id), data));
@@ -68,7 +69,7 @@ export function deleteShoppingItems(ids, { log = true, reason = '' } = {}) {
   if (log) {
     state.shopping.filter((i) => ids.includes(i.id)).forEach((i) => logChange({
       scope: 'courses', action: reason === 'rangement' ? 'rangement' : 'suppression', name: i.name, itemId: i.id,
-      details: [i.quantity ? `quantité : ${i.quantity}` : '']
+      details: [i.quantity ? { k: 'hist.qty', p: { qty: i.quantity } } : '']
     }));
   }
   const batch = writeBatch(db);
@@ -79,6 +80,6 @@ export function deleteShoppingItems(ids, { log = true, reason = '' } = {}) {
 export function clearCheckedShopping() {
   const checked = state.shopping.filter((i) => i.checked);
   if (!checked.length) return;
-  logChange({ scope: 'courses', action: 'panier', name: `${checked.length} article${checked.length > 1 ? 's' : ''}`, details: [checked.map((i) => i.name).join(', ')] });
+  logChange({ scope: 'courses', action: 'panier', name: countName('count.items', checked.length), details: [checked.map((i) => i.name).join(', ')] });
   deleteShoppingItems(checked.map((i) => i.id), { log: false });
 }

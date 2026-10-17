@@ -1,5 +1,7 @@
 // Kookia — Ouverture de la caméra arrière.
 
+import { t } from '../i18n/i18n.js';
+
 /**
  * Ouvre la caméra arrière dans l'élément vidéo.
  * Gérée ici plutôt que par ZXing : si iOS refuse de lancer la vidéo, ZXing l'ignore
@@ -7,7 +9,7 @@
  */
 export async function startCamera(video) {
   if (!navigator.mediaDevices?.getUserMedia) {
-    throw Object.assign(new Error('Caméra non disponible dans ce navigateur.'), { name: 'NotSupportedError' });
+    throw Object.assign(new Error(t('device.noCamera')), { name: 'NotSupportedError' });
   }
   const attempts = [
     { audio: false, video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } } },
@@ -25,7 +27,7 @@ export async function startCamera(video) {
       if (error?.name === 'NotAllowedError' || error?.name === 'SecurityError') throw error;
     }
   }
-  if (!stream) throw lastError ?? new Error('Caméra indisponible.');
+  if (!stream) throw lastError ?? new Error(t('device.cameraUnavailable'));
 
   // Indispensables sur iPhone pour lire la vidéo sans plein écran ni son.
   video.setAttribute('playsinline', '');

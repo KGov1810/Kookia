@@ -6,6 +6,7 @@ import { openSheet } from '../../components/sheet.js';
 import { toast } from '../../components/toast.js';
 import * as store from '../../data/store/index.js';
 import { state } from '../../data/store/state.js';
+import { t } from '../../services/i18n/i18n.js';
 import * as S from '../../services/index.js';
 import { moveItemToFridge } from './shopping-view.js';
 
@@ -20,22 +21,22 @@ export function openShoppingItem(id) {
   const sheet = openSheet({
     render: () => html`
       <header class="sheet-head">
-        <button class="link" data-action="close">Annuler</button>
-        <h2>Article</h2>
-        <button class="link strong" data-action="save">OK</button>
+        <button class="link" data-action="close">${t('common.cancel')}</button>
+        <h2>${t('item.title')}</h2>
+        <button class="link strong" data-action="save">${t('common.ok')}</button>
       </header>
       <div class="sheet-body">
         <section class="group">
-          <label class="field"><span>Article</span><input name="name" value="${draft.name}" autocomplete="off"></label>
-          <label class="field"><span>Nombre à acheter</span><input name="quantity" value="${draft.quantity}" placeholder="—" inputmode="numeric" pattern="[0-9]*" maxlength="3" autocomplete="off" enterkeyhint="done"></label>
+          <label class="field"><span>${t('item.title')}</span><input name="name" value="${draft.name}" autocomplete="off"></label>
+          <label class="field"><span>${t('item.count')}</span><input name="quantity" value="${draft.quantity}" placeholder="—" inputmode="numeric" pattern="[0-9]*" maxlength="3" autocomplete="off" enterkeyhint="done"></label>
         </section>
         <div class="quick">
           ${['1', '2', '3', '4', '6'].map((n) => html`<button data-action="set-qty" data-value="${n}">${n}</button>`)}
-          <button data-action="set-qty" data-value="">Aucune</button>
+          <button data-action="set-qty" data-value="">${t('item.noCount')}</button>
         </div>
         <section class="group">
-          <button class="row-button" data-action="to-fridge">${I.jar}Acheté : ranger dans le stock</button>
-          <button class="row-button danger" data-action="delete">${I.trash}Supprimer de la liste</button>
+          <button class="row-button" data-action="to-fridge">${I.jar}${t('item.bought')}</button>
+          <button class="row-button danger" data-action="delete">${I.trash}${t('item.remove')}</button>
         </section>
       </div>`,
     actions: {
@@ -56,7 +57,7 @@ export function openShoppingItem(id) {
       delete: () => {
         store.deleteShoppingItems([id]);
         sheet.close();
-        toast(`${item.name} : supprimé`, 'Annuler', () => store.addShoppingItem(item.name, item.quantity));
+        toast(t('shop.deleted', { name: item.name }), t('common.cancel'), () => store.addShoppingItem(item.name, item.quantity));
       }
     },
     onInput: (event) => {

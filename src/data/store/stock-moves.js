@@ -6,7 +6,7 @@ import { freezerLimit } from '../../services/stock/stock-dates.js';
 import { unitsAmount } from '../../services/stock/opened.js';
 import { logChange } from './history.js';
 import { recordMovement } from './movements.js';
-import { restText, takeAmounts } from './opening.js';
+import { restRich, takeAmounts } from './opening.js';
 import { removeProducts, saveProduct } from './products.js';
 import { state } from './state.js';
 import { canWrite } from './writes.js';
@@ -17,7 +17,7 @@ const byIds = (ids) => state.products.filter((p) => ids.includes(p.id));
 export function consumeOne(ids, { reason = '' } = {}) {
   return takeAmounts(byIds(ids).map((product) => ({ product, amount: unitsAmount(product, 1) })), {
     type: 'consomme',
-    details: (_p, rest) => [restText(rest, 'fr'), reason]
+    details: (_p, rest) => [restRich(rest), reason]
   });
 }
 
@@ -27,7 +27,7 @@ function takeChosen(id, units, type, unitPrice) {
   return takeAmounts(byIds([id]).map((product) => ({ product, amount: unitsAmount(product, n) })), {
     type,
     unitPrice,
-    details: (p, rest) => [(p.count ?? 1) > 1 ? `${Math.min(n, p.count)} sur ${p.count}` : '', restText(rest, 'fr')]
+    details: (p, rest) => [(p.count ?? 1) > 1 ? { k: 'units.ofTotal', p: { n: Math.min(n, p.count), total: p.count } } : '', restRich(rest)]
   });
 }
 
@@ -42,7 +42,7 @@ export function discardUnits(id, units, { unitPrice } = {}) {
 /** Recette cuisinée : uses [{ id, amount }] en unités (0,4 = 200 g d'un paquet de 500 g). */
 export function consumeAmounts(uses, { reason = '' } = {}) {
   const entries = uses.map(({ id, amount }) => ({ product: state.products.find((p) => p.id === id), amount })).filter((e) => e.product);
-  return takeAmounts(entries, { type: 'consomme', details: (_p, rest) => [restText(rest, 'fr'), reason] });
+  return takeAmounts(entries, { type: 'consomme', details: (_p, rest) => [restRich(rest), reason] });
 }
 
 /**
@@ -64,7 +64,7 @@ export function freezeUnits(product, units) {
     return { before, frozenId: '', product: { ...product, ...frozen } };
   }
   const frozenId = crypto.randomUUID();
-  logChange({ scope: 'stock', action: 'congelation', name: product.name, itemId: product.id, details: [`${taken} sur ${total}`, `il en reste ${total - taken}`] });
+  logChange({ scope: 'stock', action: 'congelation', name: product.name, itemId: product.id, details: [{ k: 'units.ofTotal', p: { n: taken, total } }, { k: 'rest.whole', p: { n: total - taken } }] });
   saveProduct({ ...product, count: total - taken }, { log: false });
   saveProduct({ ...product, ...frozen, id: frozenId, count: taken, createdAt: Date.now() }, { log: false, purchase: false });
   return { before, frozenId, product: { ...product, ...frozen } };
@@ -74,7 +74,7 @@ export function freezeUnits(product, units) {
 export function undoFreeze({ before, frozenId }) {
   if (!canWrite()) return;
   if (frozenId) removeProducts([frozenId], { log: false });
-  logChange({ scope: 'stock', action: 'annulation', name: before.name, itemId: before.id, details: ['congélation annulée'] });
+  logChange({ scope: 'stock', action: 'annulation', name: before.name, itemId: before.id, details: [{ k: 'hist.freezeUndone' }] });
   saveProduct(before, { log: false });
 }
 

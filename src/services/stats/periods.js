@@ -39,11 +39,11 @@ export function periodMonths(id, movements = [], now = new Date()) {
 }
 
 /** « Octobre 2026 » (long), « oct » (court) ou « O » (une lettre, quand les mois sont nombreux). */
-export function monthLabel(key, { long = false, narrow = false } = {}) {
+export function monthLabel(key, { long = false, narrow = false, year: withYear = true } = {}) {
   const [year, month] = key.split('-').map(Number);
   const date = new Date(year, month - 1, 1);
   if (long) {
-    const text = date.toLocaleDateString(localeTag(), { month: 'long', year: 'numeric' });
+    const text = date.toLocaleDateString(localeTag(), withYear ? { month: 'long', year: 'numeric' } : { month: 'long' });
     return text.charAt(0).toUpperCase() + text.slice(1);
   }
   if (narrow) return date.toLocaleDateString(localeTag(), { month: 'narrow' }).toUpperCase();

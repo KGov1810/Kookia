@@ -4,7 +4,7 @@
 
 import { deleteDoc, setDoc } from 'firebase/firestore';
 import { planDayIndex } from '../../services/claude/week-plan.js';
-import { logChange } from './history.js';
+import { countName, logChange } from './history.js';
 import { saveRecipes } from './recipes.js';
 import { addShoppingItem } from './shopping.js';
 import { emit, state } from './state.js';
@@ -30,7 +30,7 @@ export function saveWeekPlan({ recipes, slots, batch, shopping, strategy, start,
     createdAt: Date.now(),
     createdBy: state.settings.userName || ''
   };
-  logChange({ scope: 'recettes', action: 'planning', name: `${plan.slots.length} repas`, details: [recipes.map((r) => r.title).join(', ')] });
+  logChange({ scope: 'recettes', action: 'planning', name: countName('count.meals', plan.slots.length), details: [recipes.map((r) => r.title).join(', ')] });
   writePlan(plan);
   return plan;
 }

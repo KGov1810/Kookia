@@ -39,7 +39,7 @@ export function cookRecipe(recipe, { factor = planFactor(recipe), confirm = fals
     const list = uses.map((u) => `• ${u.product.name} : ${u.computed && u.quantity ? u.quantity : t('qty.units', { n: 1 })} → ${store.restText(S.splitAfter(u.product, u.amount))}`).join('\n');
     if (!window.confirm(`${t('cook.confirm')}\n${list}`)) return;
   }
-  const done = store.consumeAmounts(uses.map((u) => ({ id: u.product.id, amount: u.amount })), { reason: `recette « ${recipe.title} »` });
+  const done = store.consumeAmounts(uses.map((u) => ({ id: u.product.id, amount: u.amount })), { reason: { k: 'hist.recipe', p: { title: recipe.title } } });
   store.markPlanCooked(recipe.id); // repas coché dans le planning de la semaine
   const text = t('cook.updated', { n: done.before.length });
   toast(done.before.length <= 3 ? t('cook.detail', { text, names: namesText(done.before) }) : text, t('common.cancel'), () => {

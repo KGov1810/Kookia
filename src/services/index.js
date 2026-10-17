@@ -19,6 +19,7 @@ export * from './device/script-loader.js';
 export * from './external/open-food-facts.js';
 export * from './i18n/i18n.js';
 export * from './i18n/labels.js';
+export * from './i18n/rich.js';
 export * from './quantities/portions.js';
 export * from './quantities/quantities.js';
 export * from './quantities/weights.js';

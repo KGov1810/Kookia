@@ -41,7 +41,10 @@ export function formatEuro(value) {
 /** Valeur du champ de saisie : « 2,49 », ou vide si le prix est inconnu. */
 export function priceInputValue(value) {
   const price = cleanPrice(value);
-  return price === null ? '' : roundCents(price).toFixed(2).replace('.', ',');
+  if (price === null) return '';
+  // Virgule ou point selon la langue : « 2,49 » en français, « 2.49 » en anglais.
+  const mark = new Intl.NumberFormat(localeTag()).formatToParts(1.5).find((part) => part.type === 'decimal')?.value ?? ',';
+  return roundCents(price).toFixed(2).replace('.', mark);
 }
 
 /** Montant d'un lot : prix unitaire × nombre (null si le prix est inconnu). */

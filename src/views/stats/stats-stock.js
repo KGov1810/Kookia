@@ -2,30 +2,33 @@
 
 import { html } from '../../components/html.js';
 import { I } from '../../components/icons.js';
-import * as R from '../../data/reference/index.js';
 import { state } from '../../data/store/state.js';
+import { t } from '../../services/i18n/i18n.js';
 import * as S from '../../services/index.js';
+
+/** « 12,40 € à consommer vite, sur 3 produits », le montant en gras. */
+function soonText(value) {
+  const [before, after] = t('sstock.soon', { n: value.soonCount }).split('{amount}');
+  return html`${before}<b>${S.formatEuro(value.soon)}</b>${after}`;
+}
 
 export function stockCard() {
   const value = S.stockValue(state.products, state.settings.alertDays);
-  if (!value.count) return html`<section class="stats-stock empty-stock"><p class="hint">Le stock est vide pour l'instant.</p></section>`;
+  if (!value.count) return html`<section class="stats-stock empty-stock"><p class="hint">${t('sstock.empty')}</p></section>`;
   const priced = value.count - value.unpriced;
   return html`
-    <section class="stats-stock" aria-label="Valeur du stock en ce moment">
-      <p class="stock-total"><span>En stock maintenant</span><strong>${S.formatEuro(value.total)}</strong></p>
+    <section class="stats-stock" aria-label="${t('sstock.aria')}">
+      <p class="stock-total"><span>${t('sstock.now')}</span><strong>${S.formatEuro(value.total)}</strong></p>
       ${priced ? html`
         <div class="stock-places">
           ${value.places.map((place) => {
-            const loc = R.locationOf(place.location);
-            return html`<p class="stock-place"><span>${loc.label}</span><b>${S.formatEuro(place.amount)}</b></p>`;
+            return html`<p class="stock-place"><span>${S.placeName(place.location)}</span><b>${S.formatEuro(place.amount)}</b></p>`;
           })}
         </div>` : ''}
       ${value.soon > 0 ? html`
         <button class="stock-soon" data-action="stats-soon">
-          <span><b>${S.formatEuro(value.soon)}</b> à consommer vite, sur ${S.plural(value.soonCount, 'produit')}</span>${I.chevron}
+          <span>${soonText(value)}</span>${I.chevron}
         </button>` : ''}
-      ${value.unpriced ? html`<p class="hint stock-unpriced">${priced
-        ? `${S.plural(value.unpriced, 'produit')} sans prix ${value.unpriced > 1 ? 'ne sont' : 'n\'est'} pas compté${value.unpriced > 1 ? 's' : ''}.`
-        : 'Aucun produit en stock n\'a encore de prix : ajoutez-le dans leur fiche, ou scannez vos tickets de caisse.'}</p>` : ''}
+      ${value.unpriced ? html`<p class="hint stock-unpriced">${priced ? t('sstock.unpriced', { n: value.unpriced }) : t('sstock.noPrice')}</p>` : ''}
     </section>`;
 }

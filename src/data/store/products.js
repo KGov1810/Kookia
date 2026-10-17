@@ -8,7 +8,7 @@ import { remainingOf, stockAmount } from '../../services/stock/opened.js';
 import { breadDays, dateKindOf, estimateFreshDays, freezerLimit } from '../../services/stock/stock-dates.js';
 import { locationOf } from '../reference/locations.js';
 import { db } from './connection.js';
-import { logChange, productDiff, productSummary } from './history.js';
+import { countName, logChange, productDiff, productSummary } from './history.js';
 import { CATEGORY_VERSION } from './mappers.js';
 import { cancelLastMovements, recordMovement } from './movements.js';
 import { rememberPrices } from './prices.js';
@@ -66,7 +66,7 @@ export function removeProducts(ids, { log = true, reason = '', movement = '', un
   const removed = state.products.filter((p) => ids.includes(p.id));
   if (!removed.length) return [];
   if (log) {
-    removed.forEach((p) => logChange({ scope: 'stock', action: 'suppression', name: p.name, itemId: p.id, details: [reason, quantityLabel(p)] }));
+    removed.forEach((p) => logChange({ scope: 'stock', action: 'suppression', name: p.name, itemId: p.id, details: [reason, { qty: { count: p.count ?? 1, quantity: p.quantity ?? '' } }] }));
   }
   if (movement) {
     removed.forEach((p) => recordMovement(movement, unitPrice === undefined ? p : { ...p, unitPrice }, stockAmount(p)));
@@ -82,7 +82,8 @@ export function removeProducts(ids, { log = true, reason = '', movement = '', un
 export function restoreProducts(products, { movements = true } = {}) {
   if (movements) cancelLastMovements(products.map((p) => p.id));
   products.forEach((p) => {
-    logChange({ scope: 'stock', action: 'annulation', name: p.name, itemId: p.id, details: [quantityLabel(p) ? `remis en stock : ${quantityLabel(p)}` : 'remis en stock'] });
+    const qty = { qty: { count: p.count ?? 1, quantity: p.quantity ?? '' } };
+    logChange({ scope: 'stock', action: 'annulation', name: p.name, itemId: p.id, details: [quantityLabel(p) ? { k: 'hist.restockedQty', p: { qty } } : { k: 'hist.restocked' }] });
     saveProduct(p, { log: false });
   });
 }
@@ -144,8 +145,9 @@ export function addReceiptProducts(items, shoppingIdsToRemove = [], { source = '
   rememberPrices(added);
   const bought = state.shopping.filter((i) => shoppingIdsToRemove.includes(i.id)).map((i) => i.name);
   const names = items.map((i) => (i.count > 1 ? `${i.name} ×${i.count}` : i.name)).join(', ');
+  const name = countName('count.products', items.length);
   logChange(source === 'courses'
-    ? { scope: 'courses', action: 'rangement', name: `${items.length} produit${items.length > 1 ? 's' : ''}`, details: [names] }
-    : { scope: 'stock', action: 'ticket', name: `${items.length} produit${items.length > 1 ? 's' : ''}`, details: [names, bought.length ? `retirés des courses : ${bought.join(', ')}` : ''] });
+    ? { scope: 'courses', action: 'rangement', name, details: [names] }
+    : { scope: 'stock', action: 'ticket', name, details: [names, bought.length ? { k: 'hist.fromList', p: { names: bought.join(', ') } } : ''] });
   return items.length;
 }

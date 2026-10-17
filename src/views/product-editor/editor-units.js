@@ -70,7 +70,7 @@ const RUN = {
     const total = inStock(ctx);
     // Tout d'un coup : « tout consommé » dans l'historique ; une partie : « 2 sur 10, il en reste 8 ».
     if (units >= total) {
-      const before = store.removeProducts([p.id], { reason: 'tout consommé', movement: 'consomme', ...price(ctx) });
+      const before = store.removeProducts([p.id], { reason: { k: 'hist.allConsumed' }, movement: 'consomme', ...price(ctx) });
       if (before.length) toast(outMessage(before[0], total, 'consumed'), t('common.cancel'), () => store.restoreProducts(before));
       return;
     }

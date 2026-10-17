@@ -1,5 +1,6 @@
 // Kookia — Recherche d'un produit par code-barres (Open Food Facts).
 
+import { t } from '../i18n/i18n.js';
 import { guessCategory } from '../stock/categorization.js';
 
 // Étiquettes Open Food Facts (« en:dry-pastas ») → catégorie. On teste la fin de l'étiquette
@@ -55,7 +56,7 @@ export async function lookupBarcode(code) {
   const fields = 'product_name,product_name_fr,generic_name_fr,brands,quantity,image_front_small_url,categories_tags';
   const response = await fetch(`https://world.openfoodfacts.org/api/v2/product/${digits}.json?fields=${fields}`);
   if (response.status === 404) return null;
-  if (!response.ok) throw new Error(`Open Food Facts indisponible (${response.status}).`);
+  if (!response.ok) throw new Error(t('off.unavailable', { status: response.status }));
   const json = await response.json();
   const product = json.product;
   if (json.status !== 1 || !product) return null;

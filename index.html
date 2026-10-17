@@ -18,11 +18,20 @@
   <script>
     // Secours : si le style ou le code de l'app ne se charge pas (page périmée juste après une mise à jour),
     // on recharge une fois depuis le serveur ; sinon, un bouton vide les caches de l'app et recharge.
-    // Apparence forcée dans Réglages : appliquée avant le premier affichage (pas d'éclair de l'autre thème).
-    try {
-      var theme = JSON.parse(localStorage.getItem('frigo.settings.v1') || '{}').theme;
-      if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
-    } catch (e) {}
+    // Apparence et langue choisies dans Réglages : appliquées avant le premier affichage (pas d'éclair).
+    var KOOKIA_LANG = 'fr';
+    (function () {
+      var saved = {};
+      try { saved = JSON.parse(localStorage.getItem('frigo.settings.v1') || '{}'); } catch (e) {}
+      if (saved.theme === 'light' || saved.theme === 'dark') document.documentElement.dataset.theme = saved.theme;
+      var known = ['fr', 'en', 'es', 'pt'];
+      var wanted = [saved.language || ''].concat(navigator.languages || [navigator.language || 'fr']);
+      for (var i = 0; i < wanted.length; i++) {
+        var id = String(wanted[i]).toLowerCase().split('-')[0];
+        if (known.indexOf(id) >= 0) { KOOKIA_LANG = id; break; }
+      }
+      document.documentElement.lang = KOOKIA_LANG;
+    })();
     (function () {
       var KEY = 'kookia.reload';
       function tries() { try { return Number(sessionStorage.getItem(KEY) || 0); } catch (e) { return 1; } }
@@ -38,9 +47,15 @@
         box.id = 'boot-help';
         box.setAttribute('role', 'alert');
         box.style.cssText = 'position:fixed;inset:0;z-index:99;display:flex;flex-direction:column;justify-content:center;gap:16px;padding:32px;background:#FBF6EC;color:#1D2925;font:17px/1.4 -apple-system,system-ui,sans-serif;text-align:center';
-        box.innerHTML = '<strong style="font-size:20px">Kookia ne s\u2019est pas chargée</strong><span>Vérifiez la connexion internet, puis touchez le bouton. Votre stock ne sera pas perdu : il est enregistré en ligne.</span>';
+        var text = {
+          fr: ['Kookia ne s\u2019est pas chargée', 'Vérifiez la connexion internet, puis touchez le bouton. Votre stock ne sera pas perdu : il est enregistré en ligne.', 'Recharger l\u2019app'],
+          en: ['Kookia didn\u2019t load', 'Check your internet connection, then tap the button. Your stock won\u2019t be lost: it\u2019s saved online.', 'Reload the app'],
+          es: ['Kookia no se cargó', 'Revisa la conexión a internet y toca el botón. Tu inventario no se perderá: está guardado en línea.', 'Recargar la app'],
+          pt: ['O Kookia não carregou', 'Confira a conexão com a internet e toque no botão. Seu estoque não será perdido: ele está salvo online.', 'Recarregar o app']
+        }[KOOKIA_LANG];
+        box.innerHTML = '<strong style="font-size:20px">' + text[0] + '</strong><span>' + text[1] + '</span>';
         var button = document.createElement('button');
-        button.textContent = 'Recharger l\u2019app';
+        button.textContent = text[2];
         button.style.cssText = 'align-self:center;padding:14px 24px;border:0;border-radius:14px;background:#12463E;color:#fff;font:600 17px -apple-system,system-ui,sans-serif';
         button.onclick = reset;
         box.appendChild(button);
@@ -97,5 +112,20 @@
   </nav>
 
   <div id="toast" role="status" aria-live="polite" hidden></div>
+  <script>
+    // Barre du bas dans la langue de l'iPhone dès le premier affichage (mêmes textes que tab.* dans l'app).
+    (function () {
+      var labels = {
+        en: ['Stock', 'Recipes', 'Groceries', 'Stats', 'Main navigation', 'Add a product'],
+        es: ['Inventario', 'Recetas', 'Compras', 'Cifras', 'Navegación principal', 'Agregar un producto'],
+        pt: ['Estoque', 'Receitas', 'Compras', 'Números', 'Navegação principal', 'Adicionar um produto']
+      }[KOOKIA_LANG];
+      if (!labels) return;
+      var spans = document.querySelectorAll('.tabbar .tab span');
+      for (var i = 0; i < spans.length && i < 4; i++) spans[i].textContent = labels[i];
+      document.querySelector('.tabbar').setAttribute('aria-label', labels[4]);
+      document.querySelector('.nav-add').setAttribute('aria-label', labels[5]);
+    })();
+  </script>
 </body>
 </html>

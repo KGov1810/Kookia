@@ -3,6 +3,7 @@
 import { html, setHTML } from '../../components/html.js';
 import * as store from '../../data/store/index.js';
 import { state } from '../../data/store/state.js';
+import { t } from '../../services/i18n/i18n.js';
 import * as S from '../../services/index.js';
 import { ui } from '../app/ui-state.js';
 import { categorySection, monthSection } from './stats-charts.js';
@@ -17,8 +18,8 @@ const REDRAW = ['movements', 'filters', 'sync', 'time', 'settings'];
 export const statsView = {
   render() {
     return html`
-      <header class="top"><div class="top-row"><h1>Statistiques</h1></div><div id="stats-stock"></div></header>
-      <div class="segmented stats-period" id="stats-period" role="group" aria-label="Période (le stock en haut n'en dépend pas)"></div>
+      <header class="top"><div class="top-row"><h1>${t('stats.title')}</h1></div><div id="stats-stock"></div></header>
+      <div class="segmented stats-period" id="stats-period" role="group" aria-label="${t('stats.periodAria')}"></div>
       <div id="stats-body"></div>`;
   },
   mounted() {
@@ -44,7 +45,7 @@ function showPickedMonth() {
 
 function body() {
   const error = state.movementsError ? html`<p class="note warn">${state.movementsError}</p>` : '';
-  if (!store.canWrite()) return html`<p class="hint">Les statistiques s'affichent une fois le foyer connecté.</p>`;
+  if (!store.canWrite()) return html`<p class="hint">${t('stats.noHousehold')}</p>`;
   if (!state.movementsLoaded) return [error, html`<div class="boot small"><span class="spinner"></span></div>`];
   const all = state.movements;
   if (!all.length) return [error, emptyState(false)];

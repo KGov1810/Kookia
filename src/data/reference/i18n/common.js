@@ -11,6 +11,7 @@ export const COMMON = {
   'common.cancel': ['Annuler', 'Cancel', 'Cancelar', 'Cancelar'],
   'common.ok': ['OK', 'OK', 'OK', 'OK'],
   'common.close': ['Fermer', 'Close', 'Cerrar', 'Fechar'],
+  'common.unit': ['Unité', 'Unit', 'Unidad', 'Unidade'],
   'common.edit': ['Modifier', 'Edit', 'Editar', 'Editar'],
   'common.copied': ['Copié', 'Copied', 'Copiado', 'Copiado'],
   'common.copyFailed': ['Copie impossible : sélectionnez le texte et copiez-le à la main.', 'Couldn\'t copy: select the text and copy it by hand.', 'No se pudo copiar: selecciona el texto y cópialo a mano.', 'Não foi possível copiar: selecione o texto e copie à mão.'],

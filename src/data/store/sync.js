@@ -114,17 +114,27 @@ export async function reconnect() {
   await start();
 }
 
-export function syncLabel() {
-  if (!firebaseConfig()) return t('sync.noFirebase');
-  if (!state.settings.householdCode) return t('sync.noHousehold');
-  if (state.error) return t('sync.error');
+/** État de la synchronisation : [clé du texte, valeurs]. */
+function syncState() {
+  if (!firebaseConfig()) return ['sync.noFirebase'];
+  if (!state.settings.householdCode) return ['sync.noHousehold'];
+  if (state.error) return ['sync.error'];
   if (typeof navigator !== 'undefined' && navigator.onLine === false) {
-    return t(state.pending ? 'sync.offlinePending' : 'sync.offline');
+    return [state.pending ? 'sync.offlinePending' : 'sync.offline'];
   }
-  if (state.reconnecting) return t('sync.refreshing');
-  if (!state.connected || (state.fromCache && !state.lastSync)) return t('sync.connecting');
-  if (state.fromCache) return t(state.pending ? 'sync.offlinePending' : 'sync.offline');
-  if (state.pending) return t('sync.sending');
+  if (state.reconnecting) return ['sync.refreshing'];
+  if (!state.connected || (state.fromCache && !state.lastSync)) return ['sync.connecting'];
+  if (state.fromCache) return [state.pending ? 'sync.offlinePending' : 'sync.offline'];
+  if (state.pending) return ['sync.sending'];
   const partner = partnerName();
-  return partner ? t('sync.okWith', { name: partner }) : t('sync.ok');
+  return partner ? ['sync.okWith', { name: partner }] : ['sync.ok'];
+}
+
+export function syncLabel() {
+  return t(...syncState());
+}
+
+/** Vrai quand tout est synchronisé (« Synchronisé avec Marie »). */
+export function isSynced() {
+  return syncState()[0].startsWith('sync.ok');
 }

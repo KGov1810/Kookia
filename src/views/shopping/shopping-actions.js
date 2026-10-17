@@ -7,6 +7,7 @@ import { openTicket } from '../stock/add-menu.js';
 import { openPutAway } from './put-away-sheet.js';
 import { openShoppingItem } from './shopping-item-sheet.js';
 import { moveItemToFridge } from './shopping-view.js';
+import { t } from '../../services/i18n/i18n.js';
 
 /** Actions des boutons (attribut data-action). */
 export const shoppingActions = {
@@ -15,7 +16,7 @@ export const shoppingActions = {
     const item = state.shopping.find((i) => i.id === el.dataset.id);
     if (!item) return;
     store.deleteShoppingItems([item.id]);
-    toast(`${item.name} : supprimé`, 'Annuler', () => store.addShoppingItem(item.name, item.quantity));
+    toast(t('shop.deleted', { name: item.name }), t('common.cancel'), () => store.addShoppingItem(item.name, item.quantity));
   },
   'item-to-fridge': (el) => {
     const item = state.shopping.find((i) => i.id === el.dataset.id);

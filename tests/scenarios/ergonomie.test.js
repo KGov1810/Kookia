@@ -125,7 +125,14 @@ test('Ergonomie : recettes, glisser, courses, réglages', async () => {
   await click('[data-action="recipe-mode"][data-value="semaine"]');
   log(text().includes('Plan the week'), 'Anglais : Semaine traduite (« Plan the week »)');
   await click('[data-action="recipe-mode"][data-value="idees"]');
+  await click('.tab[data-tab="courses"]');
+  log($('h1').textContent === 'Groceries' && $('#new-item').placeholder.startsWith('Add (e.g.'), 'Anglais : Courses traduites');
+  await click('.tab[data-tab="stats"]');
+  log($('h1').textContent === 'Statistics', 'Anglais : Statistiques traduites');
   await click('.tab[data-tab="frigo"]');
+  await click('[data-action="open-history"]');
+  log(sheet().textContent.includes('History') && sheet().textContent.includes('bought and put away') && sheet().textContent.includes('2 products'), `Anglais : historique lu en anglais (${sheet().textContent.replace(/\s+/g, ' ').slice(0, 160)})`);
+  await click('.sheet [data-action="close"]');
   await click('[data-action="open-settings"]');
   await setLang('pt');
   log($('h1').textContent === 'Ajustes' && $('.tab[data-tab="stock"], .tab[data-tab="frigo"]').textContent.includes('Estoque'), 'Portugais : « Ajustes », « Estoque »');

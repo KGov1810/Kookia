@@ -1,10 +1,12 @@
 // Kookia — Redimensionnement des photos.
 
+import { t } from '../i18n/i18n.js';
+
 function loadImage(src) {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => resolve(img);
-    img.onerror = () => reject(new Error('Photo illisible.'));
+    img.onerror = () => reject(new Error(t('device.badPhoto')));
     img.src = src;
   });
 }

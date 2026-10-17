@@ -8,7 +8,7 @@ import { resolveIngredient } from '../../services/stock/matching.js';
 import { stockAmount } from '../../services/stock/opened.js';
 import { recipeUnits } from '../../services/stock/recipe-usage.js';
 import { db } from './connection.js';
-import { logChange } from './history.js';
+import { countName, logChange } from './history.js';
 import { productStatus } from './selectors.js';
 import { addShoppingItem } from './shopping.js';
 import { state } from './state.js';
@@ -16,7 +16,7 @@ import { canWrite, ref, write } from './writes.js';
 
 export function saveRecipes(recipes, { log = true } = {}) {
   if (!canWrite() || !recipes.length) return;
-  if (log) logChange({ scope: 'recettes', action: 'generation', name: `${recipes.length} recette${recipes.length > 1 ? 's' : ''}`, details: [recipes.map((r) => r.title).join(', ')] });
+  if (log) logChange({ scope: 'recettes', action: 'generation', name: countName('count.recipes', recipes.length), details: [recipes.map((r) => r.title).join(', ')] });
   const batch = writeBatch(db);
   recipes.forEach(({ id, ...data }) => batch.set(ref('recettes', id), data));
   // Garde les favoris, les recettes du planning de la semaine et les 40 recettes les plus récentes.

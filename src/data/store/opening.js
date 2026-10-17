@@ -49,6 +49,13 @@ export function restText({ whole, opened }, lang) {
   return whole ? t('rest.both', { n: whole, rest }, lang) : t('rest.opened', { rest }, lang);
 }
 
+/** Même chose en valeur neutre, pour l'historique (lu dans la langue de chaque iPhone). */
+export function restRich({ whole, opened }) {
+  if (!whole && opened === null) return { k: 'rest.none' };
+  if (opened === null) return { k: 'rest.whole', p: { n: whole } };
+  return whole ? { k: 'rest.both', p: { n: whole, rest: { frac: opened } } } : { k: 'rest.opened', p: { rest: { frac: opened } } };
+}
+
 /**
  * Retire des quantités : entries [{ product, amount }] (en unités, 0,4 = 40 % d'une unité).
  * type 'consomme' ou 'jete' (statistiques) ; details(produit, reste) pour l'historique.
@@ -89,6 +96,6 @@ export function openProduct(id, remaining, { unitPrice } = {}) {
     type: 'consomme',
     unitPrice,
     action: 'entame',
-    details: (p) => [(p.count ?? 1) > 1 ? `1 sur ${p.count}` : '', `reste ${remainingLabel(remaining)}`]
+    details: (p) => [(p.count ?? 1) > 1 ? { k: 'units.ofTotal', p: { n: 1, total: p.count } } : '', { k: 'hist.rest', p: { rest: { frac: remaining } } }]
   });
 }

@@ -55,7 +55,7 @@ export function wireEvents() {
     // Un seul champ : « 2 lait » ou « lait x2 » → 2 × Lait ; un poids reste dans le nom (« Farine 1 kg »).
     const { name, quantity } = S.parseShoppingInput(nameInput.value);
     if (!name) {
-      if (nameInput.value.trim()) toast("Indiquez l'article à acheter (ex. 2 lait)");
+      if (nameInput.value.trim()) toast(S.t('shop.needName'));
       nameInput.focus();
       return;
     }
@@ -63,10 +63,10 @@ export function wireEvents() {
     if (result) {
       nameInput.value = '';
       const inStock = stockNote({ name });
-      if (result === 'updated') toast(`${name} : quantité mise à jour (${quantity})`);
-      else if (inStock) toast(`${name} : ajouté. ${inStock}, à vérifier avant d'acheter.`);
+      if (result === 'updated') toast(S.t('shop.qtyUpdated', { name, qty: quantity }));
+      else if (inStock) toast(S.t('shop.addedInStock', { name, left: inStock }));
     } else {
-      toast('Déjà dans la liste');
+      toast(S.t('shop.already'));
     }
     nameInput.focus();
   });

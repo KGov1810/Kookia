@@ -31,6 +31,17 @@ export function language() {
   return current;
 }
 
+/** Exécute fn comme si l'iPhone était dans la langue lang (ex. le texte français noté dans l'historique). */
+export function inLanguage(lang, fn) {
+  const saved = current;
+  current = LANGUAGE_IDS.includes(lang) ? lang : saved;
+  try {
+    return fn();
+  } finally {
+    current = saved;
+  }
+}
+
 /** Format des dates et des nombres de la langue : « fr-FR », « en-US », « es-419 », « pt-BR ». */
 export function localeTag(lang = current) {
   return LANGUAGES.find((l) => l.id === lang)?.tag ?? 'fr-FR';

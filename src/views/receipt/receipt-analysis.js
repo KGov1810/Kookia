@@ -3,6 +3,7 @@
 import { toast } from '../../components/toast.js';
 import * as store from '../../data/store/index.js';
 import { state } from '../../data/store/state.js';
+import { t } from '../../services/i18n/i18n.js';
 import * as S from '../../services/index.js';
 import { showTab } from '../app/router.js';
 import { removals as listRemovals, selected } from './receipt-render.js';
@@ -14,7 +15,7 @@ export async function addPhoto(ctx, file) {
     view.photos.push({ preview: dataUrl, base64 });
     view.error = '';
   } catch (error) {
-    view.error = error?.message || 'Photo illisible.';
+    view.error = error?.message || t('device.badPhoto');
   }
   if (ctx.sheet.isOpen) ctx.sheet.update();
 }
@@ -32,7 +33,7 @@ function shoppingFor(item, used) {
 export async function analyze(ctx) {
   const { view } = ctx;
   if (!view.photos.length || view.busy) return;
-  view.busy = `Claude lit ${view.photos.length > 1 ? `les ${view.photos.length} photos du ticket` : 'le ticket'}… (jusqu'à 2 minutes pour un long ticket)`;
+  view.busy = t('ticket.reading', { n: view.photos.length });
   view.error = '';
   ctx.sheet.update();
   try {
@@ -74,7 +75,7 @@ export function confirmItems(ctx) {
   if (!items.length) store.deleteShoppingItems(removals, { reason: 'rangement' });
   items.filter((i) => i.locationTouched).forEach((i) => store.rememberPlacement(i, { location: i.location }));
   ctx.sheet.close();
-  const parts = [added ? `${S.plural(added, 'produit ajouté', 'produits ajoutés')} au stock` : '', removals.length ? `${S.plural(removals.length, 'article retiré', 'articles retirés')} de la liste` : ''];
+  const parts = [added ? t('ticket.added', { n: added }) : '', removals.length ? t('ticket.removed', { n: removals.length }) : ''];
   toast(parts.filter(Boolean).join(' · '));
   if (added) showTab('frigo');
 }

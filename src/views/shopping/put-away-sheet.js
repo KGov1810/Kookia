@@ -8,6 +8,7 @@ import { toast } from '../../components/toast.js';
 import * as R from '../../data/reference/index.js';
 import * as store from '../../data/store/index.js';
 import { state } from '../../data/store/state.js';
+import { t } from '../../services/i18n/i18n.js';
 import * as S from '../../services/index.js';
 import { showTab } from '../app/router.js';
 
@@ -21,16 +22,16 @@ export function proposal(item) {
 }
 
 function line(item, index) {
-  const details = [item.quantity, item.unitPrice !== null ? `${S.formatEuro(item.unitPrice)} l'unité` : ''].filter(Boolean).join(' · ');
+  const details = [item.quantity, item.unitPrice !== null ? t('away.unit', { price: S.formatEuro(item.unitPrice) }) : ''].filter(Boolean).join(' · ');
   return html`
     <div class="receipt-line put-away-line ${item.selected ? '' : 'off'}">
-      <button class="pick-box" role="checkbox" aria-checked="${String(item.selected)}" data-action="toggle-line" data-index="${index}" aria-label="Ranger ${item.name}"><span class="box">${I.check}</span></button>
+      <button class="pick-box" role="checkbox" aria-checked="${String(item.selected)}" data-action="toggle-line" data-index="${index}" aria-label="${t('away.line', { name: item.name })}"><span class="box">${I.check}</span></button>
       <span class="thumb">${R.category(item.category).emoji}</span>
       <div class="receipt-fields">
         <span class="put-away-name">${item.count > 1 ? html`<b>${item.count} ×</b> ` : ''}${item.name}</span>
         ${details ? html`<small>${details}</small>` : ''}
-        <select class="receipt-location" data-index="${index}" aria-label="Lieu de rangement de ${item.name}">
-          ${R.LOCATIONS.map((loc) => html`<option value="${loc.id}" ${item.location === loc.id ? raw('selected') : ''}>${loc.label}</option>`)}
+        <select class="receipt-location" data-index="${index}" aria-label="${t('away.place', { name: item.name })}">
+          ${R.LOCATIONS.map((loc) => html`<option value="${loc.id}" ${item.location === loc.id ? raw('selected') : ''}>${S.placeName(loc.id)}</option>`)}
         </select>
       </div>
     </div>`;
@@ -38,7 +39,7 @@ function line(item, index) {
 
 /** Fiche de vérification des articles cochés, puis ajout au stock et retrait de la liste. */
 export function openPutAway() {
-  const items = state.shopping.filter((i) => i.checked && i.name).sort((a, b) => a.name.localeCompare(b.name, 'fr')).map(proposal);
+  const items = state.shopping.filter((i) => i.checked && i.name).sort((a, b) => a.name.localeCompare(b.name, S.localeTag())).map(proposal);
   if (!items.length) return null;
   const kept = () => items.filter((i) => i.selected);
   const fridge = () => kept().filter((i) => i.location === 'frigo').length;
@@ -46,15 +47,15 @@ export function openPutAway() {
     tall: true,
     render: () => html`
       <header class="sheet-head">
-        <button class="link" data-action="close">Annuler</button>
-        <h2>Ranger le panier</h2>
-        <button class="link strong" data-action="confirm" ${kept().length ? '' : raw('disabled')}>Ranger</button>
+        <button class="link" data-action="close">${t('common.cancel')}</button>
+        <h2>${t('away.title')}</h2>
+        <button class="link strong" data-action="confirm" ${kept().length ? '' : raw('disabled')}>${t('away.confirm')}</button>
       </header>
       <div class="sheet-body">
-        <p class="hint">Vérifiez le rangement ; décochez ce qui ne va pas en stock.</p>
+        <p class="hint">${t('away.hint')}</p>
         <section class="group">${items.map(line)}</section>
-        ${fridge() ? html`<p class="hint">Au frigo, la date sera à compléter dans le stock (elle est sur l'emballage).</p>` : ''}
-        <button class="primary" data-action="confirm" ${kept().length ? '' : raw('disabled')}>${I.check}Ranger ${S.plural(kept().length, 'produit')}</button>
+        ${fridge() ? html`<p class="hint">${t('away.fridgeHint')}</p>` : ''}
+        <button class="primary" data-action="confirm" ${kept().length ? '' : raw('disabled')}>${I.check}${t('away.putN', { n: kept().length })}</button>
       </div>`,
     actions: {
       'toggle-line': (el) => {
@@ -69,7 +70,7 @@ export function openPutAway() {
         chosen.filter((i) => i.locationTouched).forEach((i) => store.rememberPlacement(i, { location: i.location }));
         sheet.close();
         if (!added) return;
-        toast(`${S.plural(added, 'produit rangé', 'produits rangés')} dans le stock${fridge() ? ' · dates du frigo à compléter' : ''}`);
+        toast(`${t('away.done', { n: added })}${fridge() ? t('away.datesToFill') : ''}`);
         showTab('frigo');
       }
     },

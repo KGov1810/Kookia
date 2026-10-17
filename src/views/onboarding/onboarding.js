@@ -4,6 +4,7 @@ import { fmt } from '../../components/html.js';
 import { isStandalone } from '../../components/platform.js';
 import * as store from '../../data/store/index.js';
 import { state } from '../../data/store/state.js';
+import { t } from '../../services/i18n/i18n.js';
 import { render } from '../app/router.js';
 import { screen, ui } from '../app/ui-state.js';
 import { ONBOARDING } from './onboarding-steps.js';
@@ -33,7 +34,7 @@ function onboardingName() {
 export async function onboardingCreate() {
   const name = onboardingName();
   if (!name) {
-    ui.onboarding.message = { kind: 'warn', text: 'Indiquez votre prénom.' };
+    ui.onboarding.message = { kind: 'warn', text: t('ob.needName') };
     renderOnboarding();
     return;
   }
@@ -54,12 +55,12 @@ export async function onboardingJoin() {
   const name = onboardingName();
   const input = ui.onboarding.invite || document.getElementById('join-text')?.value || ui.onboarding.joinText;
   if (!name) {
-    ui.onboarding.message = { kind: 'warn', text: 'Indiquez votre prénom.' };
+    ui.onboarding.message = { kind: 'warn', text: t('ob.needName') };
     renderOnboarding();
     return;
   }
   if (!input.trim()) {
-    ui.onboarding.message = { kind: 'warn', text: "Collez le code d'invitation reçu de l'autre iPhone." };
+    ui.onboarding.message = { kind: 'warn', text: t('ob.needCode') };
     renderOnboarding();
     return;
   }
@@ -98,7 +99,7 @@ export function onboardingConnect() {
   }
   ui.onboarding.message = {
     kind: 'warn',
-    text: "Texte non reconnu. Collez le code d'invitation (il commence par FRIGO1.) ou le bloc de configuration Firebase complet."
+    text: t('ob.notRecognized')
   };
   renderOnboarding();
 }

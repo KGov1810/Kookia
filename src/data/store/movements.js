@@ -2,6 +2,7 @@
 // Écrits à part : si les règles Firestore ne les autorisent pas encore, le stock fonctionne quand même.
 
 import { collection, deleteDoc, onSnapshot, query, serverTimestamp, setDoc, where } from 'firebase/firestore';
+import { t } from '../../services/i18n/i18n.js';
 import { cleanPrice } from '../../services/stats/money.js';
 import { auth, db } from './connection.js';
 import { errorMessage } from './errors.js';
@@ -9,12 +10,11 @@ import { toMovement } from './mappers.js';
 import { emit, state } from './state.js';
 import { canWrite, ref } from './writes.js';
 
-const DENIED = "Les statistiques ne sont pas encore autorisées : recollez les règles Firestore (fichier firestore.rules, README).";
 
 /** Refus des règles Firestore : message clair dans l'onglet Stats. Renvoie vrai si c'était le cas. */
 export function reportStatsDenied(error) {
   if (error?.code !== 'permission-denied') return false;
-  state.movementsError = DENIED;
+  state.movementsError = t('stats.denied');
   emit('movements');
   return true;
 }
