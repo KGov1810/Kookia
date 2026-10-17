@@ -33,7 +33,7 @@ export function fridgeList() {
       <button class="secondary" data-action="add-menu">${I.plus}Ajouter un produit</button></div>`;
   }
 
-  const groups = [['pending', 'Date à compléter'], ['expired', 'Périmés'], ['soon', 'À consommer vite'],
+  const groups = [['pending', 'Date à compléter'], ['expired', 'Périmés'], ['check', 'À vérifier'], ['soon', 'À consommer vite'],
     ['old', 'Oubliés depuis longtemps'], ['ok', 'En stock']];
   return groups.map(([status, title]) => {
     const list = items.filter((p) => store.productStatus(p) === status);

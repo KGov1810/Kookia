@@ -11,7 +11,7 @@
 
 .chip i { font-style: normal; font-weight: 700; }
 
-.chip i.soon { color: var(--apricot); }
+.chip i.soon, .chip i.check { color: var(--apricot); }
 
 .chip i.expired { color: var(--tomato); }
 

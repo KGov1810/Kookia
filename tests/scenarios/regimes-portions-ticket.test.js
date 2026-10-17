@@ -135,6 +135,8 @@ test("Régimes, portions, calories, ticket de caisse", async () => {
   await click('[data-action="add-menu"]');
   log(sheet().textContent.includes('Scanner un ticket de caisse'), 'Menu + : « Scanner un ticket de caisse »');
   await click(sheet().querySelector('[data-action="ticket"]'), 400);
+  log(!sheet().querySelector('.receipt-photo') && sheet().querySelector('[data-action="add-photo"].primary')?.textContent.includes('Photographier le ticket'), 'Fiche du ticket ouverte d\'abord, sans menu de photo qui surgit');
+  await click(sheet().querySelector('[data-action="add-photo"]'), 60);
   log(sheet().querySelectorAll('.receipt-photo').length === 1, 'Photo du ticket ajoutée');
   await click(sheet().querySelector('[data-action="add-photo"]'), 60);
   log(sheet().querySelectorAll('.receipt-photo').length === 2 && sheet().textContent.includes('Ajouter une photo (suite du ticket)'), 'Deuxième photo (ticket long)');

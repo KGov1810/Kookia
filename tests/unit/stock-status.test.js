@@ -12,12 +12,12 @@ test('Statuts, libellés et compteurs du stock', async () => {
   const ms = (y, m, d) => new Date(y, m - 1, d).getTime();
   // Statuts selon le type de date
   check(S.stockStatus({ expiry: iso(2026, 9, 29) }, 2, today) === 'expired', 'ancien produit (DLC) dépassé → périmé');
-  check(S.stockStatus({ expiry: iso(2026, 9, 29), dateKind: 'ddm' }, 2, today) === 'soon', 'DDM dépassée → à consommer vite, pas périmé');
+  check(S.stockStatus({ expiry: iso(2026, 9, 29), dateKind: 'ddm' }, 2, today) === 'check', 'DDM dépassée → à vérifier, pas périmé');
   check(S.stockStatus({ expiry: iso(2026, 10, 10), dateKind: 'ddm' }, 2, today) === 'soon' && S.stockStatus({ expiry: iso(2026, 11, 10), dateKind: 'ddm' }, 2, today) === 'ok', 'DDM : alerte 14 jours avant');
   check(S.stockStatus({ expiry: iso(2026, 10, 20), dateKind: 'congele' }, 2, today) === 'soon' && S.stockStatus({ expiry: iso(2027, 3, 1), dateKind: 'congele' }, 2, today) === 'ok', 'congelé : alerte 30 jours avant');
   check(S.stockStatus({ dateKind: 'aucune', createdAt: ms(2026, 6, 1) }, 2, today) === 'ok' && S.stockStatus({ dateKind: 'aucune', createdAt: ms(2026, 2, 1) }, 2, today) === 'old', 'sans date : « oublié » après 6 mois');
   check(S.stockStatus({ expiry: '', dateKind: 'dlc' }, 2, today) === 'pending', 'date à compléter');
-  check(S.stockStatus({ expiry: iso(2026, 9, 30), dateKind: 'estimee' }, 2, today) === 'soon', 'estimée dépassée → à vérifier (pas périmé)');
+  check(S.stockStatus({ expiry: iso(2026, 9, 30), dateKind: 'estimee' }, 2, today) === 'check', 'estimée dépassée → à vérifier (pas périmé)');
   // Libellés
   check(S.stockLabel({ dateKind: 'aucune', location: 'placard', createdAt: ms(2026, 2, 1) }, today) === 'Au placard depuis 8 mois', 'libellé ancienneté', S.stockLabel({ dateKind: 'aucune', location: 'placard', createdAt: ms(2026, 2, 1) }, today));
   check(S.stockLabel({ dateKind: 'congele', frozenAt: iso(2026, 3, 3), expiry: iso(2026, 9, 3) }, today).includes('durée conseillée dépassée'), 'congelé dépassé');

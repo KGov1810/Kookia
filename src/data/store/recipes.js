@@ -98,7 +98,7 @@ export function recipeAvailability(recipe, priorityIds = new Set()) {
   const inFridge = [...new Map(rows.filter((r) => r.product).map((r) => [r.product.id, r.product])).values()];
   const missing = rows.filter((r) => !r.product && r.ingredient.source !== 'placard').map((r) => r.ingredient);
   const priorityUsed = inFridge.filter((p) => priorityIds.has(p.id)).length;
-  const urgentUsed = inFridge.filter((p) => ['expired', 'soon'].includes(productStatus(p))).length;
+  const urgentUsed = inFridge.filter((p) => ['expired', 'check', 'soon'].includes(productStatus(p))).length;
   return { rows, inFridge, missing, priorityUsed, urgentUsed };
 }
 

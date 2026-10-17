@@ -19,7 +19,7 @@ export function stockValue(products, alertDays = 2, today = new Date()) {
     }
     place.amount = roundCents(place.amount + amount);
     out.total = roundCents(out.total + amount);
-    if (stockStatus(product, alertDays, today) === 'soon') {
+    if (['soon', 'check'].includes(stockStatus(product, alertDays, today))) {
       out.soon = roundCents(out.soon + amount);
       out.soonCount += 1;
     }

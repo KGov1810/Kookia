@@ -67,7 +67,7 @@ export function photosStep(ctx) {
           </div>`)}
       </div>` : ''}
     <div class="row-actions">
-      <button class="secondary" data-action="add-photo">${I.camera}${view.photos.length ? 'Ajouter une photo (suite du ticket)' : 'Photographier le ticket'}</button>
+      <button class="${view.photos.length ? 'secondary' : 'primary'}" data-action="add-photo">${I.camera}${view.photos.length ? 'Ajouter une photo (suite du ticket)' : 'Photographier le ticket'}</button>
       ${view.photos.length ? html`<button class="primary" data-action="analyze">${I.sparkle}Lire le ticket</button>` : ''}
     </div>
     <p class="hint">La photo est envoyée à Claude pour être lue ; elle n'est pas conservée dans l'app.</p>`;

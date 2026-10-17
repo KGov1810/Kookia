@@ -7,7 +7,7 @@ import * as S from '../../services/index.js';
 import { rerenderIf } from '../app/router.js';
 import { currentFilters, ui } from '../app/ui-state.js';
 
-const URGENCY = { soon: 0, ok: 1, old: 2, pending: 3 };
+const URGENCY = { check: 0, soon: 0, ok: 1, old: 2, pending: 3 };
 
 /** Stock utilisable, du plus urgent au moins urgent (sans les produits périmés). */
 function stockByUrgency() {
@@ -63,8 +63,8 @@ export async function replaceSlot(index) {
     const withLeftovers = !slot.leftovers && plan.slots.some((s) => s.leftovers && s.recipeId === slot.recipeId);
     const [recipe] = await S.generateRecipes({
       key: state.settings.claudeKey, model: state.settings.model,
-      priority: stock.filter((p) => !taken.has(p.id) && store.productStatus(p) === 'soon'),
-      others: stock.filter((p) => taken.has(p.id) || store.productStatus(p) !== 'soon'),
+      priority: stock.filter((p) => !taken.has(p.id) && ['soon', 'check'].includes(store.productStatus(p))),
+      others: stock.filter((p) => taken.has(p.id) || !['soon', 'check'].includes(store.productStatus(p))),
       shopping: state.shopping, filters: currentFilters(), count: 1,
       servings: withLeftovers ? plan.servings * 2 : plan.servings,
       extraLines: [

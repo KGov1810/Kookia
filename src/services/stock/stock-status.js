@@ -5,14 +5,18 @@ import { daysUntil, expiryLabel, formatDate, hasDate } from '../dates/dates.js';
 import { durationText } from '../text/text.js';
 import { ageInDays, dateKindOf } from './stock-dates.js';
 
-/** 'pending' (date à compléter) | 'expired' | 'soon' | 'old' (oublié depuis longtemps) | 'ok'. */
+/**
+ * 'pending' (date à compléter) | 'expired' (date limite dépassée) | 'check' (date estimée ou « de préférence »
+ * dépassée : à vérifier) | 'soon' | 'old' (oublié depuis longtemps) | 'ok'.
+ */
 export function stockStatus(product, alertDays = 2, today = new Date()) {
   const kind = dateKindOf(product);
   if (kind === 'aucune') return ageInDays(product, today) >= 180 ? 'old' : 'ok';
   if (!hasDate(product.expiry)) return 'pending';
   const days = daysUntil(product.expiry, today);
-  // Seule une date limite (DLC) dépassée rend un produit « périmé ».
-  if (days < 0) return kind === 'dlc' ? 'expired' : 'soon';
+  // Date limite (DLC) dépassée : périmé. Date estimée ou « de préférence » dépassée : à vérifier (souvent encore bon).
+  // Congelé au-delà de la durée conseillée : à consommer vite.
+  if (days < 0) return kind === 'dlc' ? 'expired' : kind === 'congele' ? 'soon' : 'check';
   const window = kind === 'congele' ? 30 : kind === 'ddm' ? 14 : alertDays;
   return days <= Math.max(0, window) ? 'soon' : 'ok';
 }

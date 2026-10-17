@@ -46,7 +46,9 @@ function fridgeAlert() {
   const title = all
     ? `${S.plural(urgent.length, 'produit')} périmé${urgent.length > 1 ? 's' : ''}`
     : `${S.plural(urgent.length, 'produit')} à sauver`;
-  const detail = all ? 'À vérifier avant de les jeter' : expired ? `Dont ${expired} périmé${expired > 1 ? 's' : ''}, à vérifier` : 'Tout est encore bon';
+  const check = urgent.filter((p) => store.productStatus(p) === 'check').length;
+  const parts = [expired ? `${expired} périmé${expired > 1 ? 's' : ''}` : '', check ? `${check} à vérifier` : ''].filter(Boolean);
+  const detail = all ? 'À vérifier avant de les jeter' : parts.length ? `Dont ${parts.join(', ')}` : 'Tout est encore bon';
   return html`
     <button class="alert-card ${all ? 'expired' : ''}" data-action="go-recipes">
       <span><strong>${title}</strong><small>${detail}</small></span>

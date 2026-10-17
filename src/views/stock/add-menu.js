@@ -15,9 +15,12 @@ export function scanThenEdit() {
   openScanner((code) => openEditor({ barcode: code }));
 }
 
-/** Ticket de caisse : photo choisie dans le geste (règle d'iOS) ; sans clé, la fiche explique quoi faire. */
+/**
+ * Ticket de caisse : la fiche s'ouvre d'abord ; « Photographier le ticket » ouvre ensuite le menu de l'iPhone
+ * (photothèque, appareil photo, fichier), placé sous le bouton. Sans clé, la fiche explique quoi faire.
+ */
 export function openTicket() {
-  openReceipt(hasClaudeKey() ? pickImage({ camera: false }) : null);
+  openReceipt(null);
 }
 
 export function openAddMenu() {

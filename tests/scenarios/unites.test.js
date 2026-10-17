@@ -91,6 +91,7 @@ test('Unités : fiche produit et ticket de caisse', async () => {
   };
   await click('[data-action="add-menu"]');
   await click(sheet().querySelector('[data-action="ticket"]'), 400);
+  await click(sheet().querySelector('[data-action=\"add-photo\"]'), 60); // la fiche s'ouvre d'abord, puis la photo
   await click(sheet().querySelector('[data-action="analyze"]'), 80);
   const line = (name) => [...sheet().querySelectorAll('.receipt-line')].find((l) => l.querySelector('input').value === name);
   const lineUnits = (name) => [...line(name).querySelectorAll('[data-action="set-unit"]')];

@@ -77,6 +77,9 @@
 
 .days.soon { background: var(--apricot-soft); color: var(--apricot); }
 
+/* Date estimée ou « de préférence » dépassée : à vérifier (plein abricot, moins alarmant que le rouge des périmés). */
+.days.check { background: var(--apricot-fill); color: #FFFFFF; }
+
 .days.expired { background: var(--tomato-fill); color: #FFFFFF; }
 
 

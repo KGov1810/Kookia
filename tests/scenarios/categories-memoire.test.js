@@ -96,6 +96,7 @@ test('Catégories : proposition, Claude, mémoire des corrections', async () => 
   };
   await click('[data-action="add-menu"]');
   await click(sheet().querySelector('[data-action="ticket"]'), 400);
+  await click(sheet().querySelector('[data-action=\"add-photo\"]'), 60); // la fiche s'ouvre d'abord, puis la photo
   await click(sheet().querySelector('[data-action="analyze"]'), 80);
   log(calls.at(-1).text.includes('- patisserie : Farine, sucre et pâtisserie'), 'Claude reçoit le sens de chaque catégorie');
   const line = (name) => [...sheet().querySelectorAll('.receipt-line')].find((l) => l.querySelector('input').value === name);

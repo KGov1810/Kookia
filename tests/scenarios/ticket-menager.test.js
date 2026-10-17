@@ -48,6 +48,7 @@ test('Ticket : non alimentaire, liste de courses, pain', async () => {
     await click('.tab[data-tab="frigo"]');
     await click('[data-action="add-menu"]');
     await click(sheet().querySelector('[data-action="ticket"]'), 400);
+    await click(sheet().querySelector('[data-action=\"add-photo\"]'), 60); // la fiche s'ouvre d'abord, puis la photo
     await click(sheet().querySelector('[data-action="analyze"]'), 120);
   };
   const items = () => [...sheet().querySelectorAll('.receipt-item')];

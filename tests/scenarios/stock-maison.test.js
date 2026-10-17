@@ -37,9 +37,10 @@ test("Stock de toute la maison : lieux, dates, congélation, ticket", async () =
   log(row('Filet de poulet').querySelector('.where')?.title === 'Frigo', 'Ancien produit (sans lieu) rangé au frigo (« au frigo » en vue « Tout »)');
 
   console.log('\n— Types de date —');
-  log(sections().join(' | ') === 'Périmés | À consommer vite | Oubliés depuis longtemps', `Sections : ${sections().join(' | ')}`);
+  log(sections().join(' | ') === 'Périmés | À vérifier | À consommer vite | Oubliés depuis longtemps', `Sections : ${sections().join(' | ')}`);
   log(row('Yaourt').querySelector('.days').classList.contains('expired'), 'Yaourt (DLC dépassée) : « Périmés »');
-  log(row('Pâtes').querySelector('.days').classList.contains('soon') && row('Pâtes').closest('.list').previousElementSibling?.textContent !== 'Périmés', 'Pâtes (DDM dépassée) : « À consommer vite », pas périmées');
+  log(row('Pâtes').querySelector('.days').classList.contains('check') && row('Pâtes').closest('.list').previousElementSibling?.childNodes[0].textContent === 'À vérifier', 'Pâtes (DDM dépassée) : « À vérifier », pas périmées');
+  log($('.alert-card').textContent.includes('Dont 1 périmé, 1 à vérifier'), 'Bandeau : « Dont 1 périmé, 1 à vérifier »');
   log(row('Riz basmati').querySelector('.days b').textContent === '8' && row('Riz basmati').querySelector('.days small').textContent === 'mois ici', 'Riz sans date : « 8 mois ici », section oubliés');
   await click(row('Pâtes').querySelector('.product-main'), 400);
   log(sheet().querySelector('.expiry-status').textContent.includes('dépassée depuis 10 jours : souvent encore bon'), 'Pâtes : « de préférence » dépassée, souvent encore bonne');
@@ -142,6 +143,7 @@ test("Stock de toute la maison : lieux, dates, congélation, ticket", async () =
     { nom: 'Crème fraîche', texte_ticket: 'CREME FR', categorie: 'laitier', nombre: 1, contenance: '20 cl', lieu: 'frigo' }] } }] }) });
   await click('.tab[data-tab="frigo"]');
   await click('[data-action="add-menu"]'); await click(sheet().querySelector('[data-action="ticket"]'), 400);
+  await click(sheet().querySelector('[data-action=\"add-photo\"]'), 60); // la fiche s'ouvre d'abord, puis la photo
   await click(sheet().querySelector('[data-action="analyze"]'), 80);
   log([...sheet().querySelectorAll('.receipt-location')].map((s) => s.value).join() === 'congelateur,placard,fruits,frigo', 'Vérification : lieu proposé pour chaque ligne');
   const sel = [...sheet().querySelectorAll('.receipt-location')][3];

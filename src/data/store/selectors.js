@@ -24,9 +24,9 @@ export function stockMatches(name) {
   return state.products.filter((p) => nameMatchScore(base, p.name) > 0);
 }
 
-/** Périmés + à consommer vite (hors produits dont la date est à compléter). */
+/** Périmés + à vérifier + à consommer vite (hors produits dont la date est à compléter). */
 export function urgentProducts() {
-  return sortedProducts().filter((p) => ['expired', 'soon'].includes(productStatus(p)));
+  return sortedProducts().filter((p) => ['expired', 'check', 'soon'].includes(productStatus(p)));
 }
 
 /** Produits ajoutés sans date (ex. depuis un ticket de caisse). */
@@ -34,8 +34,9 @@ export function pendingProducts() {
   return sortedProducts().filter((p) => productStatus(p) === 'pending');
 }
 
+/** À consommer vite ou à vérifier (date estimée ou « de préférence » dépassée) : à utiliser en priorité. */
 export function soonProducts() {
-  return sortedProducts().filter((p) => productStatus(p) === 'soon');
+  return sortedProducts().filter((p) => ['soon', 'check'].includes(productStatus(p)));
 }
 
 export function productById(id) {

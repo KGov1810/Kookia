@@ -38,7 +38,7 @@
 
 .status-card .status-text small { display: block; margin-top: 3px; padding: 0; font-size: 13px; font-weight: 400; color: var(--muted); }
 
-.status-card .days { width: 62px; height: 54px; border-radius: 16px; }
+.status-card .days { min-width: 62px; height: 54px; padding: 0 8px; border-radius: 16px; }
 
 /* Consommé (plein), Congeler, Jeté. */
 .action-tiles { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 10px; }

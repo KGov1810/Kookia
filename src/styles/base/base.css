@@ -61,7 +61,7 @@ h2.section small { font: 600 14px var(--font); color: var(--muted); }
 
 h2.section.expired { color: var(--tomato); }
 
-h2.section.soon { color: var(--apricot); }
+h2.section.soon, h2.section.check { color: var(--apricot); }
 
 .spinner {
   width: 26px; height: 26px; border-radius: 50%;

@@ -65,7 +65,7 @@
 
 .expiry-status.expired { color: var(--tomato); }
 
-.expiry-status.soon { color: var(--apricot); }
+.expiry-status.soon, .expiry-status.check { color: var(--apricot); }
 
 .expiry-status.ok { color: var(--herb); }
 
