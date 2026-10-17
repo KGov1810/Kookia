@@ -1,6 +1,7 @@
 // Kookia — Écoute en temps réel et reconnexion.
 
 import { collection, disableNetwork, enableNetwork, onSnapshot } from 'firebase/firestore';
+import { t } from '../../services/i18n/i18n.js';
 import { db, ensureFirebase, signIn } from './connection.js';
 import { errorMessage } from './errors.js';
 import { purgeHistory } from './history.js';
@@ -11,7 +12,6 @@ import { listenPrices } from './prices.js';
 import { rememberRecipeLinks } from './recipes.js';
 import { partnerName } from './selectors.js';
 import { emit, state } from './state.js';
-import { t } from '../../services/i18n/i18n.js';
 
 let unsubscribers = [];
 

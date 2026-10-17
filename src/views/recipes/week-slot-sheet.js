@@ -6,6 +6,7 @@ import { openSheet } from '../../components/sheet.js';
 import * as store from '../../data/store/index.js';
 import { hasClaudeKey } from '../../data/store/selectors.js';
 import { state } from '../../data/store/state.js';
+import { t } from '../../services/i18n/i18n.js';
 import * as S from '../../services/index.js';
 import { openRecipe } from './recipe-detail.js';
 import { replaceSlot } from './week-generation.js';
@@ -25,29 +26,29 @@ export function openSlotSheet(index) {
     tall: true,
     render: () => {
       const slot = slotNow();
-      if (!slot) return html`<header class="sheet-head"><span></span><h2>Repas</h2><button class="link strong" data-action="close">Fermer</button></header>`;
+      if (!slot) return html`<header class="sheet-head"><span></span><h2>${t('slot.title')}</h2><button class="link strong" data-action="close">${t('common.close')}</button></header>`;
       const recipe = state.recipes.find((r) => r.id === slot.recipeId);
       const plan = state.plan;
       return html`
         <header class="sheet-head">
-          ${picking ? html`<button class="link" data-action="back">Retour</button>` : html`<span></span>`}
+          ${picking ? html`<button class="link" data-action="back">${t('slot.back')}</button>` : html`<span></span>`}
           <h2>${slotTitle(plan, slot)}</h2>
-          <button class="link strong" data-action="close">Fermer</button>
+          <button class="link strong" data-action="close">${t('common.close')}</button>
         </header>
         <div class="sheet-body">
           ${picking ? html`
-            <p class="hint">Les recettes faisables avec le stock d'abord.</p>
+            <p class="hint">${t('slot.doableFirst')}</p>
             <div class="list">${pickList(slot.recipeId).map((r) => html`
               <button class="recipe-card" data-action="pick" data-id="${r.id}"><h3><span>${r.title}</span>${r.favorite ? I.star : ''}</h3>
                 <span class="facts"><span>${I.clock}${S.formatMinutes(r.totalMinutes)}</span></span></button>`)}</div>` : html`
             <section class="group">
-              ${recipe ? html`<div class="field"><span>${slot.leftovers ? 'Restes de' : 'Au menu'}</span><b class="slot-current">${recipe.title}</b></div>` : ''}
-              ${recipe ? html`<button class="row-button" data-action="view">${I.check}Voir la recette</button>` : ''}
-              <button class="row-button" data-action="regenerate" ${hasClaudeKey() ? '' : raw('disabled')}>${I.sparkle}Une autre recette (Claude)</button>
-              <button class="row-button" data-action="choose">${I.star}Choisir dans mes recettes</button>
-              <button class="row-button danger" data-action="remove">${I.trash}Retirer ce repas</button>
+              ${recipe ? html`<div class="field"><span>${t(slot.leftovers ? 'slot.leftoversOf' : 'slot.onMenu')}</span><b class="slot-current">${recipe.title}</b></div>` : ''}
+              ${recipe ? html`<button class="row-button" data-action="view">${I.check}${t('slot.view')}</button>` : ''}
+              <button class="row-button" data-action="regenerate" ${hasClaudeKey() ? '' : raw('disabled')}>${I.sparkle}${t('slot.another')}</button>
+              <button class="row-button" data-action="choose">${I.star}${t('slot.choose')}</button>
+              <button class="row-button danger" data-action="remove">${I.trash}${t('slot.remove')}</button>
             </section>
-            ${slot.leftovers ? html`<p class="hint">Remplacer des restes leur donne une recette à part entière.</p>` : ''}`}
+            ${slot.leftovers ? html`<p class="hint">${t('slot.leftoversHint')}</p>` : ''}`}
         </div>`;
     },
     actions: {
@@ -85,13 +86,13 @@ export function openBatchSheet() {
       const batch = plan?.batch;
       const recipes = (batch?.recipeIds ?? []).map((id) => state.recipes.find((r) => r.id === id)).filter(Boolean);
       return html`
-        <header class="sheet-head"><span></span><h2>Batch cooking</h2><button class="link strong" data-action="close">Fermer</button></header>
+        <header class="sheet-head"><span></span><h2>${t('batch.title')}</h2><button class="link strong" data-action="close">${t('common.close')}</button></header>
         <div class="sheet-body">
           ${batch ? html`
-            <p class="hint">${S.weekDayLabel(plan.start, batch.day)} · environ ${S.formatMinutes(batch.minutes)}</p>
-            <section class="group"><h2>Étapes</h2><ol class="steps">${batch.steps.map((step) => html`<li><span>${step}</span></li>`)}</ol></section>
-            ${recipes.length ? html`<h2 class="section">Recettes avancées</h2>
-              <div class="list">${recipes.map((r) => html`<button class="recipe-card" data-action="view" data-id="${r.id}"><h3><span>${r.title}</span></h3></button>`)}</div>` : ''}` : html`<p class="hint">Pas de séance de batch cooking cette semaine.</p>`}
+            <p class="hint">${t('batch.about', { day: S.capitalize(S.weekDayLabel(plan.start, batch.day)), time: S.formatMinutes(batch.minutes) })}</p>
+            <section class="group"><h2>${t('batch.steps')}</h2><ol class="steps">${batch.steps.map((step) => html`<li><span>${step}</span></li>`)}</ol></section>
+            ${recipes.length ? html`<h2 class="section">${t('batch.recipes')}</h2>
+              <div class="list">${recipes.map((r) => html`<button class="recipe-card" data-action="view" data-id="${r.id}"><h3><span>${r.title}</span></h3></button>`)}</div>` : ''}` : html`<p class="hint">${t('batch.none')}</p>`}
         </div>`;
     },
     actions: {

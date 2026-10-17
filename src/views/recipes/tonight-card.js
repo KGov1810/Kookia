@@ -6,6 +6,7 @@ import { I } from '../../components/icons.js';
 import { recipeThumb } from '../../components/recipe-visuals.js';
 import * as store from '../../data/store/index.js';
 import { state } from '../../data/store/state.js';
+import { t } from '../../services/i18n/i18n.js';
 import * as S from '../../services/index.js';
 import { cookedPreview } from './recipe-cooking.js';
 
@@ -27,18 +28,19 @@ export function tonightCard() {
   if (!meal) return '';
   const { slot, index, recipe } = meal;
   const { inFridge } = store.recipeAvailability(recipe);
-  const facts = [S.formatMinutes(recipe.totalMinutes), inFridge.length ? `avec ${S.plural(inFridge.length, 'produit')} du stock` : ''].filter(Boolean).join(', ');
+  const facts = [S.formatMinutes(recipe.totalMinutes), inFridge.length ? t('tonight.withStock', { n: inFridge.length }) : ''].filter(Boolean).join(', ');
   const preview = cookedPreview(recipe);
-  const when = slot.meal === 'midi' ? 'ce midi' : 'ce soir';
+  const lunch = slot.meal === 'midi';
+  const planned = t(lunch ? 'tonight.lunch' : 'tonight.dinner');
   return html`
-    <section class="group tonight" aria-label="Prévu ${when}">
+    <section class="group tonight" aria-label="${planned}">
       <button class="tonight-head" data-action="open-recipe" data-id="${recipe.id}">
         ${recipeThumb(recipe)}
-        <span class="tonight-text"><small>Prévu ${when}</small><b>${recipe.title}</b><span>${facts}</span></span>
+        <span class="tonight-text"><small>${planned}</small><b>${recipe.title}</b><span>${facts}</span></span>
       </button>
       <div class="tonight-actions">
-        <button class="primary" data-action="tonight-cooked" data-id="${recipe.id}">${I.check}Je l'ai cuisiné</button>
-        <button class="secondary" data-action="week-slot" data-index="${index}">Pas ${when}</button>
+        <button class="primary" data-action="tonight-cooked" data-id="${recipe.id}">${I.check}${t('tonight.cooked')}</button>
+        <button class="secondary" data-action="week-slot" data-index="${index}">${t(lunch ? 'tonight.notLunch' : 'tonight.notDinner')}</button>
       </div>
       ${preview ? html`<p class="hint inset">${preview}</p>` : ''}
     </section>`;

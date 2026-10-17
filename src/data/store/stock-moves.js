@@ -17,7 +17,7 @@ const byIds = (ids) => state.products.filter((p) => ids.includes(p.id));
 export function consumeOne(ids, { reason = '' } = {}) {
   return takeAmounts(byIds(ids).map((product) => ({ product, amount: unitsAmount(product, 1) })), {
     type: 'consomme',
-    details: (_p, rest) => [restText(rest), reason]
+    details: (_p, rest) => [restText(rest, 'fr'), reason]
   });
 }
 
@@ -27,7 +27,7 @@ function takeChosen(id, units, type, unitPrice) {
   return takeAmounts(byIds([id]).map((product) => ({ product, amount: unitsAmount(product, n) })), {
     type,
     unitPrice,
-    details: (p, rest) => [(p.count ?? 1) > 1 ? `${Math.min(n, p.count)} sur ${p.count}` : '', restText(rest)]
+    details: (p, rest) => [(p.count ?? 1) > 1 ? `${Math.min(n, p.count)} sur ${p.count}` : '', restText(rest, 'fr')]
   });
 }
 
@@ -42,7 +42,7 @@ export function discardUnits(id, units, { unitPrice } = {}) {
 /** Recette cuisinée : uses [{ id, amount }] en unités (0,4 = 200 g d'un paquet de 500 g). */
 export function consumeAmounts(uses, { reason = '' } = {}) {
   const entries = uses.map(({ id, amount }) => ({ product: state.products.find((p) => p.id === id), amount })).filter((e) => e.product);
-  return takeAmounts(entries, { type: 'consomme', details: (_p, rest) => [restText(rest), reason] });
+  return takeAmounts(entries, { type: 'consomme', details: (_p, rest) => [restText(rest, 'fr'), reason] });
 }
 
 /**

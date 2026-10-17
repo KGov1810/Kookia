@@ -1,6 +1,7 @@
 // Kookia — Affichage d'une recette : vignette du plat, origine, ingrédients.
 
 import * as R from '../data/reference/index.js';
+import { t } from '../services/i18n/i18n.js';
 import * as S from '../services/index.js';
 import { simplify } from '../services/text/text.js';
 import { html } from './html.js';
@@ -39,47 +40,39 @@ export function recipeThumb(recipe) {
   return html`<span class="recipe-thumb tint-${tint}" aria-hidden="true">${emoji}</span>`;
 }
 
-export const DIFFICULTY_LABEL = { facile: 'Facile', moyen: 'Moyen', difficile: 'Difficile' };
-
-const SOURCE = {
-  stock: { label: 'Au frigo', icon: I.fridge },
-  courses: { label: 'Liste de courses', icon: I.cart },
-  placard: { label: 'Placard', icon: I.cabinet },
-  a_acheter: { label: 'À acheter', icon: I.cart }
-};
+const SOURCE_ICON = { stock: I.fridge, courses: I.cart, placard: I.cabinet, a_acheter: I.cart };
 
 export function originFact(recipe) {
   const origin = R.originOf(recipe.origin);
-  return origin ? html`<span>${origin.emoji} ${origin.label}</span>` : '';
+  return origin ? html`<span>${origin.emoji} ${S.originName(origin.id)}</span>` : '';
 }
 
 export function servingsLabel(n) {
-  return `${n} personne${n > 1 ? 's' : ''}`;
+  return t('servings', { n });
 }
 
 /** « Au placard », « Au congélateur (même code-barres) », « Au frigo (produit similaire) »… */
 function whereLabel(product, via) {
-  const at = R.locationOf(product.location).at;
-  const place = at.charAt(0).toUpperCase() + at.slice(1);
-  if (via === 'code-barres') return `${place} (même code-barres)`;
-  if (via === 'nom') return `${place} (produit similaire)`;
+  const place = S.capitalize(S.placeAt(product.location));
+  if (via === 'code-barres') return t('ing.sameBarcode', { place });
+  if (via === 'nom') return t('ing.similar', { place });
   return place;
 }
 
 export function ingredientRow({ ingredient, product, via, inShopping }, factor = 1) {
-  const source = SOURCE[ingredient.source] ? ingredient.source : 'a_acheter';
+  const source = SOURCE_ICON[ingredient.source] ? ingredient.source : 'a_acheter';
   let where;
   if (product) where = whereLabel(product, via);
-  else if (source === 'placard') where = SOURCE.placard.label;
-  else if (inShopping) where = 'Sur la liste de courses';
-  else if (ingredient.productId) where = 'Plus en stock';
-  else where = 'À acheter';
+  else if (source === 'placard') where = S.placeName('placard');
+  else if (inShopping) where = t('ing.onList');
+  else if (ingredient.productId) where = t('ing.noMore');
+  else where = t('ing.toBuy');
   const detail = [S.scaleIngredient(ingredient, factor), where].filter(Boolean).join(', ');
   const iconSource = product ? 'stock' : (source === 'placard' ? 'placard' : (inShopping ? 'courses' : 'a_acheter'));
   const productNote = product && via !== 'origine' ? html`<small class="matched">${product.name}</small>` : '';
   return html`
     <div class="ingredient">
-      <span class="src ${iconSource}">${SOURCE[iconSource].icon}</span>
+      <span class="src ${iconSource}">${SOURCE_ICON[iconSource]}</span>
       <div><span>${ingredient.name}</span><small>${detail}</small>${productNote}</div>
       ${product ? dayCounter(product) : ''}
     </div>`;

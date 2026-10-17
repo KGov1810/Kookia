@@ -3,8 +3,8 @@
 
 import { toast } from '../../components/toast.js';
 import * as store from '../../data/store/index.js';
-import * as S from '../../services/index.js';
 import { t } from '../../services/i18n/i18n.js';
+import * as S from '../../services/index.js';
 import { priceIsInvalid } from './editor-price.js';
 
 /** État de la fiche à l'ouverture : sert à savoir si quelque chose a changé. */

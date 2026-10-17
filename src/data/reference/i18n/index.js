@@ -7,5 +7,8 @@ import { FOODS } from './foods.js';
 import { STOCK } from './stock.js';
 import { PRODUCT } from './product.js';
 import { CAPTURE } from './capture.js';
+import { RECIPES } from './recipes.js';
+import { RECIPE } from './recipe.js';
+import { WEEK } from './week.js';
 
-export const STRINGS = { ...COMMON, ...SETTINGS, ...PLACES, ...FOODS, ...STOCK, ...PRODUCT, ...CAPTURE };
+export const STRINGS = { ...COMMON, ...SETTINGS, ...PLACES, ...FOODS, ...STOCK, ...PRODUCT, ...CAPTURE, ...RECIPES, ...RECIPE, ...WEEK };

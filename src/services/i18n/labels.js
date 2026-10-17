@@ -3,7 +3,7 @@
 
 import { category } from '../../data/reference/categories.js';
 import { locationOf } from '../../data/reference/locations.js';
-import { t } from './i18n.js';
+import { language, localeTag, t } from './i18n.js';
 
 /** « Frigo », « Fridge »… */
 export function placeName(id, lang) {
@@ -33,6 +33,27 @@ export function produceName(name, lang) {
   const key = `fv.${name}`;
   const text = t(key, {}, lang);
   return text === key ? name : text;
+}
+
+/** Cuisine : « Italienne », « Italian »… (« Tour du monde » pour 'monde'). */
+export function originName(id, lang) {
+  return t(`origin.${id}`, {}, lang);
+}
+
+/** Régime : « Végétarien », « Vegetarian »… ('' : tous). */
+export function dietName(id, lang) {
+  return t(`diet.${id ?? ''}`, {}, lang);
+}
+
+export function difficultyName(id, lang) {
+  const key = `difficulty.${id ?? ''}`;
+  const text = t(key, {}, lang);
+  return text === key ? String(id ?? '') : text;
+}
+
+/** Nom au milieu d'une phrase : en minuscule (« cuisine italienne »), sauf en anglais (« Italian cuisine »). */
+export function inSentence(text, lang = language()) {
+  return lang === 'en' ? String(text ?? '') : String(text ?? '').toLocaleLowerCase(localeTag(lang));
 }
 
 export function capitalize(text) {

@@ -3,6 +3,7 @@
 import { toast } from '../../components/toast.js';
 import * as store from '../../data/store/index.js';
 import { state } from '../../data/store/state.js';
+import { t } from '../../services/i18n/i18n.js';
 import * as S from '../../services/index.js';
 import { rerenderIf } from '../app/router.js';
 import { currentFilters, ui } from '../app/ui-state.js';
@@ -21,7 +22,7 @@ function stockByUrgency() {
 /** start : AAAA-MM-JJ ; slots : [{ day, meal }] ; batchDay : jour de la séance ou null. */
 export async function startWeekGeneration({ start, slots, servings, leftovers, batchDay }) {
   if (ui.week.busy) return;
-  ui.week.busy = `Claude prépare ${S.plural(slots.length, 'repas', 'repas')} avec votre stock… (1 à 3 minutes)`;
+  ui.week.busy = t('week.busy', { n: slots.length });
   ui.week.note = null;
   rerenderIf('recettes');
   try {
@@ -31,7 +32,7 @@ export async function startWeekGeneration({ start, slots, servings, leftovers, b
       servings, slots, start, leftovers, batchDay
     });
     if (!plan.slots.length) {
-      ui.week.note = { kind: 'warn', text: 'Aucun repas reçu, réessayez.' };
+      ui.week.note = { kind: 'warn', text: t('week.noneReceived') };
       return;
     }
     // Repas demandés sans recette reçue : gardés vides, à compléter avec « Changer ».
@@ -39,7 +40,7 @@ export async function startWeekGeneration({ start, slots, servings, leftovers, b
       .map((s) => ({ ...s, recipeId: null, leftovers: false }));
     const all = [...plan.slots, ...missing].sort((a, b) => a.day - b.day || S.MEALS.indexOf(a.meal) - S.MEALS.indexOf(b.meal));
     store.saveWeekPlan({ ...plan, slots: all, start, servings });
-    ui.week.note = { kind: 'ok', text: `${S.plural(plan.slots.length, 'repas planifié', 'repas planifiés')}${missing.length ? ` ; ${S.plural(missing.length, 'repas', 'repas')} sans recette, à compléter` : ''}.` };
+    ui.week.note = { kind: 'ok', text: `${t('week.planned', { n: plan.slots.length })}${missing.length ? t('week.withoutRecipe', { n: missing.length }) : ''}.` };
   } catch (error) {
     ui.week.note = { kind: 'error', text: error?.message || String(error) };
   } finally {
@@ -68,15 +69,15 @@ export async function replaceSlot(index) {
       shopping: state.shopping, filters: currentFilters(), count: 1,
       servings: withLeftovers ? plan.servings * 2 : plan.servings,
       extraLines: [
-        `Une seule recette, pour le ${S.weekDayLabel(plan.start, slot.day)} (${slot.meal}).`,
+        `Une seule recette, pour le ${S.weekDayLabel(plan.start, slot.day, undefined, 'fr')} (${slot.meal}).`,
         ...(others.length ? [`Déjà au menu cette semaine, à ne pas refaire : ${[...new Set(others.map((r) => r.title))].join(', ')}.`] : []),
         ...(withLeftovers ? ['Le plat sera aussi mangé en restes le lendemain midi : il doit se réchauffer ou se manger froid.'] : [])
       ]
     });
-    if (!recipe) throw new Error('Aucune recette reçue, réessayez.');
+    if (!recipe) throw new Error(t('gen.none'));
     store.saveRecipes([recipe], { log: false });
     store.setPlanSlot(index, recipe.id);
-    toast(`Nouveau repas : ${recipe.title}`);
+    toast(t('week.newMeal', { title: recipe.title }));
   } catch (error) {
     toast(error?.message || String(error));
   } finally {

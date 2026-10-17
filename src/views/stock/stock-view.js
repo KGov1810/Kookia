@@ -6,8 +6,8 @@ import { errorNote, syncLine } from '../../components/status.js';
 import * as R from '../../data/reference/index.js';
 import * as store from '../../data/store/index.js';
 import { state } from '../../data/store/state.js';
-import * as S from '../../services/index.js';
 import { t } from '../../services/i18n/i18n.js';
+import * as S from '../../services/index.js';
 import { ui } from '../app/ui-state.js';
 import { fridgeList } from './stock-list.js';
 

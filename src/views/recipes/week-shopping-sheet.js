@@ -6,6 +6,7 @@ import { openSheet } from '../../components/sheet.js';
 import { toast } from '../../components/toast.js';
 import * as store from '../../data/store/index.js';
 import { state } from '../../data/store/state.js';
+import { t } from '../../services/i18n/i18n.js';
 import * as S from '../../services/index.js';
 
 /** Déjà dans la liste de courses (même produit, poids compris dans le nom ou non) ? */
@@ -24,7 +25,7 @@ export function addWeekShopping() {
   const missing = missingWeekItems();
   if (!missing.length) return;
   const added = store.addPlanShopping(missing);
-  toast(added ? `${S.plural(added, 'article ajouté', 'articles ajoutés')} aux courses` : 'Déjà dans la liste de courses');
+  toast(added ? t('wshop.added', { n: added }) : t('detail.already'));
 }
 
 export function openWeekShopping() {
@@ -38,21 +39,21 @@ export function openWeekShopping() {
       const items = state.plan?.shopping ?? [];
       return html`
         <header class="sheet-head">
-          <button class="link" data-action="close">Fermer</button>
-          <h2>Courses de la semaine</h2>
-          <button class="link strong" data-action="add" ${picked.size ? '' : raw('disabled')}>Ajouter</button>
+          <button class="link" data-action="close">${t('common.close')}</button>
+          <h2>${t('week.shopping')}</h2>
+          <button class="link strong" data-action="add" ${picked.size ? '' : raw('disabled')}>${t('editor.add')}</button>
         </header>
         <div class="sheet-body">
           ${items.length ? html`
-            <p class="hint">Tout ce qui manque pour les repas de la semaine, regroupé. Décochez ce que vous avez déjà.</p>
+            <p class="hint">${t('wshop.hint')}</p>
             <section class="group">${items.map((item, i) => html`
               <button class="pick" role="checkbox" aria-checked="${String(picked.has(i))}" data-action="toggle" data-index="${i}" ${item.added ? raw('disabled') : ''}>
                 <span class="box">${I.check}</span>
                 <span class="product-text"><span class="product-name">${item.name}</span>
-                  <span class="product-meta">${[item.quantity, item.added ? 'ajouté aux courses' : onList(item) ? 'déjà dans la liste' : ''].filter(Boolean).join(' · ')}</span></span>
+                  <span class="product-meta">${[item.quantity, item.added ? t('wshop.addedTag') : onList(item) ? t('wshop.onList') : ''].filter(Boolean).join(' · ')}</span></span>
               </button>`)}</section>
-            <button class="primary" data-action="add" ${picked.size ? '' : raw('disabled')}>${I.cart}Ajouter ${S.plural(picked.size, 'article')} aux courses</button>`
-            : html`<p class="hint">Rien à acheter : la semaine se fait avec le stock.</p>`}
+            <button class="primary" data-action="add" ${picked.size ? '' : raw('disabled')}>${I.cart}${t('week.addItems', { n: picked.size })}</button>`
+            : html`<p class="hint">${t('wshop.nothing')}</p>`}
         </div>`;
     },
     actions: {
@@ -66,7 +67,7 @@ export function openWeekShopping() {
         if (!picked.size) return;
         const added = store.addPlanShopping([...picked]);
         sheet.close();
-        toast(added ? `${S.plural(added, 'article ajouté', 'articles ajoutés')} aux courses` : 'Déjà dans la liste de courses');
+        toast(added ? t('wshop.added', { n: added }) : t('detail.already'));
       }
     }
   });

@@ -2,8 +2,8 @@
 
 import { html } from '../../components/html.js';
 import { markUnit, unitInput } from '../../components/unit-input.js';
-import * as S from '../../services/index.js';
 import { t } from '../../services/i18n/i18n.js';
+import * as S from '../../services/index.js';
 
 /**
  * État du champ, recalculé si le poids a changé ailleurs (code-barres, photo) :

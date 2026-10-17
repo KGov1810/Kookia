@@ -5,8 +5,8 @@ import { html, raw } from '../../components/html.js';
 import { I } from '../../components/icons.js';
 import { toast } from '../../components/toast.js';
 import * as store from '../../data/store/index.js';
-import * as S from '../../services/index.js';
 import { t } from '../../services/i18n/i18n.js';
+import * as S from '../../services/index.js';
 import { flushEdits } from './editor-save.js';
 
 // Textes : units.consume (bouton), units.qConsume (question), units.vConsume (« Consommer 2 »)…

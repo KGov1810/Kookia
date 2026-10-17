@@ -1,10 +1,10 @@
 // Kookia — Scanner de code-barres : ouverture, boutons et fermeture.
 
 import { pickImage } from '../../components/platform.js';
+import { t } from '../../services/i18n/i18n.js';
 import * as S from '../../services/index.js';
 import { begin, stopCamera } from './scanner-camera.js';
 import { createScannerOverlay, say, showActions } from './scanner-overlay.js';
-import { t } from '../../services/i18n/i18n.js';
 
 /**
  * Plein écran caméra. L'app gère la caméra elle-même et surveille l'image :

@@ -7,6 +7,7 @@ import { LANGUAGES, LANGUAGE_IDS } from '../../data/reference/i18n/languages.js'
 
 let current = 'fr';
 const rules = new Map();
+const lists = new Map();
 
 /** Langue de l'iPhone si l'app la connaît, sinon le français. */
 export function detectLanguage(preferred = globalThis.navigator?.languages ?? [globalThis.navigator?.language ?? 'fr']) {
@@ -47,4 +48,10 @@ export function t(key, params = {}, lang = current) {
   let text = entry[LANGUAGE_IDS.indexOf(lang)] ?? entry[0];
   if (Array.isArray(text)) text = text[pluralIndex(Number(params.n) || 0, lang)];
   return text.replace(/\{(\w+)\}/g, (match, name) => (params[name] ?? match));
+}
+
+/** « Courgettes, comté et crème », « zucchini, cheese and cream »… */
+export function listText(items, lang = current) {
+  if (!lists.has(lang)) lists.set(lang, new Intl.ListFormat(localeTag(lang), { type: 'conjunction' }));
+  return lists.get(lang).format(items.map(String));
 }

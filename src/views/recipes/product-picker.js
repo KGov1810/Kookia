@@ -5,6 +5,7 @@ import { I } from '../../components/icons.js';
 import { thumb } from '../../components/product-visuals.js';
 import { openSheet } from '../../components/sheet.js';
 import * as store from '../../data/store/index.js';
+import { t } from '../../services/i18n/i18n.js';
 import * as S from '../../services/index.js';
 import { rerenderIf } from '../app/router.js';
 import { ui } from '../app/ui-state.js';
@@ -14,9 +15,9 @@ export function openProductPicker() {
     tall: true,
     render: () => html`
       <header class="sheet-head">
-        <button class="link" data-action="none">Aucun</button>
-        <h2>Produits à utiliser</h2>
-        <button class="link strong" data-action="close">OK</button>
+        <button class="link" data-action="none">${t('picker.none')}</button>
+        <h2>${t('picker.title')}</h2>
+        <button class="link strong" data-action="close">${t('common.ok')}</button>
       </header>
       <div class="sheet-body">
         <section class="group">

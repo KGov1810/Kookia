@@ -2,6 +2,7 @@
 // unités consommées ou jetées. L'unité qu'on ouvre devient une ligne à part si d'autres restent intactes.
 
 import { toISODate } from '../../services/dates/dates.js';
+import { t } from '../../services/i18n/i18n.js';
 import { cleanPrice } from '../../services/stats/money.js';
 import { openingChanges, remainingLabel, remainingOf, splitAfter } from '../../services/stock/opened.js';
 import { logChange } from './history.js';
@@ -40,11 +41,12 @@ function applyRest(product, { whole, opened }) {
   return [id];
 }
 
-/** « il en reste 2 », « il en reste ½ », « il en reste 2 + ½ entamé », « plus en stock ». */
-export function restText({ whole, opened }) {
-  if (!whole && opened === null) return 'plus en stock';
-  if (opened === null) return `il en reste ${whole}`;
-  return whole ? `il en reste ${whole} + ${remainingLabel(opened)} entamé` : `il en reste ${remainingLabel(opened)}`;
+/** « il en reste 2 », « il en reste ½ », « il en reste 2 + ½ entamé », « plus en stock » (lang : 'fr' pour l'historique). */
+export function restText({ whole, opened }, lang) {
+  if (!whole && opened === null) return t('rest.none', {}, lang);
+  if (opened === null) return t('rest.whole', { n: whole }, lang);
+  const rest = remainingLabel(opened);
+  return whole ? t('rest.both', { n: whole, rest }, lang) : t('rest.opened', { rest }, lang);
 }
 
 /**

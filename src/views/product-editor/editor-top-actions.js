@@ -6,8 +6,8 @@ import { I } from '../../components/icons.js';
 import { dayCounter, thumb } from '../../components/product-visuals.js';
 import * as store from '../../data/store/index.js';
 import { state } from '../../data/store/state.js';
-import * as S from '../../services/index.js';
 import { t } from '../../services/i18n/i18n.js';
+import * as S from '../../services/index.js';
 import { openingRow } from './editor-opening.js';
 import { unitsBox, unitsTile } from './editor-units.js';
 

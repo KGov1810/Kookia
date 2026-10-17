@@ -3,16 +3,18 @@
 import { html } from '../../components/html.js';
 import { openSheet } from '../../components/sheet.js';
 import * as R from '../../data/reference/index.js';
+import { t } from '../../services/i18n/i18n.js';
+import { originName } from '../../services/i18n/labels.js';
 import { ui } from '../app/ui-state.js';
 
 /** « Toutes », « 🇮🇹 Italienne, 🇯🇵 Japonaise », « « nouilles » »… */
 export function originSummary() {
   const labels = ui.filters.origins.map((id) => R.ORIGINS.find((o) => o.id === id)).filter(Boolean)
-    .map((o) => `${o.emoji} ${o.label}`);
+    .map((o) => `${o.emoji} ${originName(o.id)}`);
   const shown = labels.length > 3 ? [...labels.slice(0, 2), `+${labels.length - 2}`] : labels;
   const parts = [...shown];
-  if (ui.filters.wish) parts.push(`« ${ui.filters.wish} »`);
-  return parts.length ? parts.join(', ') : 'Toutes les cuisines';
+  if (ui.filters.wish) parts.push(t('origins.wishQuoted', { wish: ui.filters.wish }));
+  return parts.length ? parts.join(', ') : t('origins.allCuisines');
 }
 
 /**
@@ -25,21 +27,21 @@ export function openOriginPicker(onDone) {
     tall: true,
     render: () => html`
       <header class="sheet-head">
-        <button class="link" data-action="clear">Effacer</button>
-        <h2>Origine</h2>
-        <button class="link strong" data-action="done">OK</button>
+        <button class="link" data-action="clear">${t('filters.clear')}</button>
+        <h2>${t('origins.title')}</h2>
+        <button class="link strong" data-action="done">${t('common.ok')}</button>
       </header>
       <div class="sheet-body">
         <section class="group">
-          <label class="field stack"><span>Envie de…</span>
-            <input name="wish" value="${draft.wish}" placeholder="nouilles, couscous, ramen, curry…" autocomplete="off" enterkeyhint="done">
+          <label class="field stack"><span>${t('origins.wish')}</span>
+            <input name="wish" value="${draft.wish}" placeholder="${t('origins.wishPlaceholder')}" autocomplete="off" enterkeyhint="done">
           </label>
         </section>
-        <h2 class="section">Cuisines<small>${draft.origins.size ? `${draft.origins.size} choisie${draft.origins.size > 1 ? 's' : ''}` : 'toutes'}</small></h2>
-        <div class="origin-grid" role="group" aria-label="Cuisines">
-          ${R.ORIGINS.map((o) => html`<button class="origin-chip" data-action="toggle-origin" data-id="${o.id}" aria-pressed="${String(draft.origins.has(o.id))}"><span aria-hidden="true">${o.emoji}</span>${o.label}</button>`)}
+        <h2 class="section">${t('origins.cuisines')}<small>${draft.origins.size ? t('origins.chosen', { n: draft.origins.size }) : t('origins.any')}</small></h2>
+        <div class="origin-grid" role="group" aria-label="${t('origins.cuisines')}">
+          ${R.ORIGINS.map((o) => html`<button class="origin-chip" data-action="toggle-origin" data-id="${o.id}" aria-pressed="${String(draft.origins.has(o.id))}"><span aria-hidden="true">${o.emoji}</span>${originName(o.id)}</button>`)}
         </div>
-        <p class="hint">Plusieurs choix possibles. Avec une cuisine ou une envie, Claude peut prévoir jusqu'à 6 ingrédients à acheter par recette pour rester fidèle à l'originale.</p>
+        <p class="hint">${t('origins.hint')}</p>
       </div>`,
     actions: {
       'toggle-origin': (el) => {

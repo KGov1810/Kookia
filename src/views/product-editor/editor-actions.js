@@ -3,8 +3,8 @@
 import { pickImage } from '../../components/platform.js';
 import { toast } from '../../components/toast.js';
 import * as store from '../../data/store/index.js';
-import * as S from '../../services/index.js';
 import { t } from '../../services/i18n/i18n.js';
+import * as S from '../../services/index.js';
 import { openScanner } from '../scanner/scanner.js';
 import { openingActions } from './editor-opening.js';
 import { setQuantityUnit } from './editor-quantity.js';

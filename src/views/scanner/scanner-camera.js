@@ -1,9 +1,9 @@
 // Kookia — Scanner : caméra, analyse de l'image et surveillance (image absente ou noire).
 
+import { t } from '../../services/i18n/i18n.js';
 import * as S from '../../services/index.js';
 import { say, showActions } from './scanner-overlay.js';
 import { finish } from './scanner.js';
-import { t } from '../../services/i18n/i18n.js';
 
 /** Coupe la caméra et invalide la session en cours (analyse, surveillance). */
 export function stopCamera(sc) {

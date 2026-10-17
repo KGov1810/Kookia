@@ -7,6 +7,7 @@ import * as R from '../../data/reference/index.js';
 import * as store from '../../data/store/index.js';
 import { hasClaudeKey } from '../../data/store/selectors.js';
 import { state } from '../../data/store/state.js';
+import { t } from '../../services/i18n/i18n.js';
 import * as S from '../../services/index.js';
 import { rerenderKeepScroll } from '../app/router.js';
 import { currentFilters, ui } from '../app/ui-state.js';
@@ -16,14 +17,14 @@ import { hasFilters, quickFilters } from './recipe-filters.js';
 import { weekView } from './week-view.js';
 
 function recipesHeader() {
-  return html`<header class="top"><div class="top-row"><h1>Recettes</h1></div>${modeSwitch()}</header>`;
+  return html`<header class="top"><div class="top-row"><h1>${t('tab.recipes')}</h1></div>${modeSwitch()}</header>`;
 }
 
 /** Idées (5 recettes) ou Semaine (planning des repas). */
 function modeSwitch() {
   return html`
-    <div class="segmented mode-switch" role="tablist" aria-label="Recettes">
-      ${[['idees', 'Idées'], ['semaine', 'Semaine']].map(([id, label]) => html`
+    <div class="segmented mode-switch" role="tablist" aria-label="${t('tab.recipes')}">
+      ${[['idees', t('recipes.ideas')], ['semaine', t('recipes.week')]].map(([id, label]) => html`
         <button role="tab" data-action="recipe-mode" data-value="${id}" aria-selected="${String(ui.recipeMode === id)}" aria-pressed="${String(ui.recipeMode === id)}">${id === 'semaine' ? I.calendar : I.sparkle}${label}</button>`)}
     </div>`;
 }
@@ -45,9 +46,9 @@ function recipeTabs(filters) {
     .filter((r) => S.matchesFilters(r, filters));
   const doable = store.compatibleRecipes({ priorityIds: ui.priority, filters, limit: Infinity });
   return {
-    realisables: { label: 'Réalisables', items: doable.map((c) => [c.recipe, c]), empty: 'Aucune recette enregistrée n\'est réalisable avec le stock actuel : demandez-en à Claude.' },
-    favoris: { label: 'Favoris', items: all.filter((r) => r.favorite).map((r) => [r]), empty: 'Pas encore de favori : touchez l\'étoile dans une recette pour la garder ici.' },
-    toutes: { label: 'Toutes', items: all.map((r) => [r]), empty: 'Aucune recette ne correspond à ces filtres.' }
+    realisables: { label: t('recipes.doable'), items: doable.map((c) => [c.recipe, c]), empty: t('recipes.emptyDoable') },
+    favoris: { label: t('recipes.favorites'), items: all.filter((r) => r.favorite).map((r) => [r]), empty: t('recipes.emptyFavorites') },
+    toutes: { label: t('recipes.all'), items: all.map((r) => [r]), empty: t('recipes.emptyFiltered') }
   };
 }
 
@@ -63,12 +64,12 @@ function priorityCard() {
   return html`
     <section class="group priority-card">
       <div class="group-head">
-        <h2>À utiliser en priorité</h2>
-        <button class="link" data-action="pick-products" ${state.products.length ? '' : raw('disabled')}>${priority.length ? 'Modifier' : 'Choisir'}</button>
+        <h2>${t('recipes.priority')}</h2>
+        <button class="link" data-action="pick-products" ${state.products.length ? '' : raw('disabled')}>${t(priority.length ? 'common.edit' : 'recipes.choose')}</button>
       </div>
       ${priority.length
         ? html`<div class="prio-chips">${priority.map((p) => html`<span class="prio-chip"><span class="prio-icon ${thumbTint(p)}" aria-hidden="true">${R.category(p.category).emoji}</span>${p.name}<b class="${store.productStatus(p)}">${shortExpiry(p)}</b></span>`)}</div>`
-        : html`<p class="hint">${state.products.length ? 'Rien d\'urgent : Claude pioche dans tout le stock.' : 'Stock vide : Claude part de la liste de courses.'}</p>`}
+        : html`<p class="hint">${t(state.products.length ? 'recipes.nothingUrgent' : 'recipes.emptyStock')}</p>`}
     </section>`;
 }
 
@@ -79,11 +80,11 @@ function generateBlock() {
   return html`
     <div class="start-action">
       <button class="primary generate" data-action="generate" ${canGenerate ? '' : raw('disabled')}>
-        ${ui.generating ? html`<span class="spinner"></span>Claude cuisine… (environ 30 s)` : html`${I.sparkle}Proposer 5 recettes`}
+        ${ui.generating ? html`<span class="spinner"></span>${t('recipes.cooking')}` : html`${I.sparkle}${t('recipes.propose')}`}
       </button>
       ${ui.recipeNote
         ? html`<p class="note ${ui.recipeNote.kind}">${ui.recipeNote.text}</p>`
-        : !hasKey ? html`<p class="hint">Ajoutez votre clé API Claude dans Réglages pour générer des recettes.</p>` : ''}
+        : !hasKey ? html`<p class="hint">${t('recipes.needKey')}</p>` : ''}
     </div>`;
 }
 
@@ -106,18 +107,18 @@ export const recipesView = {
       ${quickFilters()}
       ${generateBlock()}
 
-      <h2 class="section recipes-title">Mes recettes</h2>
-      <div class="recipe-tabs" role="tablist" aria-label="Mes recettes">
+      <h2 class="section recipes-title">${t('recipes.mine')}</h2>
+      <div class="recipe-tabs" role="tablist" aria-label="${t('recipes.mine')}">
         ${Object.entries(tabs).map(([id, tab]) => html`
           <button role="tab" data-action="recipe-tab" data-value="${id}" aria-selected="${String(id === current)}" aria-pressed="${String(id === current)}">${tab.label}<i>${tab.items.length}</i></button>`)}
       </div>
       <div class="list">
         ${cards.length
           ? cards
-          : html`<p class="hint">${!state.recipes.length ? 'Aucune recette pour l\'instant. Les recettes générées sont partagées avec l\'autre iPhone.' : empty}</p>`}
+          : html`<p class="hint">${!state.recipes.length ? t('recipes.none') : empty}</p>`}
       </div>
-      ${hiddenOld ? html`<p class="hint">${S.plural(hiddenOld, 'recette ancienne', 'recettes anciennes')} (sans régime, calories ou origine) ${hiddenOld > 1 ? 'sont masquées' : 'est masquée'} avec ces filtres.</p>` : ''}
-      ${!cards.length && hasFilters() && state.recipes.length ? html`<button class="secondary" data-action="clear-filters">Effacer les filtres</button>` : ''}`;
+      ${hiddenOld ? html`<p class="hint">${t('recipes.hiddenOld', { n: hiddenOld })}</p>` : ''}
+      ${!cards.length && hasFilters() && state.recipes.length ? html`<button class="secondary" data-action="clear-filters">${t('recipes.clearFilters')}</button>` : ''}`;
   },
   update() {
     rerenderKeepScroll();

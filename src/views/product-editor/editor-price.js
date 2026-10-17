@@ -2,8 +2,8 @@
 
 import { html, raw } from '../../components/html.js';
 import { lastKnownPrice } from '../../data/store/prices.js';
-import * as S from '../../services/index.js';
 import { t } from '../../services/i18n/i18n.js';
+import * as S from '../../services/index.js';
 
 /** Texte sous le champ : origine du prix proposé et total pour plusieurs unités. */
 export function priceHint(ctx) {

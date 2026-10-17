@@ -7,6 +7,7 @@ import { openSheet } from '../../components/sheet.js';
 import * as R from '../../data/reference/index.js';
 import * as store from '../../data/store/index.js';
 import { state } from '../../data/store/state.js';
+import { t } from '../../services/i18n/i18n.js';
 import * as S from '../../services/index.js';
 import { NO_FILTERS, ui } from '../app/ui-state.js';
 import { openOriginPicker, originSummary } from './origin-picker.js';
@@ -41,20 +42,19 @@ const pill = (action, pressed, label) =>
 export function quickFilters() {
   const f = ui.filters;
   const servings = state.settings.servings || 2;
-  const diet = R.DIETS.find((d) => d.id === f.diet);
   const extra = extraCount();
   return html`
-    <div class="quick-filters" role="group" aria-label="Personnes et filtres">
-      <div class="servings-pill" role="group" aria-label="Nombre de personnes : ${servingsLabel(servings)}">
-        <button data-action="servings-minus" aria-label="Une personne de moins" ${servings <= 1 ? raw('disabled') : ''}>−</button>
-        <output>${servings} pers.</output>
-        <button data-action="servings-plus" aria-label="Une personne de plus" ${servings >= 12 ? raw('disabled') : ''}>+</button>
+    <div class="quick-filters" role="group" aria-label="${t('filters.group')}">
+      <div class="servings-pill" role="group" aria-label="${t('filters.servingsAria', { label: servingsLabel(servings) })}">
+        <button data-action="servings-minus" aria-label="${t('filters.lessPerson')}" ${servings <= 1 ? raw('disabled') : ''}>−</button>
+        <output>${t('filters.people', { n: servings })}</output>
+        <button data-action="servings-plus" aria-label="${t('filters.morePerson')}" ${servings >= 12 ? raw('disabled') : ''}>+</button>
       </div>
-      ${pill('quick-time', f.maxMinutes > 0, f.maxMinutes ? `${S.formatMinutes(f.maxMinutes)} ou moins` : 'Rapide')}
-      ${pill('quick-light', f.light, f.light ? `Léger ≤ ${state.settings.lightMaxKcal || 500} kcal` : 'Léger')}
-      ${pill('quick-diet', Boolean(f.diet), f.diet ? diet.label : 'Végé')}
-      ${pill('quick-batch', f.batchOnly, 'Batch')}
-      <button class="chip filter-chip more" data-action="more-filters" aria-pressed="${String(extra > 0)}">${I.sliders}Filtres${extra ? html`<i>${extra}</i>` : ''}</button>
+      ${pill('quick-time', f.maxMinutes > 0, f.maxMinutes ? t('filters.orLess', { time: S.formatMinutes(f.maxMinutes) }) : t('filters.quick'))}
+      ${pill('quick-light', f.light, f.light ? t('filters.lightMax', { kcal: state.settings.lightMaxKcal || 500 }) : t('filters.light'))}
+      ${pill('quick-diet', Boolean(f.diet), f.diet ? S.dietName(f.diet) : t('filters.veggie'))}
+      ${pill('quick-batch', f.batchOnly, t('filters.batch'))}
+      <button class="chip filter-chip more" data-action="more-filters" aria-pressed="${String(extra > 0)}">${I.sliders}${t('filters.title')}${extra ? html`<i>${extra}</i>` : ''}</button>
     </div>`;
 }
 
@@ -84,23 +84,23 @@ export function openFiltersSheet() {
       const f = ui.filters;
       return html`
         <header class="sheet-head">
-          <button class="link" data-action="clear">Effacer</button>
-          <h2>Filtres</h2>
-          <button class="link strong" data-action="close">OK</button>
+          <button class="link" data-action="clear">${t('filters.clear')}</button>
+          <h2>${t('filters.title')}</h2>
+          <button class="link strong" data-action="close">${t('common.ok')}</button>
         </header>
         <div class="sheet-body">
           <section class="group filters-group">
-            ${segmented('Régime', 'set-diet', R.DIETS.map((d) => [d.id, d.label]), f.diet)}
-            ${segmented('Temps total maximum', 'set-time', R.TIME_FILTERS.map((t) => [t.max, t.label]), f.maxMinutes)}
-            ${segmented('Difficulté', 'set-difficulty', [['', 'Toutes'], ...R.DIFFICULTIES.map((d) => [d.id, d.label])], f.difficulty)}
+            ${segmented(t('filters.diet'), 'set-diet', R.DIETS.map((d) => [d.id, S.dietName(d.id)]), f.diet)}
+            ${segmented(t('filters.maxTime'), 'set-time', R.TIME_FILTERS.map((x) => [x.max, x.max ? S.formatMinutes(x.max) : t('time.any')]), f.maxMinutes)}
+            ${segmented(t('filters.difficulty'), 'set-difficulty', [['', S.difficultyName('')], ...R.DIFFICULTIES.map((d) => [d.id, S.difficultyName(d.id)])], f.difficulty)}
           </section>
           <section class="group">
             <button class="field field-button" data-action="pick-origin">
-              <span class="label-stack">Origine ou envie<small>${originSummary()}</small></span>
+              <span class="label-stack">${t('filters.originOrWish')}<small>${originSummary()}</small></span>
               <span class="chevron" aria-hidden="true">›</span>
             </button>
           </section>
-          <p class="hint">Les filtres trient vos recettes et guident Claude. Ils restent mémorisés sur cet iPhone, sauf l'envie.</p>
+          <p class="hint">${t('filters.hint')}</p>
         </div>`;
     },
     actions: {

@@ -7,8 +7,8 @@ import { toast } from '../../components/toast.js';
 import * as R from '../../data/reference/index.js';
 import * as store from '../../data/store/index.js';
 import { state } from '../../data/store/state.js';
-import * as S from '../../services/index.js';
 import { t } from '../../services/i18n/i18n.js';
+import * as S from '../../services/index.js';
 import { simplify } from '../../services/text/text.js';
 import { screen, ui } from '../app/ui-state.js';
 

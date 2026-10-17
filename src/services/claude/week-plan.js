@@ -1,7 +1,7 @@
 // Kookia — Planning de la semaine par Claude : des recettes pour les repas choisis, en utilisant le stock
 // intelligemment (ce qui périme d'abord, achats partagés, restes du soir, batch cooking) et les courses regroupées.
 
-import { localeTag } from '../i18n/i18n.js';
+import { language, localeTag, t } from '../i18n/i18n.js';
 import { filterLines } from '../recipes/recipe-filters.js';
 import { callTool } from './client.js';
 import { parseRecipe, shoppingLines, stockDescriber } from './recipe-parse.js';
@@ -56,10 +56,27 @@ const WEEK_TOOL = {
   }
 };
 
-/** « J3 (mercredi 15 octobre) » pour le jour d'indice 2 à partir de start (AAAA-MM-JJ). */
-export function weekDayLabel(start, day, options = { weekday: 'long', day: 'numeric', month: 'long' }) {
+function dayDate(start, day) {
   const [y, m, d] = start.split('-').map(Number);
-  return new Date(y, m - 1, d + day).toLocaleDateString(localeTag(), options);
+  return new Date(y, m - 1, d + day);
+}
+
+/** « mercredi 15 octobre » pour le jour d'indice 2 à partir de start (AAAA-MM-JJ) ; lang : 'fr' pour Claude. */
+export function weekDayLabel(start, day, options = { weekday: 'long', day: 'numeric', month: 'long' }, lang) {
+  return dayDate(start, day).toLocaleDateString(localeTag(lang), options);
+}
+
+/** « Du 14 au 20 octobre », « Du 28 septembre au 4 octobre » ; « October 14 – 20 » dans les autres langues. */
+export function weekRangeLabel(start, lang = language()) {
+  const options = { day: 'numeric', month: 'long' };
+  if (lang !== 'fr') {
+    const format = new Intl.DateTimeFormat(localeTag(lang), options);
+    if (format.formatRange) return format.formatRange(dayDate(start, 0), dayDate(start, 6));
+  }
+  const first = weekDayLabel(start, 0, options, lang);
+  const last = weekDayLabel(start, 6, options, lang);
+  const sameMonth = first.split(' ').slice(1).join(' ') === last.split(' ').slice(1).join(' ');
+  return t('week.range', { from: sameMonth ? first.split(' ')[0] : first, to: last }, lang);
 }
 
 /** Jour du planning correspondant à aujourd'hui (0 = premier jour ; négatif avant, 7 et plus après la semaine). */
@@ -79,7 +96,7 @@ function strategyLines({ leftovers, batchDay, start, servings }) {
     lines.push(`Restes : pour un midi qui suit un soir planifié, prévois de préférence les restes de ce dîner (restes = true, recette = celle du dîner de la veille) quand le plat se réchauffe ou se mange froid ; ce dîner est alors préparé pour ${servings * 2} portions (portions = ${servings * 2}).`);
   }
   if (batchDay !== null && batchDay !== undefined) {
-    lines.push(`Batch cooking : prévois une séance de préparation le J${batchDay + 1} (${weekDayLabel(start, batchDay)}), de 1 h à 2 h 30, qui avance plusieurs recettes de la semaine (cuire céréales et légumineuses, préparer sauces, légumes, marinades) ; décris-la dans batch et allège les étapes des recettes concernées (« utiliser le riz cuit le ${weekDayLabel(start, batchDay, { weekday: 'long' })} »).`);
+    lines.push(`Batch cooking : prévois une séance de préparation le J${batchDay + 1} (${weekDayLabel(start, batchDay, undefined, 'fr')}), de 1 h à 2 h 30, qui avance plusieurs recettes de la semaine (cuire céréales et légumineuses, préparer sauces, légumes, marinades) ; décris-la dans batch et allège les étapes des recettes concernées (« utiliser le riz cuit le ${weekDayLabel(start, batchDay, { weekday: 'long' }, 'fr')} »).`);
   }
   return lines;
 }
@@ -94,7 +111,7 @@ export async function generateWeekPlan({ key, model, products, shopping, filters
   const stockLines = products.map(describe);
   const listLines = shoppingLines(shopping);
   const days = [...new Set(slots.map((s) => s.day))].sort((a, b) => a - b);
-  const wanted = days.map((day) => `- J${day + 1} (${weekDayLabel(start, day)}) : ${MEALS.filter((meal) => slots.some((s) => s.day === day && s.meal === meal)).join(' et ')}`);
+  const wanted = days.map((day) => `- J${day + 1} (${weekDayLabel(start, day, undefined, 'fr')}) : ${MEALS.filter((meal) => slots.some((s) => s.day === day && s.meal === meal)).join(' et ')}`);
   const prompt = [
     `Nous sommes le ${new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}.`,
     '',

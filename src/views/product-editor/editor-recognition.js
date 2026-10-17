@@ -4,8 +4,8 @@ import { longDate } from '../../components/product-visuals.js';
 import * as store from '../../data/store/index.js';
 import { hasClaudeKey } from '../../data/store/selectors.js';
 import { state } from '../../data/store/state.js';
-import * as S from '../../services/index.js';
 import { t } from '../../services/i18n/i18n.js';
+import * as S from '../../services/index.js';
 import { applyKnownPrice } from './editor-price.js';
 import { applyReadDate, setLocation } from './editor-state.js';
 

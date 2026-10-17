@@ -4,8 +4,8 @@ import { html } from '../../components/html.js';
 import { I } from '../../components/icons.js';
 import * as R from '../../data/reference/index.js';
 import { state } from '../../data/store/state.js';
-import * as S from '../../services/index.js';
 import { t } from '../../services/i18n/i18n.js';
+import * as S from '../../services/index.js';
 
 // Choix du type de date : libellé court (kindShort.*), le libellé complet (kind.*) reste lu par VoiceOver.
 

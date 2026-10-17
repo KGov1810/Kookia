@@ -2,6 +2,7 @@
 
 import * as store from '../../data/store/index.js';
 import { state } from '../../data/store/state.js';
+import { t } from '../../services/i18n/i18n.js';
 import * as S from '../../services/index.js';
 import { rerenderIf } from '../app/router.js';
 import { currentFilters, ui } from '../app/ui-state.js';
@@ -30,11 +31,11 @@ export async function startRecipeGeneration() {
     ui.freshIds = new Set(recipes.map((r) => r.id));
     if (recipes.length) ui.recipeTab = 'toutes';
     if (!recipes.length) {
-      ui.recipeNote = { kind: 'warn', text: 'Aucune recette reçue, réessayez.' };
+      ui.recipeNote = { kind: 'warn', text: t('gen.none') };
     } else if (!recipes.some((r) => S.matchesFilters(r, filters))) {
-      ui.recipeNote = { kind: 'warn', text: 'Les recettes reçues ne respectent pas tous les filtres : assouplissez-les pour les voir, ou réessayez.' };
+      ui.recipeNote = { kind: 'warn', text: t('gen.filtered') };
     } else {
-      ui.recipeNote = { kind: 'ok', text: `${S.plural(recipes.length, 'nouvelle recette', 'nouvelles recettes')} en tête de « Mes recettes ».` };
+      ui.recipeNote = { kind: 'ok', text: t('gen.done', { n: recipes.length }) };
     }
   } catch (error) {
     ui.recipeNote = { kind: 'error', text: error?.message || String(error) };
