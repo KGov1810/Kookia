@@ -2,6 +2,8 @@
 
 import { fmt } from '../../components/html.js';
 import { openSheets } from '../../components/sheet.js';
+import { state } from '../../data/store/state.js';
+import { setLanguage } from '../../services/i18n/i18n.js';
 import { needsOnboarding, renderOnboarding } from '../onboarding/onboarding.js';
 import { recipesView } from '../recipes/recipes-view.js';
 import { settingsView } from '../settings/settings-view.js';
@@ -20,6 +22,7 @@ export function viewFor(tab) {
 }
 
 export function render() {
+  setLanguage(state.settings.language);
   const onboarding = needsOnboarding();
   document.body.classList.toggle('onboarding', onboarding);
   if (onboarding) {
@@ -56,6 +59,10 @@ export function showTab(name) {
 }
 
 export function onStoreChange(what) {
+  if (what === 'settings' && setLanguage(state.settings.language)) {
+    render(); // nouvelle langue : tout l'écran est redessiné
+    return;
+  }
   const onboarding = needsOnboarding();
   if (onboarding !== document.body.classList.contains('onboarding')) {
     render();

@@ -111,5 +111,13 @@ test('Ergonomie : recettes, glisser, courses, réglages', async () => {
   $('#name-input').value = 'Kev';
   await click('[data-action="done-name"]');
   log(JSON.parse(w.localStorage.getItem('frigo.settings.v1')).userName === 'Kev' && $('#profile-card b').textContent === 'Kev', 'Prénom modifié depuis le bandeau');
+  console.log('\n— Langue —');
+  const setLang = async (value) => { $('#language').value = value; $('#language').dispatchEvent(new w.Event('change', { bubbles: true })); await tick(); };
+  await setLang('en');
+  log($('h1').textContent === 'Settings' && $('.tab[data-tab="courses"] span').textContent === 'Groceries' && w.document.documentElement.lang === 'en' && JSON.parse(w.localStorage.getItem('frigo.settings.v1')).language === 'en', 'Anglais : Réglages et barre du bas traduits, choix gardé sur l\'iPhone');
+  await setLang('pt');
+  log($('h1').textContent === 'Ajustes' && $('.tab[data-tab="stock"], .tab[data-tab="frigo"]').textContent.includes('Estoque'), 'Portugais : « Ajustes », « Estoque »');
+  await setLang('');
+  log($('h1').textContent === 'Réglages' && $('#language').value === '' && $('#language').options[0].textContent === 'Comme l\'iPhone (Français)', 'Retour à la langue de l\'iPhone (français)');
   log(!P.errors.length, `Aucune erreur JS ${P.errors.join(' ')}`);
 });

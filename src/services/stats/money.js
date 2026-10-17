@@ -1,6 +1,15 @@
 // Kookia — Prix : lecture d'une saisie (« 2,49 », « 2.49 € »), arrondi et affichage en euros.
 
-const EURO = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' });
+import { localeTag } from '../i18n/i18n.js';
+
+const formats = new Map();
+
+/** Euros au format de la langue : « 2,49 € », « €2.49 »… */
+function euroFormat() {
+  const tag = localeTag();
+  if (!formats.has(tag)) formats.set(tag, new Intl.NumberFormat(tag, { style: 'currency', currency: 'EUR' }));
+  return formats.get(tag);
+}
 
 /** Prix enregistrable (nombre ≥ 0, au dixième de centime) ou null s'il est inconnu. */
 export function cleanPrice(value) {
@@ -26,7 +35,7 @@ export function parsePrice(text) {
 
 /** « 2,49 € » (espaces insécables remplacés par des espaces simples). */
 export function formatEuro(value) {
-  return EURO.format(roundCents(Number(value) || 0)).replace(/[\u00a0\u202f]/g, ' ');
+  return euroFormat().format(roundCents(Number(value) || 0)).replace(/[\u00a0\u202f]/g, ' ');
 }
 
 /** Valeur du champ de saisie : « 2,49 », ou vide si le prix est inconnu. */

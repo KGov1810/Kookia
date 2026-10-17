@@ -1,5 +1,7 @@
 // Kookia — Périodes des statistiques (mois calendaires, heure locale).
 
+import { localeTag } from '../i18n/i18n.js';
+
 export const STATS_PERIODS = [
   { id: 'mois', label: 'Ce mois', months: 1 },
   { id: '3mois', label: '3 mois', months: 3 },
@@ -41,9 +43,9 @@ export function monthLabel(key, { long = false, narrow = false } = {}) {
   const [year, month] = key.split('-').map(Number);
   const date = new Date(year, month - 1, 1);
   if (long) {
-    const text = date.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+    const text = date.toLocaleDateString(localeTag(), { month: 'long', year: 'numeric' });
     return text.charAt(0).toUpperCase() + text.slice(1);
   }
-  if (narrow) return date.toLocaleDateString('fr-FR', { month: 'narrow' }).toUpperCase();
-  return date.toLocaleDateString('fr-FR', { month: 'short' }).replace(/\.$/, '');
+  if (narrow) return date.toLocaleDateString(localeTag(), { month: 'narrow' }).toUpperCase();
+  return date.toLocaleDateString(localeTag(), { month: 'short' }).replace(/\.$/, '');
 }

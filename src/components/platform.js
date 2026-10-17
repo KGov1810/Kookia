@@ -1,5 +1,6 @@
 // Kookia — Photo, copie, partage, mode écran d'accueil.
 
+import { t } from '../services/i18n/i18n.js';
 import { toast } from './toast.js';
 
 export function pickImage({ camera = false } = {}) {
@@ -23,9 +24,9 @@ export function pickImage({ camera = false } = {}) {
 export async function copyText(text) {
   try {
     await navigator.clipboard.writeText(text);
-    toast('Copié');
+    toast(t('common.copied'));
   } catch {
-    toast('Copie impossible : sélectionnez le texte et copiez-le à la main.');
+    toast(t('common.copyFailed'));
   }
 }
 

@@ -2,13 +2,20 @@
 
 import * as store from '../../data/store/index.js';
 import { state } from '../../data/store/state.js';
+import { t } from '../../services/i18n/i18n.js';
 import { ui } from './ui-state.js';
 
 /** Couleur de la barre d'état : celle du bandeau vert du haut. */
 const HEAD_COLOR = { light: '#12463E', dark: '#16362F' };
 
+const TAB_LABEL = { frigo: 'tab.stock', recettes: 'tab.recipes', courses: 'tab.shopping', stats: 'tab.stats' };
+
 export function updateChrome() {
+  document.querySelector('.tabbar')?.setAttribute('aria-label', t('nav.label'));
+  document.querySelector('.nav-add')?.setAttribute('aria-label', t('nav.add'));
   document.querySelectorAll('.tab').forEach((tab) => {
+    const label = tab.querySelector('span');
+    if (label && TAB_LABEL[tab.dataset.tab]) label.textContent = t(TAB_LABEL[tab.dataset.tab]);
     if (tab.dataset.tab === ui.tab) tab.setAttribute('aria-current', 'page');
     else tab.removeAttribute('aria-current');
   });

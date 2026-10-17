@@ -1,25 +1,27 @@
 // Kookia — Messages d'erreur compréhensibles.
 
+import { t } from '../../services/i18n/i18n.js';
+
 export function errorMessage(error) {
   const code = error?.code ?? '';
   switch (code) {
     case 'permission-denied':
-      return 'Accès refusé par Firebase : vérifiez les règles Firestore (README, étape 1).';
+      return t('error.denied');
     case 'unavailable':
-      return 'Pas de connexion : les modifications seront envoyées au retour du réseau.';
+      return t('error.unavailable');
     case 'not-found':
     case 'failed-precondition':
-      return 'Base Firestore introuvable : créez-la dans la console Firebase (README, étape 1).';
+      return t('error.noDatabase');
     case 'auth/operation-not-allowed':
     case 'auth/admin-restricted-operation':
-      return 'Activez la connexion « Anonyme » dans Firebase > Authentication (README, étape 1).';
+      return t('error.anonymous');
     case 'auth/configuration-not-found':
-      return 'Authentication n\'est pas activé dans la console Firebase (README, étape 1).';
+      return t('error.noAuth');
     case 'auth/api-key-not-valid':
     case 'auth/invalid-api-key':
-      return 'Configuration Firebase invalide : recopiez-la depuis la console Firebase.';
+      return t('error.badConfig');
     case 'auth/network-request-failed':
-      return 'Pas de connexion internet.';
+      return t('error.network');
     default:
       return error?.message ?? String(error);
   }

@@ -1,5 +1,7 @@
 // Kookia — Dates au format AAAA-MM-JJ (heure locale).
 
+import { localeTag } from '../i18n/i18n.js';
+
 export const DAY = 86_400_000;
 
 export function startOfDay(date = new Date()) {
@@ -53,7 +55,7 @@ export function addMonths(date, months) {
 
 export function formatDate(iso, options = { day: 'numeric', month: 'short' }) {
   const date = parseISODate(iso);
-  return date ? date.toLocaleDateString('fr-FR', options) : '';
+  return date ? date.toLocaleDateString(localeTag(), options) : '';
 }
 
 /** 'expired' | 'soon' | 'ok' | 'pending' (date à compléter). */

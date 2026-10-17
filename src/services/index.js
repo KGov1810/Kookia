@@ -17,6 +17,7 @@ export * from './device/images.js';
 export * from './device/ocr.js';
 export * from './device/script-loader.js';
 export * from './external/open-food-facts.js';
+export * from './i18n/i18n.js';
 export * from './quantities/portions.js';
 export * from './quantities/quantities.js';
 export * from './quantities/weights.js';

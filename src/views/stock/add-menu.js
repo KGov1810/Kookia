@@ -5,6 +5,7 @@ import { I } from '../../components/icons.js';
 import { pickImage } from '../../components/platform.js';
 import { openSheet } from '../../components/sheet.js';
 import { hasClaudeKey } from '../../data/store/selectors.js';
+import { t } from '../../services/i18n/i18n.js';
 import { openProduceSheet } from '../produce/produce-sheet.js';
 import { openEditor } from '../product-editor/product-editor.js';
 import { openReceipt } from '../receipt/receipt-sheet.js';
@@ -28,12 +29,12 @@ export function openAddMenu() {
   const sheet = openSheet({
     render: () => html`
       <div class="menu">
-        <button class="menu-item" data-action="scan">${I.barcode}<span>Scanner un code-barres<small>Nom et photo retrouvés automatiquement</small></span></button>
-        <button class="menu-item" data-action="photo">${I.camera}<span>Prendre le produit en photo<small>${hasKey ? 'Claude reconnaît le produit et sa date' : "Lecture de la date sur l'emballage"}</small></span></button>
-        <button class="menu-item" data-action="produce">${I.apple}<span>Fruits et légumes<small>Sans code-barres : choisissez dans la liste</small></span></button>
-        <button class="menu-item" data-action="ticket">${I.receipt}<span>Scanner un ticket de caisse<small>${hasKey ? 'Tous les produits des courses d\'un coup' : 'Nécessite une clé Claude (Réglages)'}</small></span></button>
-        <button class="menu-item" data-action="manual">${I.pencil}<span>Saisir à la main</span></button>
-        <button class="secondary" data-action="close">Annuler</button>
+        <button class="menu-item" data-action="scan">${I.barcode}<span>${t('add.scan')}<small>${t('add.scanHint')}</small></span></button>
+        <button class="menu-item" data-action="photo">${I.camera}<span>${t('add.photo')}<small>${t(hasKey ? 'add.photoClaude' : 'add.photoDate')}</small></span></button>
+        <button class="menu-item" data-action="produce">${I.apple}<span>${t('add.produce')}<small>${t('add.produceHint')}</small></span></button>
+        <button class="menu-item" data-action="ticket">${I.receipt}<span>${t('add.ticket')}<small>${t(hasKey ? 'add.ticketHint' : 'add.needsKey')}</small></span></button>
+        <button class="menu-item" data-action="manual">${I.pencil}<span>${t('add.manual')}</span></button>
+        <button class="secondary" data-action="close">${t('common.cancel')}</button>
       </div>`,
     actions: {
       scan: () => {

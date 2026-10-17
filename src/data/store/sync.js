@@ -11,6 +11,7 @@ import { listenPrices } from './prices.js';
 import { rememberRecipeLinks } from './recipes.js';
 import { partnerName } from './selectors.js';
 import { emit, state } from './state.js';
+import { t } from '../../services/i18n/i18n.js';
 
 let unsubscribers = [];
 
@@ -114,16 +115,16 @@ export async function reconnect() {
 }
 
 export function syncLabel() {
-  if (!firebaseConfig()) return 'Firebase non configuré';
-  if (!state.settings.householdCode) return 'Aucun foyer';
-  if (state.error) return 'Erreur de synchronisation';
+  if (!firebaseConfig()) return t('sync.noFirebase');
+  if (!state.settings.householdCode) return t('sync.noHousehold');
+  if (state.error) return t('sync.error');
   if (typeof navigator !== 'undefined' && navigator.onLine === false) {
-    return state.pending ? 'Hors ligne, envoi en attente' : 'Hors ligne';
+    return t(state.pending ? 'sync.offlinePending' : 'sync.offline');
   }
-  if (state.reconnecting) return 'Actualisation…';
-  if (!state.connected || (state.fromCache && !state.lastSync)) return 'Connexion…';
-  if (state.fromCache) return state.pending ? 'Hors ligne, envoi en attente' : 'Hors ligne';
-  if (state.pending) return 'Envoi en cours…';
+  if (state.reconnecting) return t('sync.refreshing');
+  if (!state.connected || (state.fromCache && !state.lastSync)) return t('sync.connecting');
+  if (state.fromCache) return t(state.pending ? 'sync.offlinePending' : 'sync.offline');
+  if (state.pending) return t('sync.sending');
   const partner = partnerName();
-  return partner ? `Synchronisé avec ${partner}` : 'Synchronisé';
+  return partner ? t('sync.okWith', { name: partner }) : t('sync.ok');
 }

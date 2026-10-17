@@ -1,6 +1,7 @@
 // Kookia — Planning de la semaine par Claude : des recettes pour les repas choisis, en utilisant le stock
 // intelligemment (ce qui périme d'abord, achats partagés, restes du soir, batch cooking) et les courses regroupées.
 
+import { localeTag } from '../i18n/i18n.js';
 import { filterLines } from '../recipes/recipe-filters.js';
 import { callTool } from './client.js';
 import { parseRecipe, shoppingLines, stockDescriber } from './recipe-parse.js';
@@ -58,7 +59,7 @@ const WEEK_TOOL = {
 /** « J3 (mercredi 15 octobre) » pour le jour d'indice 2 à partir de start (AAAA-MM-JJ). */
 export function weekDayLabel(start, day, options = { weekday: 'long', day: 'numeric', month: 'long' }) {
   const [y, m, d] = start.split('-').map(Number);
-  return new Date(y, m - 1, d + day).toLocaleDateString('fr-FR', options);
+  return new Date(y, m - 1, d + day).toLocaleDateString(localeTag(), options);
 }
 
 /** Jour du planning correspondant à aujourd'hui (0 = premier jour ; négatif avant, 7 et plus après la semaine). */

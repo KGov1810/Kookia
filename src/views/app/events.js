@@ -44,6 +44,7 @@ export function wireEvents() {
     const t = event.target;
     if (t.dataset.setting === 'userName') store.updateSettings({ userName: t.value.trim() });
     else if (t.id === 'model') store.updateSettings({ model: t.value });
+    else if (t.id === 'language') store.updateSettings({ language: t.value });
     else if (t.dataset.statsFilter) setStatsFilter(t.dataset.statsFilter, t.value);
   });
 

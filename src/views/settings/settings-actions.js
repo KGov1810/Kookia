@@ -4,6 +4,7 @@ import { copyText, shareText } from '../../components/platform.js';
 import { toast } from '../../components/toast.js';
 import * as store from '../../data/store/index.js';
 import { state } from '../../data/store/state.js';
+import { t } from '../../services/i18n/i18n.js';
 import { updateAppBadge } from '../app/chrome.js';
 import { rerenderKeepScroll } from '../app/router.js';
 import { ui } from '../app/ui-state.js';
@@ -18,19 +19,19 @@ export const settingsActions = {
   'save-key': () => {
     const key = document.getElementById('key-input')?.value.trim() ?? '';
     if (!key.startsWith('sk-')) {
-      toast('Ce texte ne ressemble pas à une clé Claude (elle commence par sk-ant-).');
+      toast(t('settings.keyInvalid'));
       return;
     }
     store.updateSettings({ claudeKey: key });
-    toast('Clé enregistrée');
+    toast(t('settings.keyStored'));
   },
   'delete-key': () => {
-    if (window.confirm('Supprimer la clé Claude de cet iPhone ?')) store.updateSettings({ claudeKey: '' });
+    if (window.confirm(t('settings.keyConfirmDelete'))) store.updateSettings({ claudeKey: '' });
   },
   'share-invite': () => shareText(inviteMessage()),
   'copy-invite': () => copyText(store.invitationCode()),
   leave: () => {
-    if (window.confirm("Quitter ce foyer ? Les données restent dans le foyer : vous pourrez le rejoindre avec le code d'invitation.")) {
+    if (window.confirm(t('settings.leaveConfirm'))) {
       store.leaveHousehold();
     }
   },
