@@ -13,8 +13,8 @@ function stored(ctx) {
   return store.productById(ctx.p.id) ?? ctx.p;
 }
 
-/** Ce que l'ouverture change (date, rangement), en clair. */
-function changesText(product) {
+/** Ce que l'ouverture change (date, rangement), en clair (aussi pour ¾ ½ ¼ en glissant une ligne du stock). */
+export function openingEffect(product) {
   if (S.isOpened(product)) return '';
   const changes = S.openingChanges(product);
   return [
@@ -32,7 +32,7 @@ export function openingRow(ctx) {
   const remaining = S.remainingOf(product);
   const opened = remaining < 1;
   const count = product.count ?? 1;
-  const effect = changesText(product);
+  const effect = openingEffect(product);
   const note = [count > 1 && !opened ? t('opening.oneOf', { n: count }) : '', effect ? t('opening.effect', { effect }) : ''].filter(Boolean).join(' · ');
   return html`
     <div class="opening-row" role="group" aria-label="${t('opening.aria')}">
@@ -50,7 +50,7 @@ export function openingActions(ctx) {
       flushEdits(ctx); // modifications de la fiche gardées avant le geste
       const product = stored(ctx);
       const remaining = Number(el.dataset.value);
-      const effect = changesText(product);
+      const effect = openingEffect(product);
       const done = store.openProduct(product.id, remaining, price(ctx));
       ctx.view.take = null;
       ctx.sheet.close();

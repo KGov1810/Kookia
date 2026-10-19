@@ -60,7 +60,7 @@ test('Ergonomie : recettes, glisser, courses, réglages', async () => {
   await click('#toast button', 40);
   log(product('Yaourts').count === 3, 'Annuler : 3 yaourts');
   await swipe('Jambon blanc', -100);
-  log(row('Jambon blanc').classList.contains('open') && !sheet(), 'Glisser à gauche : boutons « Entamé » et « Jeté » visibles');
+  log(row('Jambon blanc').classList.contains('open') && !sheet() && row('Jambon blanc').querySelectorAll('[data-action="swipe-rest"]').length === 3, 'Glisser à gauche : « Il reste ¾ ½ ¼ » et « Jeté » visibles');
   await click(row('Jambon blanc').querySelector('[data-action="swipe-discard"]'), 60);
   const moves = docs('mouvements');
   log(!product('Jambon blanc') && moves.some((m) => m.type === 'jete' && m.name === 'Jambon blanc' && m.unitPrice === 2.9) && $('#toast').textContent.includes('Jambon blanc : jeté, retiré du stock'), 'Jeté : retiré du stock, compté dans le gaspillage, Annuler proposé');
@@ -71,9 +71,15 @@ test('Ergonomie : recettes, glisser, courses, réglages', async () => {
   await click(row('Yaourts').querySelector('.product-main'), 60);
   log(!sheet() && !$$('.product.open').length, 'Un toucher ailleurs referme les boutons sans ouvrir de fiche');
   await swipe('Lait UHT', -100);
-  await click(row('Lait UHT').querySelector('[data-action="swipe-open"]'), 400);
-  log(sheet()?.querySelectorAll('[data-action="set-remaining"]').length === 3, '« Entamé » ouvre la fiche, ¾ ½ ¼ en haut');
-  await click(sheet().querySelector('[data-action="close"]'), 350);
+  await click(row('Lait UHT').querySelector('[data-action="swipe-rest"][data-value="0.5"]'), 60);
+  log(product('Lait UHT').remaining === 0.5 && !sheet() && $('#toast').textContent.includes('Lait UHT : entamé, reste ½'), `« ½ » en glissant : entamé, il en reste ½, sans ouvrir la fiche (${$('#toast').textContent})`);
+  log(row('Lait UHT').querySelector('[data-action="swipe-rest"][data-value="0.5"]').disabled && row('Lait UHT').querySelector('[data-action="swipe-rest"][data-value="0.75"]').disabled && !row('Lait UHT').querySelector('[data-action="swipe-rest"][data-value="0.25"]').disabled, 'Ensuite : ¾ et ½ grisés, ¼ reste possible');
+  await click('#toast button', 40);
+  log(!product('Lait UHT').remaining || product('Lait UHT').remaining === 1, 'Annuler : lait remis entier');
+  await swipe('Yaourts', 400);
+  log(!product('Yaourts') && $('#toast').textContent.includes('Yaourts : tout consommé (3), retiré du stock'), `Glisser loin à droite : les 3 yaourts consommés (${$('#toast').textContent})`);
+  await click('#toast button', 40);
+  log(product('Yaourts')?.count === 3, 'Annuler : 3 yaourts remis');
 
   console.log('\n— Courses : un seul champ, « par X », Tout ranger —');
   await click('.tab[data-tab="courses"]');

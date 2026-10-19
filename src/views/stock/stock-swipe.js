@@ -1,11 +1,13 @@
 // Kookia — Stock : glisser une ligne de produit.
-// Vers la droite : consommé (une unité, avec Annuler). Vers la gauche : fait apparaître « Entamé » et « Jeté ».
+// Vers la droite : consommé (une unité, avec Annuler) ; plus loin, toutes les unités. Vers la gauche : fait apparaître
+// « Il reste ¾ ½ ¼ » et « Jeté ».
 // Le défilement vertical reste celui de Safari (touch-action: pan-y) ; un geste vertical annule le glisser.
 
 import { screen } from '../app/ui-state.js';
-import { consume } from './stock-list.js';
+import { consume, consumeAll } from './stock-gestures.js';
 
 const CONSUME_AT = 96; // px vers la droite pour consommer
+const ALL_SHARE = 0.55; // plus loin (part de la largeur de la ligne) : toutes les unités
 const OPEN_AT = 48;    // px vers la gauche pour montrer les boutons
 const START = 10;      // px avant de décider : glisser ou défiler
 
@@ -15,6 +17,12 @@ let swallowClickUntil = 0;
 
 const buttonsWidth = (row) => row.querySelector('.swipe-buttons')?.offsetWidth || 168;
 
+/** Distance pour « Tout consommé » : seulement s'il y a plusieurs unités. */
+function allAt(row) {
+  if (Number(row.dataset.units) <= 1) return Infinity;
+  return Math.max(CONSUME_AT + 70, Math.round(row.offsetWidth * ALL_SHARE));
+}
+
 function place(row, x, animate) {
   const front = row.querySelector('.product-front');
   if (!front) return;
@@ -22,6 +30,7 @@ function place(row, x, animate) {
   front.style.transform = x ? `translateX(${x}px)` : '';
   row.classList.toggle('swipe-right', x > 0);
   row.classList.toggle('swipe-left', x < 0);
+  row.classList.toggle('swipe-all', x >= allAt(row));
 }
 
 /** Referme la ligne dont les boutons sont visibles. */
@@ -61,7 +70,8 @@ function onMove(event) {
   let x = drag.base + dx;
   if (drag.base < 0) x = Math.min(x, 0); // ligne ouverte : glisser à droite la referme seulement
   if (x < -max) x = -max - (-max - x) / 3; // résistance au-delà des boutons
-  if (x > CONSUME_AT) x = CONSUME_AT + (x - CONSUME_AT) / 3;
+  const stop = Number.isFinite(allAt(drag.row)) ? allAt(drag.row) : CONSUME_AT;
+  if (x > stop) x = stop + (x - stop) / 3; // résistance au-delà du dernier seuil
   drag.x = x;
   place(drag.row, x, false);
 }
@@ -72,7 +82,10 @@ function onUp() {
   drag = null;
   if (!active) return;
   swallowClickUntil = Date.now() + 450; // pas d'ouverture de fiche à la fin du geste
-  if (base === 0 && x >= CONSUME_AT) {
+  if (base === 0 && x >= allAt(row)) {
+    place(row, 0, true);
+    consumeAll(row.dataset.id);
+  } else if (base === 0 && x >= CONSUME_AT) {
     place(row, 0, true);
     consume(row.dataset.id);
   } else if (x <= -OPEN_AT) {
@@ -98,7 +111,7 @@ export function wireSwipe() {
   screen.addEventListener('pointerup', onUp);
   screen.addEventListener('pointercancel', onCancel);
   // Avant les actions : le « clic » qui termine un geste, ou un toucher ailleurs quand des boutons sont visibles,
-  // ne fait que refermer (pas d'ouverture de fiche). « Entamé » et « Jeté » restent toujours actifs.
+  // ne fait que refermer (pas d'ouverture de fiche). « ¾ ½ ¼ » et « Jeté » restent toujours actifs.
   screen.addEventListener('click', (event) => {
     if (openRow && !openRow.isConnected) openRow = null; // liste redessinée entre-temps
     if (event.target.closest('.swipe-buttons')) return;

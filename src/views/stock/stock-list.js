@@ -3,14 +3,13 @@
 import { html, raw } from '../../components/html.js';
 import { I } from '../../components/icons.js';
 import { dayCounter, thumb } from '../../components/product-visuals.js';
-import { toast } from '../../components/toast.js';
 import * as R from '../../data/reference/index.js';
 import * as store from '../../data/store/index.js';
 import { state } from '../../data/store/state.js';
 import { t } from '../../services/i18n/i18n.js';
 import * as S from '../../services/index.js';
 import { simplify } from '../../services/text/text.js';
-import { screen, ui } from '../app/ui-state.js';
+import { ui } from '../app/ui-state.js';
 
 export function fridgeList() {
   if (!state.products.length) {
@@ -62,11 +61,10 @@ function productRow(product) {
   const place = ui.location ? '' : html`<span class="where" title="${S.placeName(location)}">${parts.length ? ', ' : ''}${where(location)}</span>`;
   const meta = parts.join(', ');
   return html`
-    <div class="product" data-id="${product.id}">
+    <div class="product" data-id="${product.id}" data-units="${product.count ?? 1}">
       <div class="swipe-under" aria-hidden="true">
-        <span class="swipe-consume">${I.check}${t('swipe.consumed')}</span>
-        <span class="swipe-buttons">
-          <button class="swipe-open" data-action="swipe-open" data-id="${product.id}" tabindex="-1">${I.gauge}${t('swipe.opened')}</button>
+        <span class="swipe-consume"><span class="one">${I.check}${t('swipe.consumed')}</span><span class="all">${I.check}${t('swipe.all', { n: product.count ?? 1 })}</span></span>
+        <span class="swipe-buttons">${restButtons(product)}
           <button class="swipe-discard" data-action="swipe-discard" data-id="${product.id}" tabindex="-1">${I.trash}${t('swipe.thrown')}</button>
         </span>
       </div>
@@ -94,15 +92,12 @@ function quickDates(product) {
     </div>`;
 }
 
-/** Un toucher sur « +3 j », « +1 sem »… : la date de l'emballage, retenue pour la prochaine fois, avec Annuler. */
-export function quickDate(id, days) {
-  const product = store.productById(id);
-  if (!product) return;
-  const before = { ...product };
-  const next = { ...product, expiry: S.isoInDays(days) };
-  store.saveProduct(next);
-  store.rememberShelfLife(next);
-  toast(t('quickDate.done', { name: product.name, date: longDate(next.expiry) }), t('common.cancel'), () => store.saveProduct(before));
+/** Glisser vers la gauche : « Il reste ¾ ½ ¼ » en un toucher (les parts déjà dépassées sont grisées). */
+function restButtons(product) {
+  const remaining = S.remainingOf(product);
+  return html`<span class="swipe-rest"><small>${t('swipe.rest')}</small><span class="swipe-parts">
+    ${R.REMAINING_CHOICES.map((value) => html`<button class="swipe-part" data-action="swipe-rest" data-id="${product.id}" data-value="${value}" tabindex="-1" ${value >= remaining ? raw('disabled') : ''} aria-label="${t('swipe.restAria', { rest: S.remainingLabel(value) })}">${S.remainingLabel(value)}</button>`)}
+  </span></span>`;
 }
 
 function consumeLabel(product, opened) {
@@ -113,34 +108,4 @@ function consumeLabel(product, opened) {
 /** Petite jauge d'un produit entamé : la part qui reste. */
 function openedGauge(product) {
   return html`<i class="opened-gauge" style="${raw(`--left: ${Math.round(S.remainingOf(product) * 100)}%`)}" aria-hidden="true"></i>`;
-}
-
-/** Le rond d'un produit consomme une unité ; le produit disparaît à la dernière. */
-export function consume(id) {
-  const product = store.productById(id);
-  if (!product) return;
-  const last = (product.count ?? 1) <= 1;
-  const row = screen.querySelector(`.product[data-id="${CSS.escape(id)}"]`);
-  if (last) row?.classList.add('leaving');
-  setTimeout(() => {
-    const done = store.consumeOne([id]);
-    if (!done.before.length) {
-      row?.classList.remove('leaving');
-      return;
-    }
-    const message = last
-      ? t(S.isOpened(product) ? 'toast.finished' : 'toast.removed', { name: product.name })
-      : t('toast.left', { name: product.name, n: product.count - 1 });
-    toast(message, t('common.cancel'), () => store.undoTake(done));
-  }, last ? 180 : 0);
-}
-
-/** Jeté (glisser vers la gauche) : une unité, ou la part qui reste d'un produit entamé. */
-export function discard(id) {
-  const product = store.productById(id);
-  if (!product) return;
-  const done = store.discardUnits(id, 1);
-  if (!done.before.length) return;
-  const rest = (product.count ?? 1) - 1;
-  toast(t(rest > 0 ? 'toast.thrownLeft' : 'toast.thrown', { name: product.name, n: rest }), t('common.cancel'), () => store.undoTake(done));
 }

@@ -17,20 +17,43 @@
 
 .swipe-consume svg, .swipe-buttons svg { width: 22px; height: 22px; }
 
+.swipe-consume > span { display: inline-flex; align-items: center; gap: 8px; }
+
+.swipe-consume .all { display: none; }
+
 .product.swipe-right .swipe-consume { display: flex; }
+
+/* Glissé assez loin : toutes les unités (fond plus sombre, libellé « Tout consommé (4) »). */
+.product.swipe-all .swipe-consume { background: color-mix(in srgb, var(--herb-fill) 72%, #000); }
+
+.product.swipe-all .swipe-consume .one { display: none; }
+
+.product.swipe-all .swipe-consume .all { display: inline-flex; }
 
 .swipe-buttons { display: flex; visibility: hidden; }
 
 .product.swipe-left .swipe-buttons, .product.open .swipe-buttons { visibility: visible; }
 
-.swipe-buttons button {
-  width: 84px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
-  font-weight: 650; font-size: 14px; color: var(--on-accent);
+.swipe-discard {
+  width: 76px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  font-weight: 650; font-size: 14px; color: var(--on-accent); background: var(--tomato-fill);
 }
 
-.swipe-open { background: var(--apricot-fill); }
+/* « Il reste ¾ ½ ¼ » : un toucher, sans ouvrir la fiche. */
+.swipe-rest {
+  display: flex; flex-direction: column; justify-content: center; gap: 2px; padding: 0 4px;
+  background: var(--apricot-fill); color: var(--on-accent);
+}
 
-.swipe-discard { background: var(--tomato-fill); }
+.swipe-rest small { font-size: 12px; font-weight: 650; text-align: center; opacity: .9; }
+
+.swipe-parts { display: flex; }
+
+.swipe-part { width: 52px; min-height: 44px; font: 800 20px/1 var(--font-round); color: var(--on-accent); border-radius: 12px; }
+
+.swipe-part:active { background: rgb(0 0 0 / .14); }
+
+.swipe-part:disabled { opacity: .4; }
 
 .product.leaving { opacity: 0; transform: translateX(24px); transition: opacity 220ms var(--ease-out), transform 220ms var(--ease-out); }
 

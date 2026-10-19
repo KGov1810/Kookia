@@ -6,7 +6,7 @@ import { ui } from '../app/ui-state.js';
 import { openProduceSheet } from '../produce/produce-sheet.js';
 import { openEditor } from '../product-editor/product-editor.js';
 import { openAddMenu, scanThenEdit } from './add-menu.js';
-import { consume, discard, quickDate } from './stock-list.js';
+import { consume, discard, openPart, quickDate } from './stock-gestures.js';
 import { closeSwipedRow } from './stock-swipe.js';
 import { fridgeView } from './stock-view.js';
 
@@ -23,10 +23,9 @@ export const stockActions = {
   consume: (el) => consume(el.dataset.id),
   'quick-date': (el) => quickDate(el.dataset.id, Number(el.dataset.days)), // date à compléter, en un toucher
   // Boutons révélés en glissant une ligne vers la gauche
-  'swipe-open': (el) => {
+  'swipe-rest': (el) => {
     closeSwipedRow();
-    const product = store.productById(el.dataset.id);
-    if (product) openEditor({ product }); // ¾ ½ ¼ en haut de la fiche
+    openPart(el.dataset.id, Number(el.dataset.value)); // entamé : il en reste ¾, ½ ou ¼
   },
   'swipe-discard': (el) => {
     closeSwipedRow();
