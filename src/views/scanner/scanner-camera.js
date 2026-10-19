@@ -3,7 +3,7 @@
 import { t } from '../../services/i18n/i18n.js';
 import * as S from '../../services/index.js';
 import { say, showActions } from './scanner-overlay.js';
-import { finish } from './scanner.js';
+import { finish, found } from './scanner.js';
 
 /** Coupe la caméra et invalide la session en cours (analyse, surveillance). */
 export function stopCamera(sc) {
@@ -90,8 +90,11 @@ export async function scanLoop(sc, current) {
 
     const code = await sc.decode(sc.canvas);
     if (code && current === sc.session && !sc.finished) {
-      finish(sc, code);
-      return;
+      if (!sc.continuous) {
+        finish(sc, code);
+        return;
+      }
+      found(sc, code); // rafale : on continue avec le produit suivant
     }
   }
   sc.loopTimer = setTimeout(() => scanLoop(sc, current), 160);

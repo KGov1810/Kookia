@@ -19,6 +19,8 @@ export const COMMON = {
   // Menu « + »
   'add.scan': ['Scanner un code-barres', 'Scan a barcode', 'Escanear un código de barras', 'Escanear um código de barras'],
   'add.scanHint': ['Nom et photo retrouvés automatiquement', 'Name and photo found automatically', 'Nombre y foto encontrados automáticamente', 'Nome e foto encontrados automaticamente'],
+  'add.scanMany': ['Scanner plusieurs produits', 'Scan several products', 'Escanear varios productos', 'Escanear vários produtos'],
+  'add.scanManyHint': ['Un bip par produit, vérification à la fin', 'One beep per product, check at the end', 'Un pitido por producto, revisión al final', 'Um bipe por produto, conferência no final'],
   'add.photo': ['Prendre le produit en photo', 'Take a photo of the product', 'Tomar una foto del producto', 'Tirar uma foto do produto'],
   'add.photoClaude': ['Claude reconnaît le produit et sa date', 'Claude recognizes the product and its date', 'Claude reconoce el producto y su fecha', 'O Claude reconhece o produto e a data'],
   'add.photoDate': ['Lecture de la date sur l\'emballage', 'Reads the date on the package', 'Lee la fecha en el empaque', 'Lê a data na embalagem'],

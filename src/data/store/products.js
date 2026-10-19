@@ -93,7 +93,8 @@ export function restoreProducts(products, { movements = true } = {}) {
 }
 
 /**
- * Ajoute d'un coup les produits d'un ticket de caisse, ou du panier (« Tout ranger », source « courses »),
+ * Ajoute d'un coup les produits d'un ticket de caisse, du panier (« Tout ranger », source « courses ») ou d'un scan
+ * de plusieurs produits (source « scan », avec code-barres et photo),
  * avec la date adaptée au lieu (frigo : estimée, sauf viande, poisson, charcuterie et traiteur, à compléter),
  * et retire de la liste de courses les articles achetés.
  */
@@ -123,11 +124,11 @@ export function addReceiptProducts(items, shoppingIdsToRemove = [], { source = '
       expiry = isoInDays(estimateFreshDays(item.name, location));
     } else if (fridgeEstimable(item.category, location)) {
       dateKind = 'estimee'; // yaourts, beurre… : la durée retenue la dernière fois, sinon une durée prudente
-      expiry = isoInDays(estimatedDays({ name: item.name, category: item.category, location }));
+      expiry = isoInDays(estimatedDays({ name: item.name, category: item.category, location, barcode: item.barcode }));
     }
     const id = crypto.randomUUID();
     const count = Math.max(1, Math.round(Number(item.count) || 1));
-    added.push({ id, name: item.name.trim(), category: item.category || 'autre', location, unitPrice: cleanPrice(item.unitPrice), count });
+    added.push({ id, name: item.name.trim(), category: item.category || 'autre', location, unitPrice: cleanPrice(item.unitPrice), count, barcode: item.barcode || '' });
     batch.set(ref('produits', id), {
       name: item.name.trim(),
       expiry,
@@ -138,11 +139,11 @@ export function addReceiptProducts(items, shoppingIdsToRemove = [], { source = '
       categoryVersion: CATEGORY_VERSION,
       quantity: (item.quantity ?? '').trim(),
       count,
-      barcode: '',
+      barcode: item.barcode || '', // scan en rafale : code-barres et photo d'Open Food Facts
       addedBy: state.settings.userName,
       createdAt: now + index,
       image: '',
-      imageUrl: '',
+      imageUrl: item.imageUrl || '',
       unitPrice: cleanPrice(item.unitPrice)
     });
   });
@@ -154,8 +155,8 @@ export function addReceiptProducts(items, shoppingIdsToRemove = [], { source = '
   const bought = state.shopping.filter((i) => shoppingIdsToRemove.includes(i.id)).map((i) => i.name);
   const names = items.map((i) => (i.count > 1 ? `${i.name} ×${i.count}` : i.name)).join(', ');
   const name = countName('count.products', items.length);
-  logChange(source === 'courses'
-    ? { scope: 'courses', action: 'rangement', name, details: [names] }
-    : { scope: 'stock', action: 'ticket', name, details: [names, bought.length ? { k: 'hist.fromList', p: { names: bought.join(', ') } } : ''] });
+  if (source === 'courses') logChange({ scope: 'courses', action: 'rangement', name, details: [names] });
+  else if (source === 'scan') logChange({ scope: 'stock', action: 'ajout', name, details: [names] }); // « a ajouté 3 produits »
+  else logChange({ scope: 'stock', action: 'ticket', name, details: [names, bought.length ? { k: 'hist.fromList', p: { names: bought.join(', ') } } : ''] });
   return items.length;
 }

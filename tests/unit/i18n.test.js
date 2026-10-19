@@ -36,3 +36,17 @@ test('Langue : celle de l\'iPhone, pluriels, formats, retour au français', () =
   setLanguage('fr');
   check(t('settings.daysBefore', { n: 0 }) === '0 jour avant' && formatEuro(2.5) === '2,50 €' && t('clé.inconnue') === 'clé.inconnue', 'Français : 0 au singulier, euros, clé inconnue rendue telle quelle');
 });
+
+test('Dictionnaires : aucune clé définie deux fois (la seconde écraserait la première sans prévenir)', async () => {
+  const { readdirSync, readFileSync } = await import('node:fs');
+  const dir = `${process.cwd()}/src/data/reference/i18n/`;
+  const seen = new Map();
+  const duplicates = [];
+  for (const file of readdirSync(dir).filter((f) => !['index.js', 'languages.js'].includes(f))) {
+    for (const match of readFileSync(dir + file, 'utf8').matchAll(/^\s*'([\w.:-]+)':/gm)) {
+      if (seen.has(match[1])) duplicates.push(`${match[1]} (${seen.get(match[1])}, ${file})`);
+      else seen.set(match[1], file);
+    }
+  }
+  expect(duplicates).toEqual([]);
+});

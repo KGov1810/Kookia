@@ -64,5 +64,19 @@ export const CAPTURE = {
   'produce.each': ['{price} pièce', '{price} each', '{price} cada uno', '{price} cada'],
   'produce.lastPrice': ['dernier prix payé, à vérifier', 'last price paid, check it', 'último precio pagado, revísalo', 'último preço pago, confira'],
   'produce.badPriceFor': ['Prix illisible pour {name} : écrivez par exemple 3,58 (ou laissez vide).', 'Unreadable price for {name}: write for example 3.58 (or leave it empty).', 'Precio ilegible para {name}: escribe por ejemplo 3.58 (o déjalo vacío).', 'Preço ilegível para {name}: escreva por exemplo 3,58 (ou deixe vazio).'],
+  // Scanner plusieurs produits (rafale)
+  'multi.close': ['Terminer', 'Done', 'Listo', 'Concluir'],
+  'multi.done': [['Vérifier {n} produit', 'Vérifier {n} produits'], ['Check {n} product', 'Check {n} products'], ['Revisar {n} producto', 'Revisar {n} productos'], ['Conferir {n} produto', 'Conferir {n} produtos']],
+  'multi.searching': ['Recherche du produit…', 'Looking up the product…', 'Buscando el producto…', 'Buscando o produto…'],
+  'multi.unknown': ['Code {code} inconnu', 'Unknown code {code}', 'Código {code} desconocido', 'Código {code} desconhecido'],
+  'multi.offline': ['Code {code} : pas de réseau', 'Code {code}: no network', 'Código {code}: sin conexión', 'Código {code}: sem rede'],
+  'multi.plus': ['Un {name} de plus', 'One more {name}', 'Un {name} más', 'Mais um {name}'],
+  'multi.trayHint': ['Le même produit deux fois : touchez + sur sa ligne.', 'Same product twice: tap + on its line.', 'El mismo producto dos veces: toca + en su línea.', 'O mesmo produto duas vezes: toque em + na linha.'],
+  'multi.title': ['Produits scannés', 'Scanned products', 'Productos escaneados', 'Produtos escaneados'],
+  'multi.hint': ['Vérifiez les noms, le nombre et le lieu ; décochez ce qui ne va pas en stock.', 'Check the names, quantities and place; untick what doesn\'t go in stock.', 'Revisa los nombres, cantidades y lugar; desmarca lo que no va al inventario.', 'Confira nomes, quantidades e local; desmarque o que não vai para o estoque.'],
+  'multi.typeName': ['Nom du produit', 'Product name', 'Nombre del producto', 'Nome do produto'],
+  'multi.line': ['Ajouter {name}', 'Add {name}', 'Agregar {name}', 'Adicionar {name}'],
+  'multi.addN': [['Ajouter {n} produit au stock', 'Ajouter {n} produits au stock'], ['Add {n} product to stock', 'Add {n} products to stock'], ['Agregar {n} producto al inventario', 'Agregar {n} productos al inventario'], ['Adicionar {n} produto ao estoque', 'Adicionar {n} produtos ao estoque']],
+  'multi.added': [['{n} produit ajouté au stock', '{n} produits ajoutés au stock'], ['{n} product added to stock', '{n} products added to stock'], ['{n} producto agregado al inventario', '{n} productos agregados al inventario'], ['{n} produto adicionado ao estoque', '{n} produtos adicionados ao estoque']],
   'produce.badWeightFor': ['Poids illisible pour {name} : tapez un nombre, par exemple 1,2 (ou laissez vide).', 'Unreadable weight for {name}: type a number, for example 1.2 (or leave it empty).', 'Peso ilegible para {name}: escribe un número, por ejemplo 1.2 (o déjalo vacío).', 'Peso ilegível para {name}: digite um número, por exemplo 1,2 (ou deixe vazio).']
 };
