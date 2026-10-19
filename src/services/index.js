@@ -30,6 +30,7 @@ export * from './recipes/localize.js';
 export * from './recipes/week-dates.js';
 export * from './stats/money.js';
 export * from './stats/periods.js';
+export * from './stats/purchases.js';
 export * from './stats/stats.js';
 export * from './stats/stock-value.js';
 export * from './stock/categorization.js';

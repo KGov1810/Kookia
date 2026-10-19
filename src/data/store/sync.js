@@ -11,6 +11,7 @@ import { toProduct, toRecipe, toShoppingItem } from './mappers.js';
 import { stopMovements } from './movements.js';
 import { publishLanguage } from './languages.js';
 import { listenPrices } from './prices.js';
+import { stopPurchases } from './purchases.js';
 import { rememberRecipeLinks } from './recipes.js';
 import { partnerName } from './selectors.js';
 import { emit, state } from './state.js';
@@ -70,6 +71,7 @@ export function stop() {
   unsubscribers.forEach((u) => u());
   unsubscribers = [];
   stopMovements();
+  stopPurchases();
   state.connected = false;
 }
 

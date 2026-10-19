@@ -23,6 +23,7 @@ export const shoppingActions = {
     if (item) moveItemToFridge(item);
   },
   'edit-item': (el) => openShoppingItem(el.dataset.id),
+  restock: (el) => store.addShoppingItem(el.dataset.name), // « À racheter » : un toucher, l'article rejoint la liste
   'put-away-all': () => openPutAway(),
   'clear-checked': () => store.clearCheckedShopping(),
   'scan-ticket': () => openTicket()

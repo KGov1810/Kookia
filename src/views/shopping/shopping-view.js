@@ -27,6 +27,7 @@ export const shoppingView = {
     this.update();
   },
   update() {
+    store.watchPurchases(); // achats des 3 derniers mois, pour « À racheter » (une seule écoute par session)
     const toBuy = state.shopping.filter((i) => !i.checked).sort((a, b) => a.createdAt - b.createdAt);
     const inCart = state.shopping.filter((i) => i.checked).sort((a, b) => a.name.localeCompare(b.name, S.localeTag()));
     summaryLine(toBuy.length, inCart.length);
@@ -38,6 +39,7 @@ export const shoppingView = {
           <h2>${t('shop.empty')}</h2>
           <p>${t('shop.emptyText')}</p>
         </div>`,
+      restockRow(),
       toBuy.length ? html`<h2 class="section">${t('shop.toBuy')}<small>${toBuy.length}</small></h2><div class="shop-group">${toBuy.map(shoppingRow)}</div>` : '',
       inCart.length ? html`
         <div class="section-row"><h2 class="section">${t('shop.cart')}<small>${inCart.length}</small></h2>
@@ -60,6 +62,15 @@ function summaryLine(toBuy, inCart) {
   const parts = [toBuy ? t('shop.nToBuy', { n: toBuy }) : '', inCart ? t('shop.nInCart', { n: inCart }) : ''].filter(Boolean);
   element.textContent = synced ? parts.join(', ') || t('shop.empty') : store.syncLabel();
   element.dataset.state = state.error ? 'error' : synced ? '' : 'offline';
+}
+
+/** « À racheter » : ce que le foyer achète souvent et qui n'est plus en stock ; un toucher l'ajoute à la liste. */
+function restockRow() {
+  const suggestions = store.restockSuggestions();
+  if (!suggestions.length) return '';
+  return html`
+    <h2 class="section restock-title"><span>${t('shop.restock')}</span><small>${t('shop.restockHint')}</small></h2>
+    <div class="restock">${suggestions.map((p) => html`<button class="restock-chip" data-action="restock" data-name="${p.name}" aria-label="${t('shop.restockAdd', { name: p.name })}">${I.plus}<span>${p.name}</span></button>`)}</div>`;
 }
 
 /** « Il en reste 2 au placard » : pour éviter d'acheter en double. */

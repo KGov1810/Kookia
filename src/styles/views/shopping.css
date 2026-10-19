@@ -70,3 +70,22 @@
 .put-away-name { font-weight: 600; font-size: 17px; }
 
 .put-away-name b { color: var(--herb-strong); }
+
+/* « À racheter » : pastilles d'un toucher, sur plusieurs lignes (tout visible sans faire défiler). */
+.restock-title { flex-wrap: wrap; row-gap: 2px; }
+
+.restock-title span { white-space: nowrap; }
+
+.restock { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.restock-chip {
+  display: inline-flex; align-items: center; gap: 6px; max-width: 100%; min-height: 44px; padding: 0 16px 0 12px;
+  border-radius: 999px; border: 1px solid var(--line); background: var(--surface); box-shadow: var(--shadow);
+  font-size: 15px; font-weight: 700; transition: transform 160ms var(--ease-out);
+}
+
+.restock-chip svg { width: 18px; height: 18px; flex: none; color: var(--herb); stroke-width: 2.4; }
+
+.restock-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.restock-chip:active { transform: scale(.97); }

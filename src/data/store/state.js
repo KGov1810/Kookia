@@ -16,6 +16,7 @@ export const state = {
   movements: [],        // mouvements de la période affichée dans Stats (chargés à la demande)
   movementsLoaded: false,
   movementsError: null, // statistiques refusées (règles Firestore pas encore mises à jour)
+  purchases: [],        // achats des 3 derniers mois, pour « À racheter » (purchases.js)
   prices: {},           // dernier prix payé, par code-barres ou par nom
   placements: {},       // catégorie et rangement corrigés à la main, par code-barres ou par nom
   shelfDays: {},        // durée retenue entre l'achat et la date d'un produit du frigo (fridge-dates.js)

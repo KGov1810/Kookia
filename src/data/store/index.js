@@ -12,6 +12,7 @@ export * from './placements.js';
 export * from './movements.js';
 export * from './opening.js';
 export * from './prices.js';
+export * from './purchases.js';
 export * from './products.js';
 export * from './recipes.js';
 export * from './selectors.js';
