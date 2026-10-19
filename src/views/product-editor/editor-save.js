@@ -46,6 +46,8 @@ export function persist(ctx, { force = true } = {}) {
   const previous = stored ? { ...stored } : null;
   store.saveProduct(p);
   rememberChoices(ctx);
+  // Date de l'emballage saisie : sa durée depuis l'achat sera proposée la prochaine fois (yaourts, beurre…).
+  if (isNew ? view.dateTouched : previous && previous.expiry !== p.expiry) store.rememberShelfLife(p);
   if (shoppingItemId) store.deleteShoppingItems([shoppingItemId], { reason: 'rangement' });
   if (isNew) toast(t('save.added', { name: p.name.trim(), at: S.placeAt(p.location) }));
   else toast(t('save.saved'), t('common.cancel'), () => previous && store.saveProduct(previous));

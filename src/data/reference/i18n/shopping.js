@@ -40,11 +40,11 @@ export const SHOPPING = {
   'away.title': ['Ranger le panier', 'Put the cart away', 'Guardar el carrito', 'Guardar o carrinho'],
   'away.confirm': ['Ranger', 'Put away', 'Guardar', 'Guardar'],
   'away.hint': ['Vérifiez le rangement ; décochez ce qui ne va pas en stock.', 'Check where things go; untick what doesn\'t go in stock.', 'Revisa dónde va cada cosa; desmarca lo que no va al inventario.', 'Confira onde cada coisa vai; desmarque o que não vai para o estoque.'],
-  'away.fridgeHint': ['Au frigo, la date sera à compléter dans le stock (elle est sur l\'emballage).', 'In the fridge, the date will need filling in from the stock (it\'s on the package).', 'En el refrigerador, la fecha se completa desde el inventario (está en el empaque).', 'Na geladeira, a data fica para completar no estoque (está na embalagem).'],
+  'away.fridgeHint': ['Viande, poisson, charcuterie et traiteur au frigo : la date sera à compléter dans le stock (elle est sur l\'emballage). Les autres produits du frigo ont une date estimée (≈).', 'Meat, fish, deli meats and ready meals in the fridge: the date will need filling in from the stock (it\'s on the package). Other fridge products get an estimated date (≈).', 'Carne, pescado, embutidos y platos preparados en el refrigerador: la fecha se completa desde el inventario (está en el empaque). Los demás productos del refrigerador tienen una fecha estimada (≈).', 'Carne, peixe, frios e pratos prontos na geladeira: a data fica para completar no estoque (está na embalagem). Os outros produtos da geladeira têm uma data estimada (≈).'],
   'away.putN': [['Ranger {n} produit', 'Ranger {n} produits'], ['Put away {n} product', 'Put away {n} products'], ['Guardar {n} producto', 'Guardar {n} productos'], ['Guardar {n} produto', 'Guardar {n} produtos']],
   'away.line': ['Ranger {name}', 'Put away {name}', 'Guardar {name}', 'Guardar {name}'],
   'away.place': ['Lieu de rangement de {name}', 'Where {name} goes', 'Lugar de {name}', 'Local de {name}'],
   'away.unit': ['{price} l\'unité', '{price} each', '{price} c/u', '{price} cada'],
   'away.done': [['{n} produit rangé dans le stock', '{n} produits rangés dans le stock'], ['{n} product put in stock', '{n} products put in stock'], ['{n} producto guardado en el inventario', '{n} productos guardados en el inventario'], ['{n} produto guardado no estoque', '{n} produtos guardados no estoque']],
-  'away.datesToFill': [' · dates du frigo à compléter', ' · fridge dates to fill in', ' · faltan fechas del refrigerador', ' · datas da geladeira para completar']
+  'away.datesToFill': [' · dates à compléter : viande, poisson…', ' · dates to fill in: meat, fish…', ' · faltan fechas: carne, pescado…', ' · datas para completar: carne, peixe…']
 };

@@ -4,6 +4,7 @@ import { fmt } from '../../components/html.js';
 import * as R from '../../data/reference/index.js';
 import * as store from '../../data/store/index.js';
 import { state } from '../../data/store/state.js';
+import { t } from '../../services/i18n/i18n.js';
 import * as S from '../../services/index.js';
 import { ui } from '../app/ui-state.js';
 import { applyKnownPrice } from './editor-price.js';
@@ -31,19 +32,47 @@ export function createEditorContext({ product = null, draft = null, mode = 'manu
     if (category) p.category = category;
     const place = draft?.location ? null : memo.location ?? (category ? S.defaultLocationFor(category, p.name, p.location) : null);
     if (place) p.location = place;
-    if (S.estimatedByDefault(category, p.name) && R.KINDS_BY_LOCATION[p.location]?.includes('estimee')) p.dateKind = 'estimee';
   }
   const ctx = { p, view, isNew, shoppingItemId, draft, mode, filePromise, barcode, sheet: null };
   applyKnownPrice(ctx); // nom déjà connu (article de courses rangé) : dernier prix payé
-  if (!p.dateKind) setKind(ctx, R.KINDS_BY_LOCATION[p.location][0]);
+  if (!p.dateKind) setKind(ctx, isNew ? defaultKind(p) : R.KINDS_BY_LOCATION[p.location][0]);
   return ctx;
+}
+
+/** Fruits, légumes, pain, et produits du frigo hors viande, poisson, charcuterie et traiteur : date estimée. */
+export function dateEstimated(p) {
+  return S.estimatedByDefault(p.category, p.name) || S.fridgeEstimable(p.category, p.location);
+}
+
+/** Type de date d'un nouveau produit à ce lieu : estimée si le produit s'y prête, sinon le premier du lieu. */
+function defaultKind(p) {
+  const kinds = R.KINDS_BY_LOCATION[p.location] ?? ['dlc'];
+  return p.name && dateEstimated(p) && kinds.includes('estimee') ? 'estimee' : kinds[0];
+}
+
+/** Catégorie ou lieu trouvés (nom tapé, code-barres) : la date estimée suit, tant qu'elle n'a pas été saisie. */
+export function followCategoryDate(ctx) {
+  const { p, view } = ctx;
+  if (view.dateTouched) return;
+  const kinds = R.KINDS_BY_LOCATION[p.location] ?? [];
+  const kind = S.dateKindOf(p);
+  if (dateEstimated(p) && (kind === 'dlc' || kind === 'aucune' || kind === 'estimee') && kinds.includes('estimee')) setKind(ctx, 'estimee');
+  else if (!dateEstimated(p) && kind === 'estimee' && kinds[0] !== 'estimee') setKind(ctx, kinds[0]);
+}
+
+/** Date choisie à la main : pour un produit du frigo estimé en attendant, c'est celle de l'emballage (DLC). */
+export function enterDate(ctx, iso) {
+  const { p, view } = ctx;
+  p.expiry = iso;
+  view.dateTouched = true;
+  if (S.dateKindOf(p) === 'estimee' && S.fridgeEstimable(p.category, p.location)) p.dateKind = 'dlc';
 }
 
 /** Change le type de date et prépare une date cohérente (estimée, congélation, aucune). */
 export function setKind(ctx, kind) {
   const { p, view, isNew } = ctx;
   p.dateKind = kind;
-  if (kind === 'estimee' && !view.dateTouched) p.expiry = S.isoInDays(S.estimateFreshDays(p.name, p.location, p.category, S.keptCold(p)));
+  if (kind === 'estimee' && !view.dateTouched) p.expiry = S.isoInDays(store.estimatedDays(p));
   if (kind === 'congele') {
     p.frozenAt = S.hasDate(p.frozenAt) ? p.frozenAt : S.isoInDays(0);
     p.expiry = S.freezerLimit(p.category, p.frozenAt);
@@ -57,9 +86,10 @@ export function setLocation(ctx, location) {
   const previous = { ...p };
   p.location = location;
   const kinds = R.KINDS_BY_LOCATION[location];
-  if (!kinds.includes(S.dateKindOf(p))) {
+  const kind = S.dateKindOf(p);
+  if (!kinds.includes(kind) || (kind === 'estimee' && !dateEstimated(p) && kinds[0] !== 'estimee')) {
     view.dateTouched = false;
-    setKind(ctx, kinds[0]);
+    setKind(ctx, dateEstimated(p) && kinds.includes('estimee') ? 'estimee' : kinds[0]);
   } else {
     followEstimate(ctx, previous);
   }
@@ -80,7 +110,7 @@ function followEstimate(ctx, previous) {
   const { p, view, isNew } = ctx;
   if (S.dateKindOf(p) !== 'estimee' || S.keptCold(p) === S.keptCold(previous)) return;
   if (isNew) {
-    if (!view.dateTouched) p.expiry = S.isoInDays(S.estimateFreshDays(p.name, p.location, p.category, S.keptCold(p)));
+    if (!view.dateTouched) p.expiry = S.isoInDays(store.estimatedDays(p));
   } else if (p.expiry === S.estimatedExpiry(previous)) {
     p.expiry = S.estimatedExpiry(p); // date jamais changée à la main (ni avant, ni dans cette fiche)
   }
@@ -98,6 +128,14 @@ export function applyReadDate(ctx, date) {
 /** Mise à jour du statut sans tout redessiner (le sélecteur de date d'iOS resterait sinon bloqué). */
 export function refreshStatus(ctx) {
   const { p } = ctx;
+  // Date de l'emballage saisie sur un produit estimé : le type affiché devient « DLC ».
+  const kind = S.dateKindOf(p);
+  ctx.sheet.panel.querySelectorAll('#date-section [data-action="set-kind"]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.value === kind)));
+  const label = ctx.sheet.panel.querySelector('#date-section .date-field > span');
+  if (label && ['dlc', 'ddm', 'estimee'].includes(kind)) {
+    label.textContent = t(`field.${kind}`);
+    ctx.sheet.panel.querySelector('#date-section [name="expiry"]')?.setAttribute('aria-label', t(`field.${kind}`));
+  }
   const card = ctx.sheet.panel.querySelector('.status-card');
   if (card) {
     card.outerHTML = fmt(draftStatus(ctx)); // produit en stock : la carte d'état du haut suit la date

@@ -7,7 +7,7 @@ import { state } from '../../data/store/state.js';
 import { t } from '../../services/i18n/i18n.js';
 import * as S from '../../services/index.js';
 import { applyKnownPrice } from './editor-price.js';
-import { applyReadDate, setLocation } from './editor-state.js';
+import { applyReadDate, followCategoryDate, setLocation } from './editor-state.js';
 
 const claude = () => ({ key: state.settings.claudeKey, model: state.settings.model });
 
@@ -58,6 +58,7 @@ export function handleBarcode(ctx, code) {
       const place = memo.location ?? S.defaultLocationFor(p.category, info.name, p.location);
       if (place) setLocation(ctx, place);
     }
+    followCategoryDate(ctx); // yaourt, beurre… : la date retenue pour ce code-barres, sinon une durée prudente
     if (S.dateKindOf(p) === 'congele') p.expiry = S.freezerLimit(p.category, p.frozenAt);
     view.sameProductId = state.products.find((x) => x.id !== p.id && x.barcode
       && S.normalizeBarcode(x.barcode) === S.normalizeBarcode(digits))?.id ?? null;
@@ -96,6 +97,7 @@ export function handleProductPhoto(ctx, file) {
         applyReadDate(ctx, result.expiry);
         view.info = t('rec.productAndDate');
       } else {
+        followCategoryDate(ctx); // pas de date lisible : estimée si le produit s'y prête
         view.info = t('rec.productNoDate');
       }
     } else {

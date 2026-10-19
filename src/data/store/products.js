@@ -4,10 +4,12 @@ import { setDoc, writeBatch } from 'firebase/firestore';
 import { isoInDays, toISODate } from '../../services/dates/dates.js';
 import { quantityLabel } from '../../services/quantities/quantities.js';
 import { cleanPrice } from '../../services/stats/money.js';
+import { fridgeEstimable } from '../../services/stock/fridge-days.js';
 import { remainingOf, stockAmount } from '../../services/stock/opened.js';
 import { breadDays, dateKindOf, estimateFreshDays, freezerLimit } from '../../services/stock/stock-dates.js';
 import { locationOf } from '../reference/locations.js';
 import { db } from './connection.js';
+import { estimatedDays } from './fridge-dates.js';
 import { countName, logChange, productDiff, productSummary } from './history.js';
 import { CATEGORY_VERSION } from './mappers.js';
 import { cancelLastMovements, recordMovement } from './movements.js';
@@ -92,7 +94,8 @@ export function restoreProducts(products, { movements = true } = {}) {
 
 /**
  * Ajoute d'un coup les produits d'un ticket de caisse, ou du panier (« Tout ranger », source « courses »),
- * avec la date adaptée au lieu (frigo : à compléter), et retire de la liste de courses les articles achetés.
+ * avec la date adaptée au lieu (frigo : estimée, sauf viande, poisson, charcuterie et traiteur, à compléter),
+ * et retire de la liste de courses les articles achetés.
  */
 export function addReceiptProducts(items, shoppingIdsToRemove = [], { source = 'ticket' } = {}) {
   if (!canWrite() || !items.length) return 0;
@@ -104,7 +107,7 @@ export function addReceiptProducts(items, shoppingIdsToRemove = [], { source = '
     const location = locationOf(item.location).id;
     const produce = ['fruits', 'legumes', 'fruits_legumes'].includes(item.category) || location === 'fruits';
     let dateKind = 'dlc';
-    let expiry = ''; // frigo : date à compléter (elle est imprimée sur l'emballage)
+    let expiry = ''; // viande, poisson… au frigo : date à compléter (elle est imprimée sur l'emballage)
     let frozenAt = '';
     if (location === 'congelateur') {
       dateKind = 'congele';
@@ -118,6 +121,9 @@ export function addReceiptProducts(items, shoppingIdsToRemove = [], { source = '
     } else if (produce) {
       dateKind = 'estimee';
       expiry = isoInDays(estimateFreshDays(item.name, location));
+    } else if (fridgeEstimable(item.category, location)) {
+      dateKind = 'estimee'; // yaourts, beurre… : la durée retenue la dernière fois, sinon une durée prudente
+      expiry = isoInDays(estimatedDays({ name: item.name, category: item.category, location }));
     }
     const id = crypto.randomUUID();
     const count = Math.max(1, Math.round(Number(item.count) || 1));

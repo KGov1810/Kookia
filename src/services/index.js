@@ -33,6 +33,7 @@ export * from './stats/periods.js';
 export * from './stats/stats.js';
 export * from './stats/stock-value.js';
 export * from './stock/categorization.js';
+export * from './stock/fridge-days.js';
 export * from './stock/matching.js';
 export * from './stock/opened.js';
 export * from './stock/recipe-usage.js';

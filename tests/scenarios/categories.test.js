@@ -58,7 +58,7 @@ test("Catégories détaillées et proposition automatique", async () => {
   await type(nameInput(), 'Haricots verts'); await type(nameInput(), 'Haricots verts', 'change');
   log(select().value === 'legumes' && sheet().querySelector('[data-action="set-loc"][data-value="frigo"]').getAttribute('aria-pressed') === 'true' && sheet().querySelector('[name="expiry"]').value === iso(5), '« Haricots verts » → Légumes, frigo, ≈ 5 jours');
   await type(nameInput(), 'Yaourt nature'); await type(nameInput(), 'Yaourt nature', 'change');
-  log(select().value === 'laitier' && sheet().querySelector('[data-action="set-kind"][data-value="dlc"]').getAttribute('aria-pressed') === 'true' && sheet().querySelector('[name="expiry"]').value === iso(7) && sheet().textContent.includes('dans 7 jours'), '« Yaourt nature » ensuite → Produits laitiers, date limite, défaut dans 7 jours (cohérent)');
+  log(select().value === 'laitier' && sheet().querySelector('[data-action="set-kind"][data-value="estimee"]').getAttribute('aria-pressed') === 'true' && sheet().querySelector('[name="expiry"]').value === iso(14) && sheet().textContent.includes('Estimation prudente'), '« Yaourt nature » ensuite → Produits laitiers, date estimée ≈ 14 jours (prudente)');
   await type(nameInput(), 'Glace vanille'); await type(nameInput(), 'Glace vanille', 'change');
   log(select().value === 'surgele' && sheet().querySelector('[data-action="set-loc"][data-value="congelateur"]').getAttribute('aria-pressed') === 'true', '« Glace vanille » → Surgelés, congélateur');
   await type(nameInput(), 'Spaghetti');

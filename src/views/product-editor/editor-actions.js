@@ -10,7 +10,7 @@ import { openingActions } from './editor-opening.js';
 import { setQuantityUnit } from './editor-quantity.js';
 import { handleBarcode, handleDatePhoto, handleProductPhoto } from './editor-recognition.js';
 import { persist } from './editor-save.js';
-import { setCold, setKind, setLocation } from './editor-state.js';
+import { enterDate, setCold, setKind, setLocation } from './editor-state.js';
 import { unitsActions } from './editor-units.js';
 
 /** Actions des boutons de la fiche, liées au produit en cours. */
@@ -27,8 +27,7 @@ export function editorActions(ctx) {
       pickImage({ camera: true }).then((file) => file && handleDatePhoto(ctx, file));
     },
     quick: (el) => {
-      p.expiry = S.isoInDays(Number(el.dataset.days));
-      view.dateTouched = true;
+      enterDate(ctx, S.isoInDays(Number(el.dataset.days)));
       ctx.sheet.update();
     },
     'set-unit': (el) => setQuantityUnit(ctx, el.dataset.unit),

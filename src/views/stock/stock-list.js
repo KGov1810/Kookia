@@ -78,7 +78,31 @@ function productRow(product) {
           ${dayCounter(product)}
         </button>
       </div>
+      ${quickDates(product)}
     </div>`;
+}
+
+const QUICK_DAYS = [[3, 'date.plusDays', 3], [7, 'date.plusWeeks', 1], [14, 'date.plusWeeks', 2]];
+const longDate = (iso) => S.formatDate(iso, { day: 'numeric', month: 'long' });
+
+/** Date à compléter (viande, poisson, charcuterie, traiteur) : « +3 j · +1 sem · +2 sem » sans ouvrir la fiche. */
+function quickDates(product) {
+  if (store.productStatus(product) !== 'pending' || S.dateKindOf(product) === 'ddm') return '';
+  return html`
+    <div class="date-quick" role="group" aria-label="${t('quickDate.aria', { name: product.name })}">
+      ${QUICK_DAYS.map(([days, key, n]) => html`<button data-action="quick-date" data-id="${product.id}" data-days="${days}" aria-label="${t('quickDate.until', { date: longDate(S.isoInDays(days)) })}">${t(key, { n })}</button>`)}
+    </div>`;
+}
+
+/** Un toucher sur « +3 j », « +1 sem »… : la date de l'emballage, retenue pour la prochaine fois, avec Annuler. */
+export function quickDate(id, days) {
+  const product = store.productById(id);
+  if (!product) return;
+  const before = { ...product };
+  const next = { ...product, expiry: S.isoInDays(days) };
+  store.saveProduct(next);
+  store.rememberShelfLife(next);
+  toast(t('quickDate.done', { name: product.name, date: longDate(next.expiry) }), t('common.cancel'), () => store.saveProduct(before));
 }
 
 function consumeLabel(product, opened) {

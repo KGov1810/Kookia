@@ -4,6 +4,7 @@ import { collection, disableNetwork, enableNetwork, onSnapshot } from 'firebase/
 import { t } from '../../services/i18n/i18n.js';
 import { db, ensureFirebase, signIn } from './connection.js';
 import { errorMessage } from './errors.js';
+import { estimateMissingDates } from './fridge-dates.js';
 import { purgeHistory } from './history.js';
 import { firebaseConfig } from './household-codes.js';
 import { toProduct, toRecipe, toShoppingItem } from './mappers.js';
@@ -42,8 +43,10 @@ export async function start() {
         state.error = null;
         state.lastSync = new Date();
         if (key === 'products' || key === 'recipes') rememberRecipeLinks(state.products);
+        if (key === 'products') state.productsLoaded = true;
       }
       emit(key);
+      if (key === 'products') estimateMissingDates(); // produits du frigo restés sans date
     },
     (error) => {
       state.error = errorMessage(error);
@@ -56,7 +59,7 @@ export async function start() {
     listen('produits', 'products', toProduct),
     listen('courses', 'shopping', toShoppingItem),
     listen('recettes', 'recipes', toRecipe),
-    listenPrices(code)
+    listenPrices(code, estimateMissingDates)
   ];
   state.connected = true;
   publishLanguage();

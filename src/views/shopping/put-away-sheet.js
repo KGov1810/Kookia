@@ -42,7 +42,8 @@ export function openPutAway() {
   const items = state.shopping.filter((i) => i.checked && i.name).sort((a, b) => a.name.localeCompare(b.name, S.localeTag())).map(proposal);
   if (!items.length) return null;
   const kept = () => items.filter((i) => i.selected);
-  const fridge = () => kept().filter((i) => i.location === 'frigo').length;
+  // Viande, poisson, charcuterie, traiteur au frigo : date à compléter (les autres produits du frigo sont estimés).
+  const fridge = () => kept().filter((i) => i.location === 'frigo' && S.manualDate(i.category)).length;
   const sheet = openSheet({
     tall: true,
     render: () => html`

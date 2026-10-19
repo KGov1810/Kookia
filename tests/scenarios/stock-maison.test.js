@@ -153,8 +153,8 @@ test("Stock de toute la maison : lieux, dates, congélation, ticket", async () =
   log(get('Steaks hachés surgelés')?.dateKind === 'congele' && get('Steaks hachés surgelés').expiry, 'Surgelés : congélateur, durée conseillée');
   log(get('Spaghetti')?.dateKind === 'aucune' && get('Spaghetti').location === 'placard' && get('Spaghetti').count === 2, 'Spaghetti : placard, sans date, ×2');
   log(get('Pommes de terre')?.dateKind === 'estimee' && get('Pommes de terre').expiry === iso(45), 'Pommes de terre : fruits & légumes, ≈ 45 jours');
-  log(get('Crème fraîche')?.dateKind === 'dlc' && get('Crème fraîche').expiry === '', 'Crème fraîche : frigo, date à compléter');
-  log(sections()[0] === 'Date à compléter' && $$('.product').filter((r) => r.querySelector('.days.pending')).length === 1, 'Seule la crème fraîche demande une date');
+  log(get('Crème fraîche')?.dateKind === 'estimee' && get('Crème fraîche').expiry === iso(10), 'Crème fraîche : frigo, date estimée ≈ 10 jours');
+  log(sections()[0] !== 'Date à compléter' && !$$('.product').some((r) => r.querySelector('.days.pending')), 'Aucun produit du ticket ne demande de date');
   console.log('\nErreurs JS :', P.errors.length ? P.errors : 'aucune');
 
 });

@@ -5,6 +5,7 @@ import { FREEZER_MONTHS } from '../../data/reference/categories.js';
 import { UNKNOWN_PRODUCE_DAYS } from '../../data/reference/produce.js';
 import { DAY, addDays, addMonths, parseISODate, startOfDay, toISODate } from '../dates/dates.js';
 import { produceFor } from './categorization.js';
+import { fridgeDays, fridgeEstimable } from './fridge-days.js';
 
 export function dateKindOf(product) {
   return product?.dateKind || 'dlc'; // anciens produits : date limite imprimée
@@ -51,9 +52,13 @@ export function keptCold(product) {
   return typeof product.cold === 'boolean' ? product.cold : produceFor(product.name)?.place === 'frigo';
 }
 
-/** Durée de conservation estimée (jours) d'un produit frais sans date imprimée, au frais ou non. */
+/**
+ * Durée de conservation estimée (jours) d'un produit sans date imprimée, au frais ou non ; pour un produit du frigo
+ * (yaourts, beurre…), durée prudente en attendant la date de l'emballage.
+ */
 export function estimateFreshDays(name, location = 'frigo', category = '', cold = keptCold({ name, location })) {
   if (category === 'boulangerie' && breadDays(name) !== null) return breadDays(name);
+  if (fridgeEstimable(category, location)) return fridgeDays(name, category);
   const item = produceFor(name);
   if (item) return cold ? item.fridgeDays : item.roomDays;
   return cold ? UNKNOWN_PRODUCE_DAYS.fridge : UNKNOWN_PRODUCE_DAYS.room;

@@ -155,22 +155,21 @@ test("Régimes, portions, calories, ticket de caisse", async () => {
   await type(lines().find((l) => l.querySelector('input').value === 'Lait demi-écrémé').querySelector('input'), 'Lait');
   await click(sheet().querySelector('.sheet-body [data-action="confirm"]'), 350);
   const added = docs(P0).filter((d) => ['Lait', 'Farine de blé'].includes(d.name));
-  log(added.length === 2 && added.every((d) => d.expiry === ''), 'Produits ajoutés sans date (« date à compléter »)');
+  log(added.length === 2 && added.every((d) => d.location === 'frigo' && d.dateKind === 'estimee' && d.expiry === iso(5)), 'Lait et farine (rangés au frigo) : date estimée ≈ 5 jours, plus « à compléter »');
   log(added.find((d) => d.name === 'Lait').count === 2 && added.find((d) => d.name === 'Lait').quantity === '1 L' && added.find((d) => d.name === 'Farine de blé').count === 2, 'Nombres et contenances repris (Lait 2 × 1 L, Farine × 2)');
   log(!docs(C0).some((d) => ['Lait', 'Farine'].includes(d.name)) && docs(C0).some((d) => d.name === 'Sel'), 'Lait et Farine retirés des courses, Sel conservé');
   log(!docs(P0).some((d) => d.name === 'Tomates'), 'Produit décoché non ajouté');
 
-  console.log('\n— Produits « date à compléter » —');
+  console.log('\n— Lait du ticket : date estimée —');
   const titles = $$('h2.section').map((h) => h.childNodes[0].textContent.trim());
-  log(titles[0] === 'Date à compléter', `Section « Date à compléter » en premier (${titles.join(' | ')})`);
+  log(!titles.includes('Date à compléter'), `Pas de section « Date à compléter » (${titles.join(' | ')})`);
   const laitRow = $$('.product').find((r) => r.textContent.includes('Lait'));
-  log(laitRow.querySelector('.days.pending b').textContent === '?' && laitRow.querySelector('.product-meta').textContent === '2 × 1 L, au frigo', 'Compteur « ? », ligne courte « 2 × 1 L, au frigo » (la section dit « Date à compléter »)');
-  log($('[data-badge="frigo"]').textContent === '1' && text().includes('1 produit à sauver'), 'Pastille et bannière ne comptent pas les produits sans date');
+  log(laitRow.querySelector('.days b').textContent === '≈5' && laitRow.querySelector('.product-meta').textContent === '2 × 1 L, au frigo', 'Compteur « ≈5 », ligne courte « 2 × 1 L, au frigo »');
+  log($('[data-badge="frigo"]').textContent === '1' && text().includes('1 produit à sauver'), 'Pastille et bannière : le lait (≈ 5 jours) n\'est pas à sauver');
   await click(laitRow.querySelector('.product-main'), 400);
-  log(sheet().textContent.includes('Pas encore de date') && sheet().querySelector('.read-date [data-action="date-photo"]') && sheet().querySelector('[name="expiry"]').value === '', 'Fiche : date vide et invitation à la compléter');
   await click(sheet().querySelector('[data-action="quick"][data-days="7"]'));
   await click(sheet().querySelector('[data-action="save"]'), 350);
-  log(docs(P0).find((d) => d.name === 'Lait').expiry === iso(7) && $$('.product').find((r) => r.textContent.includes('Lait')).querySelector('.days b').textContent === '7', 'Date complétée : le lait rejoint le frigo (7 jours)');
+  log(docs(P0).find((d) => d.name === 'Lait').expiry === iso(7) && docs(P0).find((d) => d.name === 'Lait').dateKind === 'dlc' && $$('.product').find((r) => r.textContent.includes('Lait')).querySelector('.days b').textContent === '7', 'Date de l\'emballage : le lait passe en date limite (7 jours)');
 
   console.log('\n— Sans clé Claude —');
   await click('.tab[data-tab="frigo"]'); await click('[data-action="open-settings"]');

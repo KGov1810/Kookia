@@ -3,6 +3,7 @@
 import { html } from '../../components/html.js';
 import { I } from '../../components/icons.js';
 import * as R from '../../data/reference/index.js';
+import * as store from '../../data/store/index.js';
 import { state } from '../../data/store/state.js';
 import { t } from '../../services/i18n/i18n.js';
 import * as S from '../../services/index.js';
@@ -24,6 +25,13 @@ function quickRow(kind) {
     ? [[30, t('date.plusMonths', { n: 1 })], [91, t('date.plusMonths', { n: 3 })], [182, t('date.plusMonths', { n: 6 })], [365, t('date.plusYear')]]
     : [[3, t('date.plusDays', { n: 3 })], [7, t('date.plusWeeks', { n: 1 })], [14, t('date.plusWeeks', { n: 2 })], [30, t('date.plusMonths', { n: 1 })]];
   return html`<div class="quick">${quick.map(([days, label]) => html`<button data-action="quick" data-days="${days}">${label}</button>`)}</div>`;
+}
+
+/** Fruits, légumes, pain : estimation selon le produit. Frigo : la durée retenue la dernière fois, ou prudente. */
+function estimateHint(p) {
+  if (!S.fridgeEstimable(p.category, p.location)) return t('date.estimateHint');
+  const learned = store.learnedShelfDays(p);
+  return learned ? t('date.learnedHint', { duration: S.durationText(learned) }) : t('date.fridgeHint');
 }
 
 export function dateSection(ctx) {
@@ -49,6 +57,6 @@ export function dateSection(ctx) {
       ${fields}
       ${isNew ? html`<p class="expiry-status ${status}">${S.stockLabel(p)}</p>` : ''}
       ${isNew && kind === 'dlc' && !view.dateTouched ? html`<p class="hint inset default-date">${t('date.defaultHint')}</p>` : ''}
-      ${kind === 'estimee' && !view.dateTouched ? html`<p class="hint inset default-date">${t('date.estimateHint')}</p>` : ''}
+      ${kind === 'estimee' && !view.dateTouched ? html`<p class="hint inset default-date">${estimateHint(p)}</p>` : ''}
     </div>`;
 }

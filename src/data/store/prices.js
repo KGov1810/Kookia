@@ -49,13 +49,19 @@ export function rememberPrices(products) {
   setDoc(ref('prix', 'memoire'), { prices: entries }, { merge: true }).catch(reportStatsDenied);
 }
 
-/** Écoute les mémoires du foyer (prix, catégories). Un refus des règles ne bloque pas le reste de l'app. */
-export function listenPrices(code) {
+/**
+ * Écoute les mémoires du foyer (prix, catégories, dates). Un refus des règles ne bloque pas le reste de l'app.
+ * onLoaded : appelé après chaque mise à jour (dates estimées des produits restés sans date).
+ */
+export function listenPrices(code, onLoaded = () => {}) {
   return onSnapshot(collection(db, 'foyers', code, 'prix'), (snapshot) => {
     const memo = snapshot.docs.find((d) => d.id === 'memoire');
     state.prices = memo?.data().prices ?? {};
     // Même collection : la mémoire des catégories et rangements corrigés (placements.js).
     state.placements = snapshot.docs.find((d) => d.id === 'categories')?.data().entries ?? {};
+    // Et les durées retenues entre l'achat et la date des produits du frigo (fridge-dates.js).
+    state.shelfDays = snapshot.docs.find((d) => d.id === 'dates')?.data().entries ?? {};
+    state.shelfDaysLoaded = true;
     // Et les langues des iPhone du foyer (languages.js) : Claude écrit dans chacune.
     state.languages = snapshot.docs.find((d) => d.id === 'langues')?.data().members ?? {};
     // Et le planning de la semaine (week-plan.js) : l'écran se met à jour sur les deux iPhone.
@@ -65,6 +71,7 @@ export function listenPrices(code) {
       emit('plan');
       expireWeekPlan(); // semaine terminée : effacée
     }
+    onLoaded();
   }, (error) => {
     reportStatsDenied(error);
   });

@@ -2,6 +2,7 @@
 
 export * from './connection.js';
 export * from './errors.js';
+export * from './fridge-dates.js';
 export * from './history.js';
 export * from './household-codes.js';
 export * from './household.js';
