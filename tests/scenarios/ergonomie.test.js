@@ -59,6 +59,12 @@ test('Ergonomie : recettes, glisser, courses, réglages', async () => {
   log(product('Yaourts').count === 2 && $('#toast').textContent.includes('Yaourts : il en reste 2') && !sheet(), 'Glisser à droite : un yaourt consommé, Annuler proposé, pas de fiche ouverte');
   await click('#toast button', 40);
   log(product('Yaourts').count === 3, 'Annuler : 3 yaourts');
+  // Cas réel (test raté sur GitHub) : juste après un glisser, un toucher ailleurs était ignoré pendant 0,45 s.
+  await swipe('Yaourts', 130);
+  await click('#toast button', 40);
+  await click(row('Lait UHT').querySelector('.product-main'), 400);
+  log(sheet()?.querySelector('.product-hero, h1, h2')?.textContent.includes('Lait UHT') || sheet()?.textContent.includes('Lait UHT'), 'Juste après un glisser, toucher une autre ligne ouvre bien sa fiche');
+  if (sheet()) await click(sheet().querySelector('[data-action="close"]'), 350);
   await swipe('Jambon blanc', -100);
   log(row('Jambon blanc').classList.contains('open') && !sheet() && row('Jambon blanc').querySelectorAll('[data-action="swipe-rest"]').length === 3, 'Glisser à gauche : « Il reste ¾ ½ ¼ » et « Jeté » visibles');
   await click(row('Jambon blanc').querySelector('[data-action="swipe-discard"]'), 60);

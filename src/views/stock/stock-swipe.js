@@ -13,7 +13,7 @@ const START = 10;      // px avant de décider : glisser ou défiler
 
 let drag = null;
 let openRow = null;
-let swallowClickUntil = 0;
+let swallow = null; // { id, until } : le « clic » qui termine un glisser, sur la ligne glissée seulement
 
 const buttonsWidth = (row) => row.querySelector('.swipe-buttons')?.offsetWidth || 168;
 
@@ -81,7 +81,7 @@ function onUp() {
   const { row, x, active, base } = drag;
   drag = null;
   if (!active) return;
-  swallowClickUntil = Date.now() + 450; // pas d'ouverture de fiche à la fin du geste
+  swallow = { id: row.dataset.id, until: Date.now() + 450 }; // pas d'ouverture de fiche à la fin du geste
   if (base === 0 && x >= allAt(row)) {
     place(row, 0, true);
     consumeAll(row.dataset.id);
@@ -115,7 +115,9 @@ export function wireSwipe() {
   screen.addEventListener('click', (event) => {
     if (openRow && !openRow.isConnected) openRow = null; // liste redessinée entre-temps
     if (event.target.closest('.swipe-buttons')) return;
-    const justSwiped = Date.now() < swallowClickUntil;
+    // Seul le « clic » de fin de geste, sur la ligne glissée, est ignoré (une fois) : un toucher ailleurs passe.
+    const justSwiped = swallow && Date.now() < swallow.until && event.target.closest('.product')?.dataset.id === swallow.id;
+    if (justSwiped) swallow = null;
     if (!justSwiped && !openRow) return;
     if (!justSwiped) closeSwipedRow();
     event.preventDefault();
