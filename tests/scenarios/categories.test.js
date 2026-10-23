@@ -1,10 +1,10 @@
 // Scénario : Catégories détaillées et proposition automatique.
 import { test, expect } from 'vitest';
 import { createPhone } from '../helpers/phone.js';
+import { iso } from '../helpers/dates.js';
 
 test("Catégories détaillées et proposition automatique", async () => {
   const log = (ok, msg) => expect.soft(Boolean(ok), msg).toBe(true);
-  const iso = (days) => { const d = new Date(); d.setDate(d.getDate() + days); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
   const CODE = 'CATEG-ORIES';
   const P0 = `foyers/${CODE}/produits/`, R0 = `foyers/${CODE}/recettes/`;
   const prod = (name, extra) => ({ name, expiry: iso(10), quantity: '', count: 1, barcode: '', addedBy: 'Kevin', createdAt: Date.now(), image: '', imageUrl: '', ...extra });

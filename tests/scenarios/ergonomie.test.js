@@ -2,12 +2,12 @@
 // « Tout ranger » le panier, réglages avancés repliés.
 import { test, expect } from 'vitest';
 import { createPhone } from '../helpers/phone.js';
+import { iso } from '../helpers/dates.js';
 
 test('Ergonomie : recettes, glisser, courses, réglages', async () => {
   const log = (ok, msg) => expect.soft(Boolean(ok), msg).toBe(true);
   const CODE = 'ERGON-OMIE2';
   const F = `foyers/${CODE}/`;
-  const iso = (days) => { const d = new Date(); d.setDate(d.getDate() + days); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
   const prod = (name, extra) => ({ name, expiry: iso(8), category: 'laitier', categoryVersion: 2, quantity: '', count: 1, location: 'frigo', dateKind: 'dlc', frozenAt: '', barcode: '', addedBy: 'Kevin', createdAt: 1, image: '', imageUrl: '', ...extra });
   const recipe = (title, extra) => ({ title, summary: '', difficulty: 'facile', prepMinutes: 5, servings: 2, batchCooking: false, storageDays: 0, storageTips: '', createdAt: 5, favorite: false, steps: ['Cuire.'], usedProductIds: [], kcal: 450, ingredients: [{ name: 'Yaourts', quantity: '2', source: 'stock', productId: 'yaourt' }], ...extra });
   globalThis.__db = { docs: new Map([

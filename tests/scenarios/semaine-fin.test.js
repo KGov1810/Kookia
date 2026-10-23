@@ -1,12 +1,12 @@
 // Scénario : planning de la semaine dans le temps — jours passés repliés, semaine terminée effacée automatiquement.
 import { test, expect } from 'vitest';
 import { createPhone } from '../helpers/phone.js';
+import { iso } from '../helpers/dates.js';
 
 test('Semaine : jours passés et fin de semaine', async () => {
   const log = (ok, msg) => expect.soft(Boolean(ok), msg).toBe(true);
   const CODE = 'SEMAI-NEFIN';
   const F = `foyers/${CODE}/`;
-  const iso = (days) => { const d = new Date(); d.setDate(d.getDate() + days); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
   const recipe = (title) => ({ title, summary: '', difficulty: 'facile', totalMinutes: 20, prepMinutes: 5, servings: 2, batchCooking: false, storageDays: 0, storageTips: '', createdAt: 5, favorite: false, steps: ['Cuire.'], usedProductIds: [], diet: 'omnivore', kcal: 500, ingredients: [] });
   const plan = (start) => ({ start, servings: 2, strategy: '', createdAt: 1, createdBy: 'Kevin', batch: null, shopping: [],
     slots: [0, 1, 2, 3, 4, 5, 6].map((day) => ({ day, meal: 'soir', recipeId: day % 2 ? 'gratin' : 'curry', leftovers: false, done: false })) });

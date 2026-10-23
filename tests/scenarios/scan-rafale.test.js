@@ -1,10 +1,10 @@
 // Scénario : scanner plusieurs produits à la suite (menu +), puis vérifier et tout ajouter d'un coup.
 import { test, expect } from 'vitest';
 import { createPhone } from '../helpers/phone.js';
+import { iso } from '../helpers/dates.js';
 
 test('Scanner plusieurs produits', async () => {
   const log = (ok, msg) => expect.soft(Boolean(ok), msg).toBe(true);
-  const iso = (days) => { const d = new Date(); d.setDate(d.getDate() + days); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
   const CODE = 'RAFAL-ESCAN';
   const F = `foyers/${CODE}/`;
   globalThis.__db = { docs: new Map([[`foyers/${CODE}`, { createdBy: 'Kevin' }]]), listeners: new Set(), writes: 0, network: [] };
@@ -53,20 +53,23 @@ test('Scanner plusieurs produits', async () => {
   await click($$('.tray-line')[0].querySelector('[data-action="tray-plus"]'));
   log(tray()[0] === 'Pâte à tartiner (Nutella) × 2', '« + » sur la ligne : × 2');
   await scan('2000000000017');
+  await scan('87654321');
   await scan('12345678');
-  log(tray().length === 4 && tray()[0].startsWith('Code 12345678 inconnu') && $('.scan-done').textContent === 'Vérifier 4 produits' && !$('.scan-done').hidden, `Code inconnu signalé ; « Vérifier 4 produits » (${tray().join(' | ')})`);
+  log(tray().length === 5 && tray()[0].startsWith('Code 12345678 inconnu') && $('.scan-done').textContent === 'Vérifier 5 produits' && !$('.scan-done').hidden, `Codes inconnus signalés ; « Vérifier 5 produits » (${tray().join(' | ')})`);
 
   console.log('\n— Vérification —');
   await click('.scan-done', 400);
   log(!$('.scanner') && sheet().textContent.includes('Produits scannés'), 'Fiche « Produits scannés »');
   const lines = () => [...sheet().querySelectorAll('.batch-line')];
   const lineOf = (text) => lines().find((l) => l.querySelector('input').value.includes(text));
-  log(lines().length === 4 && lines()[0].classList.contains('off') && lines()[0].querySelector('input').value === '', 'Code inconnu : ligne décochée, nom à taper');
+  log(lines().length === 5 && lines()[0].classList.contains('off') && lines()[0].querySelector('input').value === '', 'Code inconnu : ligne décochée, nom à taper');
   log(lineOf('Yaourt').querySelector('output').textContent === '8' && lineOf('Yaourt').querySelector('select').value === 'frigo', 'Yaourts : 2 packs de 4 = 8, au frigo');
   log(lineOf('Pâte à tartiner').querySelector('select').value === 'placard' && lineOf('Escalopes').querySelector('select').value === 'frigo', 'Pâte à tartiner au placard, escalopes au frigo');
   const unknown = lines()[0].querySelector('input');
   await type(unknown, 'Pesto frais');
   log(!lines()[0].classList.contains('off') && sheet().querySelector('#batch-confirm button').textContent.includes('Ajouter 4 produits au stock'), 'Nom tapé : la ligne se coche, « Ajouter 4 produits au stock »');
+  await click(lines()[1].querySelector('[data-action="toggle-line"]'));
+  log(!lines()[1].classList.contains('off') && sheet().querySelector('#batch-confirm button').textContent.includes('Ajouter 4 produits au stock'), 'Code inconnu coché sans nom : pas compté (« Ajouter 4 produits »)');
   await click(lineOf('Escalopes').querySelector('[data-action="line-plus"]'));
   await click(sheet().querySelector('#batch-confirm [data-action="confirm"]'), 400);
 
@@ -76,6 +79,7 @@ test('Scanner plusieurs produits', async () => {
   log(product('Pâte à tartiner (Nutella)')?.count === 2 && product('Pâte à tartiner (Nutella)').location === 'placard', 'Pâte à tartiner : 2, au placard');
   log(product('Escalopes de poulet')?.count === 2 && product('Escalopes de poulet').expiry === '', 'Escalopes : 2, date à compléter');
   log(product('Pesto frais')?.barcode === '12345678' && product('Pesto frais').location === 'frigo', 'Pesto frais : nom tapé, code-barres gardé');
+  log(docs('produits').length === 4 && docs('produits').every((d) => d.name.trim()), 'Aucun produit ajouté sans nom');
   log($('#toast').textContent.includes('4 produits ajoutés au stock') && $('#toast').textContent.includes('dates à compléter'), `Message (${$('#toast').textContent})`);
   const history = docs('historique').sort((a, b) => a.clientAt - b.clientAt).at(-1);
   log(history?.scope === 'stock' && history.action === 'ajout' && history.name === '4 produits', 'Historique : « a ajouté 4 produits »');

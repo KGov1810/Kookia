@@ -5,9 +5,6 @@ import * as store from '../data/store/index.js';
 import { state } from '../data/store/state.js';
 import * as S from '../services/index.js';
 import { html, raw } from './html.js';
-import { I } from './icons.js';
-
-export const LOCATION_ICON = { frigo: () => I.fridge, congelateur: () => I.snow, placard: () => I.cabinet, fruits: () => I.apple };
 
 /** Teinte de la vignette selon le rayon : vert (fruits, légumes), rose (viandes, poissons), bleu (frais, froid). */
 const TINT = {

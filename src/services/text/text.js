@@ -1,10 +1,6 @@
-// Kookia — Texte : pluriels, durées, mots significatifs, ressemblance de noms.
+// Kookia — Texte : durées, mots significatifs, ressemblance de noms.
 
 import { t } from '../i18n/i18n.js';
-
-export function plural(count, singular, pluralForm) {
-  return `${count} ${count > 1 ? (pluralForm ?? `${singular}s`) : singular}`;
-}
 
 /** « 3 jours », « 5 mois », « 2 ans » (lang : 'fr' pour les textes envoyés à Claude). */
 export function durationText(days, lang) {
@@ -17,9 +13,35 @@ const STOPWORDS = new Set(['de', 'du', 'des', 'la', 'le', 'les', 'au', 'aux', 'a
   'bio', 'avec', 'sans', 'pour', 'sur', 'the', 'and', 'of', 'with', 'for', 'organic',
   'del', 'los', 'las', 'con', 'sin', 'para', 'una', 'com', 'sem', 'uma', 'organico']); // pas « dos » : « dos de cabillaud »
 
-/** Mots significatifs d'un nom : sans accents, sans marque entre parenthèses, au singulier. */
+// Mots déjà calculés : les Courses comparent des centaines de noms à chaque rafraîchissement.
+const tokensCache = new Map();
+const CACHE_LIMIT = 5000; // ponytail : vidé d'un coup au-delà (quelques centaines de noms par foyer)
+
+/**
+ * Mots significatifs d'un nom : sans accents, sans marque entre parenthèses, au singulier.
+ * Le tableau renvoyé est partagé et figé : le copier avant de le trier.
+ */
 export function nameTokens(name) {
-  const text = String(name ?? '')
+  const key = String(name ?? '');
+  let tokens = tokensCache.get(key);
+  if (!tokens) {
+    if (tokensCache.size >= CACHE_LIMIT) tokensCache.clear();
+    tokens = Object.freeze(computeTokens(key));
+    tokensCache.set(key, tokens);
+  }
+  return tokens;
+}
+
+/** Clé d'un nom : ses mots dans l'ordre alphabétique (« Lait demi-écrémé » → « demi ecreme lait »), sans
+ * les caractères interdits dans une clé Firestore. Sert aux mémoires (prix, rangements, dates), à « À racheter »
+ * et aux statistiques. */
+export function nameKey(name) {
+  const words = [...new Set(nameTokens(name).flatMap((t) => t.split('-')).filter((t) => t.length >= 2))].sort().join(' ');
+  return words || simplify(name).trim().replace(/[.~*/[\]]/g, '');
+}
+
+function computeTokens(name) {
+  const text = name
     .replace(/\([^)]*\)/g, ' ')
     .replace(/œ/gi, 'oe').replace(/æ/gi, 'ae')
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '')

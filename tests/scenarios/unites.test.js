@@ -1,12 +1,12 @@
 // Scénario : poids et contenance en chiffre + unité (g | kg | cl | L) dans la fiche produit et au ticket.
 import { test, expect } from 'vitest';
 import { createPhone } from '../helpers/phone.js';
+import { iso } from '../helpers/dates.js';
 
 test('Unités : fiche produit et ticket de caisse', async () => {
   const log = (ok, msg) => expect.soft(Boolean(ok), msg).toBe(true);
   const CODE = 'UNITE-POIDS';
   const F = `foyers/${CODE}/`;
-  const iso = (days) => { const d = new Date(); d.setDate(d.getDate() + days); return d.toISOString().slice(0, 10); };
   const prod = (name, extra) => ({ name, expiry: iso(5), category: 'laitier', categoryVersion: 2, quantity: '', count: 1, location: 'frigo', dateKind: 'dlc', frozenAt: '', barcode: '', addedBy: 'Kevin', createdAt: 1, image: '', imageUrl: '', ...extra });
   globalThis.__db = { docs: new Map([
     [`foyers/${CODE}`, { createdBy: 'Kevin' }],

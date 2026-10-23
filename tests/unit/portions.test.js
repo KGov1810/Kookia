@@ -19,7 +19,6 @@ test.each(cases)('scaleIngredient(%j, %f) → %j', (ingredient, factor, expected
 });
 
 test('date à compléter', () => {
-  expect(S.statusOf('', 2)).toBe('pending');
   expect(S.expiryLabel('')).toBe('Date à compléter');
   expect(S.hasDate('')).toBe(false);
   expect(S.hasDate('2026-10-01')).toBe(true);

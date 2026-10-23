@@ -3,7 +3,6 @@
 
 import { html, raw } from '../../components/html.js';
 import { unitInput } from '../../components/unit-input.js';
-import * as R from '../../data/reference/index.js';
 import * as store from '../../data/store/index.js';
 import { t } from '../../services/i18n/i18n.js';
 import * as S from '../../services/index.js';
@@ -127,17 +126,6 @@ export function selectionError(entries) {
   return '';
 }
 
-/** Date selon le lieu : estimée d'ordinaire ; congelée ou sans date si le rangement retenu l'impose. */
-function dates(location, category, days) {
-  const kinds = R.KINDS_BY_LOCATION[location] ?? ['estimee'];
-  if (kinds.includes('estimee')) return { dateKind: 'estimee', expiry: S.isoInDays(days), frozenAt: '' };
-  if (kinds[0] === 'congele') {
-    const frozenAt = S.isoInDays(0);
-    return { dateKind: 'congele', frozenAt, expiry: S.freezerLimit(category, frozenAt) };
-  }
-  return { dateKind: kinds[0], expiry: '', frozenAt: '' };
-}
-
 /** Produit à enregistrer : poids et prix ramenés à une pièce, rangement corrigé auparavant s'il existe. */
 export function toProduct(entry) {
   const { item, count } = entry;
@@ -154,7 +142,7 @@ export function toProduct(entry) {
     count,
     location,
     ...(location === 'fruits' ? { cold } : {}),
-    ...dates(location, category, S.estimateFreshDays(item.name, location, category, cold)),
+    ...store.initialDates({ name: item.name, category, location, cold }), // même règle que le ticket (nom français du catalogue)
     unitPrice: price === null ? null : S.cleanPrice(price / count)
   };
 }

@@ -2,12 +2,12 @@
 // écran Semaine, courses regroupées, « J'ai cuisiné », changer / remplacer / retirer un repas.
 import { test, expect } from 'vitest';
 import { createPhone } from '../helpers/phone.js';
+import { iso } from '../helpers/dates.js';
 
 test('Planning de la semaine', async () => {
   const log = (ok, msg) => expect.soft(Boolean(ok), msg).toBe(true);
   const CODE = 'SEMAI-NEPLA';
   const F = `foyers/${CODE}/`;
-  const iso = (days) => { const d = new Date(); d.setDate(d.getDate() + days); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
   const prod = (name, extra) => ({ name, expiry: iso(8), category: 'autre', categoryVersion: 2, quantity: '', count: 1, location: 'frigo', dateKind: 'dlc', frozenAt: '', barcode: '', addedBy: 'Kevin', createdAt: 1, image: '', imageUrl: '', ...extra });
   globalThis.__db = { docs: new Map([
     [`foyers/${CODE}`, { createdBy: 'Kevin' }],

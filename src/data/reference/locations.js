@@ -17,15 +17,7 @@ export function locationOf(id) {
  * 'estimee' estimée par l'app (fruits et légumes) · 'congele' congelé maison (durée conseillée) ·
  * 'aucune' pas de date : l'app suit l'ancienneté (produits secs).
  */
-export const DATE_KINDS = {
-  dlc: { label: 'Jusqu\'au (DLC)', field: 'À consommer jusqu\'au' },
-  ddm: { label: 'De préférence (DDM)', field: 'De préférence avant le' },
-  estimee: { label: 'Estimée', field: 'Se garde jusqu\'au (estimé)' },
-  congele: { label: 'Congelé maison', field: 'Congelé le' },
-  aucune: { label: 'Sans date', field: '' }
-};
-
-/** Types proposés selon le lieu (le premier est celui par défaut). */
+/** Types proposés selon le lieu (le premier est celui par défaut) ; libellés : kind.* et field.* (i18n). */
 export const KINDS_BY_LOCATION = {
   frigo: ['dlc', 'ddm', 'estimee'],
   congelateur: ['congele', 'ddm'],

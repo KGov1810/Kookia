@@ -2,12 +2,12 @@
 // date estimée du pain, long ticket (plafond relevé).
 import { test, expect } from 'vitest';
 import { createPhone } from '../helpers/phone.js';
+import { iso } from '../helpers/dates.js';
 
 test('Ticket : non alimentaire, liste de courses, pain', async () => {
   const log = (ok, msg) => expect.soft(Boolean(ok), msg).toBe(true);
   const CODE = 'TICKE-TMENA';
   const F = `foyers/${CODE}/`;
-  const iso = (days) => { const d = new Date(); d.setDate(d.getDate() + days); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
   const item = (name, n) => [F + 'courses/' + name, { name, quantity: '', checked: false, addedBy: 'Kevin', createdAt: n }];
   globalThis.__db = { docs: new Map([
     [`foyers/${CODE}`, { createdBy: 'Kevin' }],

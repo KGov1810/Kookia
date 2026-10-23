@@ -3,7 +3,7 @@
 
 import { collection, onSnapshot, setDoc } from 'firebase/firestore';
 import { cleanPrice } from '../../services/stats/money.js';
-import { nameTokens, simplify } from '../../services/text/text.js';
+import { nameKey } from '../../services/text/text.js';
 import { db } from './connection.js';
 import { reportStatsDenied } from './movements.js';
 import { emit, state } from './state.js';
@@ -18,8 +18,7 @@ export function priceKeys({ name = '', barcode = '' } = {}) {
   const keys = [];
   const digits = String(barcode ?? '').replace(/\D/g, '');
   if (digits) keys.push(`ean:${digits}`);
-  const tokens = [...new Set(nameTokens(name).flatMap((t) => t.split('-')).filter((t) => t.length >= 2 && t !== 'a'))];
-  const words = tokens.sort().join(' ') || simplify(name).trim().replace(/[.~*/[\]]/g, '');
+  const words = nameKey(name);
   if (words) keys.push(`nom:${words}`);
   return keys;
 }

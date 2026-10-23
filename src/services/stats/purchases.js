@@ -1,13 +1,7 @@
 // Kookia — Achats fréquents : ce que le foyer achète souvent (mouvements « achat »), pour « À racheter ».
 
 import { toISODate } from '../dates/dates.js';
-import { nameTokens, simplify } from '../text/text.js';
-
-/** Clé d'un nom : ses mots sans accents ni pluriel, dans l'ordre alphabétique (« Yaourts nature » = « nature yaourt »). */
-export function purchaseKey(name) {
-  const words = [...new Set(nameTokens(name).flatMap((w) => w.split('-')).filter((w) => w.length >= 2))].sort().join(' ');
-  return words || simplify(name).trim();
-}
+import { nameKey, nameTokens } from '../text/text.js';
 
 /**
  * Même produit, au sens large : tous les mots du nom le plus court figurent dans l'autre (« Œufs » et « Œufs plein
@@ -29,7 +23,7 @@ export function frequentPurchases(purchases, { minTimes = 2 } = {}) {
   const groups = new Map();
   for (const p of purchases) {
     if (p.type !== 'achat' || !p.name?.trim()) continue;
-    const key = purchaseKey(p.name);
+    const key = nameKey(p.name); // « Yaourts nature » = « Yaourt nature »
     if (!key) continue;
     const group = groups.get(key) ?? { key, name: p.name.trim(), days: new Set(), last: 0 };
     group.days.add(toISODate(new Date(p.clientAt)));

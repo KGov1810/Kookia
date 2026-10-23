@@ -58,15 +58,6 @@ export function formatDate(iso, options = { day: 'numeric', month: 'short' }) {
   return date ? date.toLocaleDateString(localeTag(), options) : '';
 }
 
-/** 'expired' | 'soon' | 'ok' | 'pending' (date à compléter). */
-export function statusOf(iso, alertDays, today = new Date()) {
-  if (!hasDate(iso)) return 'pending';
-  const days = daysUntil(iso, today);
-  if (days < 0) return 'expired';
-  if (days <= Math.max(0, alertDays)) return 'soon';
-  return 'ok';
-}
-
 export function expiryLabel(iso, today = new Date()) {
   if (!hasDate(iso)) return t('status.pending');
   const days = daysUntil(iso, today);

@@ -2,12 +2,12 @@
 // du foyer, chaque iPhone les lit dans la sienne, et une ancienne recette est traduite à l'ouverture.
 import { test, expect } from 'vitest';
 import { createPhone } from '../helpers/phone.js';
+import { iso } from '../helpers/dates.js';
 
 test('Langues du foyer : recettes de Claude dans la langue de chaque iPhone', async () => {
   const log = (ok, msg) => expect.soft(Boolean(ok), msg).toBe(true);
   const CODE = 'LANGU-ESFOY';
   const F = `foyers/${CODE}/`;
-  const iso = (days) => { const d = new Date(); d.setDate(d.getDate() + days); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
   const prod = (name, extra) => ({ name, expiry: iso(2), category: 'laitier', categoryVersion: 2, quantity: '', count: 1, location: 'frigo', dateKind: 'dlc', frozenAt: '', barcode: '', addedBy: 'Kevin', createdAt: 1, image: '', imageUrl: '', ...extra });
   globalThis.__db = { docs: new Map([
     [`foyers/${CODE}`, { createdBy: 'Kevin' }],

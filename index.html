@@ -2,6 +2,10 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8">
+  <!-- Sécurité : seuls s'exécutent le code de l'app, les deux bibliothèques du CDN (code-barres, lecture de texte,
+       vérifiées par empreinte) et les deux scripts de cette page (empreintes « sha256 » : à recalculer s'ils
+       changent, tests/unit/csp.test.js le signale). -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'wasm-unsafe-eval' 'sha256-5dmnm2xXNLqdf4wsw4JS/At22R6WVoIRJMyN97PDvXc=' 'sha256-PdD8ImYNncqNS0OiJE27cQLG2RaH1/2KCiFIGr4i8ec='; worker-src 'self' blob:; connect-src 'self' https: data: blob:; img-src 'self' https: data: blob:; media-src 'self' blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Kookia</title>
   <meta name="description" content="Le stock de nourriture de la maison, partagé à deux : frigo, congélateur, placard, fruits et légumes, recettes anti-gaspillage et liste de courses.">

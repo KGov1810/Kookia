@@ -2,10 +2,10 @@
 // les deux iPhone (foyers/{code}/prix/dates), et la date estimée des produits restés sans date.
 
 import { setDoc, writeBatch } from 'firebase/firestore';
-import { DAY, addDays, hasDate, parseISODate, startOfDay, toISODate } from '../../services/dates/dates.js';
+import { DAY, addDays, hasDate, isoInDays, parseISODate, startOfDay, toISODate } from '../../services/dates/dates.js';
 import { fridgeEstimable } from '../../services/stock/fridge-days.js';
 import { remainingOf } from '../../services/stock/opened.js';
-import { dateKindOf, estimateFreshDays, keptCold } from '../../services/stock/stock-dates.js';
+import { dateKindOf, estimateFreshDays, estimatedByDefault, freezerLimit, keptCold } from '../../services/stock/stock-dates.js';
 import { db } from './connection.js';
 import { reportStatsDenied } from './movements.js';
 import { priceKeys } from './prices.js';
@@ -30,6 +30,24 @@ export function learnedShelfDays(product) {
 export function estimatedDays(product) {
   const learned = fridgeEstimable(product.category, product.location) ? learnedShelfDays(product) : null;
   return learned ?? estimateFreshDays(product.name, product.location || 'frigo', product.category || '', keptCold(product));
+}
+
+/**
+ * Date d'un produit ajouté sans passer par sa fiche (ticket, « Tout ranger », scan en rafale, grille des fruits et
+ * légumes) : { dateKind, expiry, frozenAt }. Congélateur : congelé aujourd'hui. Fruits, légumes, pain, et produits du
+ * frigo hors viande, poisson, charcuterie et traiteur : date estimée. Placard : sans date (ancienneté). Le reste du
+ * frigo : date de l'emballage, à compléter.
+ */
+export function initialDates(product) {
+  const location = product.location || 'frigo';
+  if (location === 'congelateur') {
+    const today = isoInDays(0);
+    return { dateKind: 'congele', frozenAt: today, expiry: freezerLimit(product.category, today) };
+  }
+  const estimated = estimatedByDefault(product.category, product.name) || location === 'fruits'
+    || fridgeEstimable(product.category, location);
+  if (estimated) return { dateKind: 'estimee', expiry: isoInDays(estimatedDays({ ...product, location })), frozenAt: '' };
+  return { dateKind: location === 'placard' ? 'aucune' : 'dlc', expiry: '', frozenAt: '' };
 }
 
 /** Date saisie à la main pour un produit du frigo pas encore entamé : sa durée depuis l'achat est retenue. */

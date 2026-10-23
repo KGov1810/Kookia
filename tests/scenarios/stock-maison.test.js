@@ -1,11 +1,11 @@
 // Scénario : Stock de toute la maison : lieux, dates, congélation, ticket.
 import { test, expect } from 'vitest';
 import { createPhone } from '../helpers/phone.js';
+import { iso } from '../helpers/dates.js';
 import { readAllCss, readProjectFile } from '../helpers/files.js';
 
 test("Stock de toute la maison : lieux, dates, congélation, ticket", async () => {
   const log = (ok, msg) => expect.soft(Boolean(ok), msg).toBe(true);
-  const iso = (days) => { const d = new Date(); d.setDate(d.getDate() + days); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
   const monthsAgo = (m) => { const d = new Date(); d.setMonth(d.getMonth() - m); return d.getTime(); };
   const CODE = 'KOOKI-ABCDE';
   const P0 = `foyers/${CODE}/produits/`, C0 = `foyers/${CODE}/courses/`;

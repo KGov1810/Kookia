@@ -1,11 +1,11 @@
 // Scénario : Historique des changements.
 import { test, expect } from 'vitest';
 import { createPhone } from '../helpers/phone.js';
+import { iso } from '../helpers/dates.js';
 import { readAllCss, readProjectFile } from '../helpers/files.js';
 
 test("Historique des changements", async () => {
   const log = (ok, msg) => expect.soft(Boolean(ok), msg).toBe(true);
-  const iso = (days) => { const d = new Date(); d.setDate(d.getDate() + days); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
   const CODE = 'HISTO-RIQUE';
   const P0 = `foyers/${CODE}/produits/`, C0 = `foyers/${CODE}/courses/`, R0 = `foyers/${CODE}/recettes/`, H0 = `foyers/${CODE}/historique/`;
   const prod = (name, extra) => ({ name, expiry: iso(5), category: 'laitier', categoryVersion: 2, quantity: '', count: 1, location: 'frigo', dateKind: 'dlc', frozenAt: '', barcode: '', addedBy: 'Kevin', createdAt: 1, image: '', imageUrl: '', ...extra });

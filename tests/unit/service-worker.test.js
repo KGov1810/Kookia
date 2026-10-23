@@ -8,16 +8,17 @@ import vm from 'node:vm';
 const VERSION = 'kookia-nouvelle';
 
 /** Charge le modèle de service worker dans un bac à sable, avec des caches et un réseau simulés. */
-function loadWorker({ cached = {} } = {}) {
-  const stores = new Map(Object.entries({ 'kookia-ancienne': cached, [VERSION]: {} }));
-  const calls = { addAll: [], fetch: [], deleted: [] };
+function loadWorker({ cached = {}, libs = {} } = {}) {
+  const stores = new Map(Object.entries({ 'kookia-ancienne': cached, [VERSION]: {}, 'kookia-libs': libs }));
+  const calls = { addAll: [], fetch: [], deleted: [], put: [] };
   const listeners = {};
   const caches = {
     keys: async () => [...stores.keys()],
     delete: async (key) => { calls.deleted.push(key); return stores.delete(key); },
     open: async (key) => ({
       addAll: async (requests) => { calls.addAll.push(...requests); },
-      put: async () => {}
+      put: async (request, response) => { calls.put.push({ key, url: request.url ?? request, response }); },
+      match: async (request) => stores.get(key)?.[request.url ?? request]
     }),
     match: async (request) => {
       const url = typeof request === 'string' ? request : request.url;
@@ -33,7 +34,7 @@ function loadWorker({ cached = {} } = {}) {
       clients: { claim: async () => {} }
     },
     caches,
-    fetch: async (request, init) => { calls.fetch.push({ url: request.url ?? request, init }); return { ok: true, clone() { return this; } }; },
+    fetch: async (request, init) => { calls.fetch.push({ url: request.url ?? request, init }); return { ok: true, type: 'cors', clone() { return this; } }; },
     // Comme dans un navigateur : adresses relatives résolues par rapport au site.
     Request: class extends Request {
       constructor(input, init) {
@@ -67,7 +68,22 @@ describe('service worker', () => {
     await sw.run('activate', {});
     expect(sw.calls.deleted).toEqual([]);
     await sw.run('message', { data: 'cleanup' });
-    expect(sw.calls.deleted).toEqual(['kookia-ancienne']);
+    expect(sw.calls.deleted).toEqual(['kookia-ancienne']); // les bibliothèques (kookia-libs) restent
+  });
+
+  it('bibliothèques : gardées d\'une version à l\'autre, jamais reprises d\'un ancien cache', async () => {
+    const url = 'https://cdn.jsdelivr.net/npm/@zxing/browser@0.2.1/umd/zxing-browser.min.js';
+    const opaque = { ok: false, type: 'opaque' };
+    const sw = loadWorker({ cached: { [url]: opaque } });
+    const response = await sw.run('fetch', { request: new Request(url) });
+    expect(response).not.toBe(opaque); // une copie « opaque » ne passerait pas la vérification d'empreinte
+    expect(sw.calls.fetch.map((f) => f.url)).toEqual([url]);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(sw.calls.put.map((p) => p.key)).toEqual(['kookia-libs']);
+    const kept = { ok: true, type: 'cors' };
+    const again = loadWorker({ libs: { [url]: kept } });
+    expect(await again.run('fetch', { request: new Request(url) })).toBe(kept);
+    expect(again.calls.fetch).toEqual([]);
   });
 
   it('une ancienne page retrouve ses fichiers dans l\'ancien cache', async () => {

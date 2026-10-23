@@ -4,6 +4,9 @@
 const VERSION = '__VERSION__';
 const PRECACHE = __PRECACHE__;
 const LIBRARY_HOSTS = ['cdn.jsdelivr.net'];
+// Bibliothèques (code-barres, lecture de texte) : adresses à version figée, gardées d'une mise à jour de l'app à
+// l'autre (sinon plusieurs Mo retéléchargés à chaque version).
+const LIBRARY_CACHE = 'kookia-libs';
 
 // Mise en cache depuis le serveur, jamais depuis le cache HTTP de Safari (il peut garder
 // quelques minutes une ancienne page index.html qui demanderait des fichiers disparus).
@@ -22,7 +25,8 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('message', (event) => {
   if (event.data !== 'cleanup') return;
   event.waitUntil(caches.keys()
-    .then((keys) => Promise.all(keys.filter((k) => k.startsWith('kookia-') && k !== VERSION).map((k) => caches.delete(k)))));
+    .then((keys) => Promise.all(keys.filter((k) => k.startsWith('kookia-') && k !== VERSION && k !== LIBRARY_CACHE)
+      .map((k) => caches.delete(k)))));
 });
 
 self.addEventListener('fetch', (event) => {
@@ -52,17 +56,14 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Bibliothèques chargées à la demande (code-barres, lecture de texte) : cache d'abord.
+  // Bibliothèques chargées à la demande : leur cache d'abord (pas les anciens caches, qui peuvent garder une copie
+  // « opaque » d'avant la vérification d'empreinte). Seules les réponses lisibles et complètes sont gardées.
   if (LIBRARY_HOSTS.includes(url.hostname)) {
-    event.respondWith(
-      caches.match(request).then((cached) => cached ?? fetch(request).then((response) => {
-        if (response.ok || response.type === 'opaque') {
-          const copy = response.clone();
-          caches.open(VERSION).then((cache) => cache.put(request, copy));
-        }
+    event.respondWith(caches.open(LIBRARY_CACHE).then((cache) => cache.match(request).then((cached) => cached
+      ?? fetch(request).then((response) => {
+        if (response.ok) cache.put(request, response.clone());
         return response;
-      }))
-    );
+      }))));
   }
   // Tout le reste (Firebase, Claude, Open Food Facts) passe directement par le réseau.
 });

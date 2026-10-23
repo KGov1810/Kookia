@@ -1,15 +1,14 @@
 // Kookia — Produits du stock : enregistrer, consommer, retirer.
 
 import { setDoc, writeBatch } from 'firebase/firestore';
-import { isoInDays, toISODate } from '../../services/dates/dates.js';
+import { toISODate } from '../../services/dates/dates.js';
 import { quantityLabel } from '../../services/quantities/quantities.js';
 import { cleanPrice } from '../../services/stats/money.js';
-import { fridgeEstimable } from '../../services/stock/fridge-days.js';
 import { remainingOf, stockAmount } from '../../services/stock/opened.js';
-import { breadDays, dateKindOf, estimateFreshDays, freezerLimit } from '../../services/stock/stock-dates.js';
+import { dateKindOf } from '../../services/stock/stock-dates.js';
 import { locationOf } from '../reference/locations.js';
 import { db } from './connection.js';
-import { estimatedDays } from './fridge-dates.js';
+import { initialDates } from './fridge-dates.js';
 import { countName, logChange, productDiff, productSummary } from './history.js';
 import { CATEGORY_VERSION } from './mappers.js';
 import { cancelLastMovements, recordMovement } from './movements.js';
@@ -102,30 +101,10 @@ export function addReceiptProducts(items, shoppingIdsToRemove = [], { source = '
   if (!canWrite() || !items.length) return 0;
   const batch = writeBatch(db);
   const now = Date.now();
-  const today = toISODate(new Date());
   const added = [];
   items.forEach((item, index) => {
     const location = locationOf(item.location).id;
-    const produce = ['fruits', 'legumes', 'fruits_legumes'].includes(item.category) || location === 'fruits';
-    let dateKind = 'dlc';
-    let expiry = ''; // viande, poisson… au frigo : date à compléter (elle est imprimée sur l'emballage)
-    let frozenAt = '';
-    if (location === 'congelateur') {
-      dateKind = 'congele';
-      frozenAt = today;
-      expiry = freezerLimit(item.category, today);
-    } else if (item.category === 'boulangerie' && breadDays(item.name) !== null) {
-      dateKind = 'estimee'; // pain : 2 jours frais, 7 jours emballé
-      expiry = isoInDays(breadDays(item.name));
-    } else if (location === 'placard') {
-      dateKind = 'aucune';
-    } else if (produce) {
-      dateKind = 'estimee';
-      expiry = isoInDays(estimateFreshDays(item.name, location));
-    } else if (fridgeEstimable(item.category, location)) {
-      dateKind = 'estimee'; // yaourts, beurre… : la durée retenue la dernière fois, sinon une durée prudente
-      expiry = isoInDays(estimatedDays({ name: item.name, category: item.category, location, barcode: item.barcode }));
-    }
+    const { dateKind, expiry, frozenAt } = initialDates({ name: item.name, category: item.category, location, barcode: item.barcode });
     const id = crypto.randomUUID();
     const count = Math.max(1, Math.round(Number(item.count) || 1));
     added.push({ id, name: item.name.trim(), category: item.category || 'autre', location, unitPrice: cleanPrice(item.unitPrice), count, barcode: item.barcode || '' });

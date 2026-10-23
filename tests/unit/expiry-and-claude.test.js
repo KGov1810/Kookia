@@ -27,9 +27,7 @@ test.each(cases)('parseExpiryDate(%j) → %s', (lines, expected) => {
 
 test('dates, durées et pluriels', () => {
   expect(S.daysUntil('2026-10-01', today)).toBe(2);
-  expect([S.statusOf('2026-10-01', 2, today), S.statusOf('2026-09-28', 2, today), S.statusOf('2026-10-10', 2, today)]).toEqual(['soon', 'expired', 'ok']);
   expect([S.formatMinutes(45), S.formatMinutes(75), S.formatMinutes(120)]).toEqual(['45 min', '1 h 15', '2 h']);
-  expect([S.plural(1, 'jour'), S.plural(3, 'jour')]).toEqual(['1 jour', '3 jours']);
 });
 
 test('génération de recettes : références au stock et ingrédients à acheter', async () => {

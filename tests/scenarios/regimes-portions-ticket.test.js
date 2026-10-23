@@ -1,10 +1,10 @@
 // Scénario : Régimes, portions, calories, ticket de caisse.
 import { test, expect } from 'vitest';
 import { createPhone } from '../helpers/phone.js';
+import { iso } from '../helpers/dates.js';
 
 test("Régimes, portions, calories, ticket de caisse", async () => {
   const log = (ok, msg) => expect.soft(Boolean(ok), msg).toBe(true);
-  const iso = (days) => { const d = new Date(); d.setDate(d.getDate() + days); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
   const CODE = 'ZXCVB-NMKLP';
   const P0 = `foyers/${CODE}/produits/`, R0 = `foyers/${CODE}/recettes/`, C0 = `foyers/${CODE}/courses/`;
   const product = (name, days, extra = {}) => ({ name, expiry: iso(days), category: 'autre', quantity: '', count: 1, barcode: '', addedBy: 'Marie', createdAt: 1, image: '', imageUrl: '', ...extra });

@@ -2,11 +2,11 @@
 // en un toucher sur la ligne, produits déjà sans date estimés à l'ouverture.
 import { test, expect } from 'vitest';
 import { createPhone } from '../helpers/phone.js';
+import { iso } from '../helpers/dates.js';
 import { fridgeDays } from '../../src/services/stock/fridge-days.js';
 
 test('Dates du frigo : estimation, mémoire, boutons sur la ligne', async () => {
   const log = (ok, msg) => expect.soft(Boolean(ok), msg).toBe(true);
-  const iso = (days) => { const d = new Date(); d.setDate(d.getDate() + days); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
   const daysAgo = (n) => { const d = new Date(); d.setDate(d.getDate() - n); d.setHours(12, 0, 0, 0); return d.getTime(); };
   const CODE = 'DATES-FRIGO';
   const F = `foyers/${CODE}/`;
@@ -25,6 +25,8 @@ test('Dates du frigo : estimation, mémoire, boutons sur la ligne', async () => 
     [F + 'produits/poulet', prod('Escalopes de poulet', { category: 'volaille' })],
     [F + 'produits/jambon', prod('Jambon blanc', { category: 'charcuterie' })],
     [F + 'produits/comte', prod('Comté', { category: 'fromage', expiry: iso(20) })],
+    // Crème déjà entamée : sa date a été raccourcie à l'ouverture, ce n'est pas celle de l'emballage.
+    [F + 'produits/creme', prod('Crème liquide', { category: 'laitier', expiry: iso(3), remaining: 0.5, openedAt: iso(-1) })],
     // Durée retenue sur l'autre iPhone : yaourt grec, 21 jours après l'achat.
     [F + 'prix/dates', { entries: { 'nom:grec yaourt': { days: 21, at: 1 } } }],
     [F + 'courses/c1', { name: 'Yaourt grec', quantity: '', checked: true, addedBy: 'Kevin', createdAt: 1 }],
@@ -86,6 +88,13 @@ test('Dates du frigo : estimation, mémoire, boutons sur la ligne', async () => 
   await manual('Filet de cabillaud');
   log(pressed() === 'dlc' && sheet().textContent.includes('dans 7 jours'), 'Poisson : pas d\'estimation, date limite proposée à vérifier (comme avant)');
   await click(sheet().querySelector('[data-action="close"]'), 350);
+
+  console.log('\n— Produit entamé : sa date n\'est pas retenue —');
+  await click(row('Crème liquide').querySelector('.product-main'), 400);
+  const cremeDate = sheet().querySelector('[name="expiry"]');
+  cremeDate.value = iso(4); await type(cremeDate, iso(4), 'change');
+  await click(sheet().querySelector('.sheet-head [data-action="close"]'), 400);
+  log(product('Crème liquide').expiry === iso(4) && !Object.keys(memory()).some((k) => k.includes('creme')), 'Crème entamée : date modifiée, mais pas apprise pour la prochaine crème');
 
   console.log('\n— Tout ranger : durée retenue, prudente, ou à compléter —');
   await click('.tab[data-tab="courses"]');

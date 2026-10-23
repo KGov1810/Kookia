@@ -1,10 +1,10 @@
 // Scénario : Origine des recettes.
 import { test, expect } from 'vitest';
 import { createPhone } from '../helpers/phone.js';
+import { iso } from '../helpers/dates.js';
 
 test("Origine des recettes", async () => {
   const log = (ok, msg) => expect.soft(Boolean(ok), msg).toBe(true);
-  const iso = (days) => { const d = new Date(); d.setDate(d.getDate() + days); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
   const CODE = 'ORIGN-EABCD';
   const P0 = `foyers/${CODE}/produits/`, R0 = `foyers/${CODE}/recettes/`;
   const base = { summary: '', difficulty: 'facile', totalMinutes: 20, prepMinutes: 10, servings: 2, batchCooking: false, storageDays: 0, storageTips: '', favorite: false, steps: ['Cuire.'], diet: 'omnivore', kcal: 500 };

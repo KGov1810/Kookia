@@ -2,7 +2,7 @@
 // Un mouvement : { type: 'achat' | 'consomme' | 'jete', name, category, location, count, unitPrice, by, clientAt }.
 
 import { category } from '../../data/reference/categories.js';
-import { nameTokens } from '../text/text.js';
+import { nameKey } from '../text/text.js';
 import { cleanPrice, lineAmount, roundCents } from './money.js';
 import { monthKey } from './periods.js';
 
@@ -86,7 +86,7 @@ export function categoryTotals(movements) {
 export function topWasted(movements, limit = 5) {
   const rows = new Map();
   for (const m of movements.filter((x) => x.type === 'jete')) {
-    const key = nameTokens(m.name).sort().join(' ') || m.name.toLowerCase();
+    const key = nameKey(m.name); // « Yaourts nature » et « Yaourt nature » : une seule ligne
     const row = rows.get(key) ?? { name: m.name, count: 0, amount: 0, priced: false };
     const amount = exactAmount(m);
     row.count = Math.round((row.count + m.count) * 1000) / 1000;
