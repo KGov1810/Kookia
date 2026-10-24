@@ -123,25 +123,34 @@ test("Régimes, portions, calories, ticket de caisse", async () => {
   globalThis.URL.createObjectURL = () => 'blob:fake'; globalThis.URL.revokeObjectURL = () => {};
   globalThis.Image = class { set src(v) { this.naturalWidth = 1200; this.naturalHeight = 3000; setTimeout(() => this.onload(), 1); } };
   const origCreate = w.document.createElement.bind(w.document);
+  let picked = 1; // photos choisies d'un coup dans la photothèque
+  let lastInput = null;
   w.document.createElement = (tag) => {
     const el = origCreate(tag);
     if (tag === 'input') el.click = () => setTimeout(() => {
-      Object.defineProperty(el, 'files', { value: [new w.File(['x'], 'ticket.jpg', { type: 'image/jpeg' })] });
+      lastInput = el;
+      Object.defineProperty(el, 'files', { value: Array.from({ length: picked }, (_, i) => new w.File(['x'], `ticket${i}.jpg`, { type: 'image/jpeg' })) });
       el.dispatchEvent(new w.Event('change'));
     }, 5);
     return el;
   };
   await click('.tab[data-tab="frigo"]');
   await click('[data-action="add-menu"]');
-  log(sheet().textContent.includes('Scanner un ticket de caisse'), 'Menu + : « Scanner un ticket de caisse »');
+  log(sheet().textContent.includes('Ticket de caisse'), 'Menu + : « Ticket de caisse »');
   await click(sheet().querySelector('[data-action="ticket"]'), 400);
   log(!sheet().querySelector('.receipt-photo') && sheet().querySelector('[data-action="add-photo"].primary')?.textContent.includes('Photographier le ticket'), 'Fiche du ticket ouverte d\'abord, sans menu de photo qui surgit');
   await click(sheet().querySelector('[data-action="add-photo"]'), 60);
-  log(sheet().querySelectorAll('.receipt-photo').length === 1, 'Photo du ticket ajoutée');
-  await click(sheet().querySelector('[data-action="add-photo"]'), 60);
-  log(sheet().querySelectorAll('.receipt-photo').length === 2 && sheet().textContent.includes('Ajouter une photo (suite du ticket)'), 'Deuxième photo (ticket long)');
+  log(sheet().querySelectorAll('.receipt-photo').length === 1 && lastInput.multiple && !lastInput.hasAttribute('capture'), 'Photo du ticket ajoutée (photothèque, sélection multiple)');
+  picked = 2;
+  await click(sheet().querySelector('[data-action="add-photo"]'), 80);
+  log(sheet().querySelectorAll('.receipt-photo').length === 3 && sheet().textContent.includes('Ajouter des photos'), 'Ticket long : 2 photos de plus choisies d\'un coup');
+  picked = 9;
+  await click(sheet().querySelector('[data-action="add-photo"]'), 150);
+  log(sheet().querySelectorAll('.receipt-photo').length === 10 && !sheet().querySelector('[data-action="add-photo"]') && $('#toast').textContent.includes('10 photos au plus par ticket'), '10 photos au plus : les suivantes sont laissées, le bouton disparaît');
+  for (let i = 0; i < 7; i++) await click(sheet().querySelectorAll('[data-action="remove-photo"]')[3]);
+  log(sheet().querySelectorAll('.receipt-photo').length === 3 && sheet().querySelector('[data-action="add-photo"]'), 'Photos retirées : on peut en rajouter');
   await click(sheet().querySelector('[data-action="analyze"]'), 80);
-  log(globalThis.__images === 2, 'Les 2 photos envoyées à Claude');
+  log(globalThis.__images === 3, 'Les 3 photos envoyées à Claude');
   const lines = () => [...sheet().querySelectorAll('.receipt-line')];
   log(lines().length === 3, '3 produits reconnus');
   const laitLine = lines().find((l) => l.querySelector('input').value === 'Lait demi-écrémé');

@@ -105,6 +105,7 @@ test("Stock de toute la maison : lieux, dates, congélation, ticket", async () =
   await click('[data-action="add-menu"]'); await click(sheet().querySelector('[data-action="scan"]'), 40);
   await type('.scan-manual input', '8710438000000');
   $('.scan-manual').dispatchEvent(new w.Event('submit', { bubbles: true, cancelable: true })); await tick(80);
+  await click('.scan-done', 80);
   log(sheet().querySelector('[data-action="set-loc"][data-value="congelateur"]').getAttribute('aria-pressed') === 'true' && sheet().querySelector('[name="frozenAt"]'), 'Frites surgelées scannées : congélateur, « Congelé le »');
   await click(sheet().querySelector('[data-action="close"]'), 350);
 

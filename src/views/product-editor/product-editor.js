@@ -10,7 +10,8 @@ import { createEditorContext } from './editor-state.js';
 
 /**
  * Ouvre la fiche d'un produit. Options : product (modification), draft (pré-remplissage),
- * mode, filePromise (photo déjà choisie), shoppingItemId (article rangé), barcode (code lu).
+ * mode, filePromise (photo déjà choisie), shoppingItemId (article rangé), barcode (code lu),
+ * lookup (recherche Open Food Facts de ce code déjà lancée par le scanner).
  */
 export function openEditor(options = {}) {
   const ctx = createEditorContext(options);
@@ -25,7 +26,7 @@ export function openEditor(options = {}) {
   });
 
   // Lancement automatique selon le choix fait dans le menu « + ».
-  if (barcode) handleBarcode(ctx, barcode);
+  if (barcode) handleBarcode(ctx, barcode, options.lookup);
   if (filePromise) {
     filePromise.then((file) => {
       if (file && ctx.sheet.isOpen) handleProductPhoto(ctx, file);

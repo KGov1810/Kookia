@@ -56,8 +56,12 @@ export function renderReceipt(ctx) {
     ${view.busy ? html`<div class="busy"><span class="spinner"></span><p>${view.busy}</p></div>` : ''}`;
 }
 
+/** Photos d'un même ticket, au plus. */
+export const MAX_PHOTOS = 10;
+
 export function photosStep(ctx) {
   const { view } = ctx;
+  const more = view.photos.length < MAX_PHOTOS;
   return html`
     <p class="hint">${t('ticket.photoHint')}</p>
     ${view.photos.length ? html`
@@ -68,7 +72,7 @@ export function photosStep(ctx) {
           </div>`)}
       </div>` : ''}
     <div class="row-actions">
-      <button class="${view.photos.length ? 'secondary' : 'primary'}" data-action="add-photo">${I.camera}${t(view.photos.length ? 'ticket.morePhoto' : 'ticket.takePhoto')}</button>
+      ${more ? html`<button class="${view.photos.length ? 'secondary' : 'primary'}" data-action="add-photo">${I.camera}${t(view.photos.length ? 'ticket.morePhoto' : 'ticket.takePhoto')}</button>` : ''}
       ${view.photos.length ? html`<button class="primary" data-action="analyze">${I.sparkle}${t('ticket.read')}</button>` : ''}
     </div>
     <p class="hint">${t('ticket.privacy')}</p>`;

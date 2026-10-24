@@ -7,6 +7,7 @@ import { state } from '../../data/store/state.js';
 import { t } from '../../services/i18n/i18n.js';
 import * as S from '../../services/index.js';
 import { ui } from '../app/ui-state.js';
+import { dateText } from './editor-date-section.js';
 import { applyKnownPrice } from './editor-price.js';
 import { draftStatus } from './editor-top-actions.js';
 
@@ -131,6 +132,11 @@ export function refreshStatus(ctx) {
   // Date de l'emballage saisie sur un produit estimé : le type affiché devient « DLC ».
   const kind = S.dateKindOf(p);
   ctx.sheet.panel.querySelectorAll('#date-section [data-action="set-kind"]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.value === kind)));
+  ctx.sheet.panel.querySelectorAll('#date-section .date-pick').forEach((pick) => {
+    const value = p[pick.querySelector('input').name]; // date limite, ou date de congélation
+    pick.classList.toggle('missing', !S.hasDate(value));
+    pick.querySelector('.date-text').textContent = dateText(value);
+  });
   const label = ctx.sheet.panel.querySelector('#date-section .date-field > span');
   if (label && ['dlc', 'ddm', 'estimee'].includes(kind)) {
     label.textContent = t(`field.${kind}`);

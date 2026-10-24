@@ -73,6 +73,7 @@ export const PRODUCT = {
   // Date, poids, prix
   'date.kind': ['Type de date', 'Date type', 'Tipo de fecha', 'Tipo de data'],
   'date.photo': ['Photo', 'Photo', 'Foto', 'Foto'],
+  'date.choose': ['Choisir la date', 'Choose the date', 'Elegir la fecha', 'Escolher a data'],
   'date.readPackage': ['Lire la date sur l\'emballage', 'Read the date on the package', 'Leer la fecha en el empaque', 'Ler a data na embalagem'],
   'date.plusDays': ['+{n} j', '+{n} d', '+{n} d', '+{n} d'],
   'date.plusWeeks': [['+{n} sem', '+{n} sem'], ['+{n} wk', '+{n} wks'], ['+{n} sem', '+{n} sem'], ['+{n} sem', '+{n} sem']],

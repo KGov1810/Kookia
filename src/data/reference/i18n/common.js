@@ -17,19 +17,16 @@ export const COMMON = {
   'common.copyFailed': ['Copie impossible : sélectionnez le texte et copiez-le à la main.', 'Couldn\'t copy: select the text and copy it by hand.', 'No se pudo copiar: selecciona el texto y cópialo a mano.', 'Não foi possível copiar: selecione o texto e copie à mão.'],
 
   // Menu « + »
-  'add.scan': ['Scanner un code-barres', 'Scan a barcode', 'Escanear un código de barras', 'Escanear um código de barras'],
-  'add.scanHint': ['Nom et photo retrouvés automatiquement', 'Name and photo found automatically', 'Nombre y foto encontrados automáticamente', 'Nome e foto encontrados automaticamente'],
-  'add.scanMany': ['Scanner plusieurs produits', 'Scan several products', 'Escanear varios productos', 'Escanear vários produtos'],
-  'add.scanManyHint': ['Un bip par produit, vérification à la fin', 'One beep per product, check at the end', 'Un pitido por producto, revisión al final', 'Um bipe por produto, conferência no final'],
-  'add.photo': ['Prendre le produit en photo', 'Take a photo of the product', 'Tomar una foto del producto', 'Tirar uma foto do produto'],
-  'add.photoClaude': ['Claude reconnaît le produit et sa date', 'Claude recognizes the product and its date', 'Claude reconoce el producto y su fecha', 'O Claude reconhece o produto e a data'],
-  'add.photoDate': ['Lecture de la date sur l\'emballage', 'Reads the date on the package', 'Lee la fecha en el empaque', 'Lê a data na embalagem'],
+  'add.scan': ['Scanner', 'Scan', 'Escanear', 'Escanear'],
+  'add.scanHint': ['Un ou plusieurs produits', 'One or more products', 'Uno o varios productos', 'Um ou vários produtos'],
   'add.produce': ['Fruits et légumes', 'Fruit and vegetables', 'Frutas y verduras', 'Frutas e verduras'],
   'add.produceHint': ['Sans code-barres : choisissez dans la liste', 'No barcode: pick from the list', 'Sin código de barras: elige de la lista', 'Sem código de barras: escolha na lista'],
-  'add.ticket': ['Scanner un ticket de caisse', 'Scan a receipt', 'Escanear un ticket de compra', 'Escanear um cupom fiscal'],
+  'add.ticket': ['Ticket de caisse', 'Receipt', 'Ticket de compra', 'Cupom fiscal'],
   'add.ticketHint': ['Tous les produits des courses d\'un coup', 'All your groceries at once', 'Todas las compras de una vez', 'Todas as compras de uma vez'],
   'add.needsKey': ['Nécessite une clé Claude (Réglages)', 'Needs a Claude key (Settings)', 'Requiere una clave de Claude (Ajustes)', 'Requer uma chave do Claude (Ajustes)'],
   'add.manual': ['Saisir à la main', 'Type it in', 'Escribir a mano', 'Digitar à mão'],
+  'add.other': ['Autre produit', 'Other product', 'Otro producto', 'Outro produto'],
+  'add.otherHint': ['Saisie à la main ou photo', 'Type it in or take a photo', 'Escribir a mano o tomar una foto', 'Digitar à mão ou tirar uma foto'],
 
   // Synchronisation
   'sync.noFirebase': ['Firebase non configuré', 'Firebase not set up', 'Firebase sin configurar', 'Firebase não configurado'],

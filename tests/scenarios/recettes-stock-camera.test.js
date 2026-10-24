@@ -137,8 +137,10 @@ test("Recettes compatibles, codes-barres, caméra, reconnexion", async () => {
   // 2. Lecture automatique d'un code
   cam.code = '3428273980046';
   await tick(400);
-  log(!$('.scanner') && detectCalls > 0, 'Code-barres lu automatiquement, scanner refermé');
-  log(cam.stops >= 1, 'Caméra bien libérée à la fermeture');
+  log($('.scanner') && detectCalls > 0 && $$('.tray-line').length === 1 && $('.scan-done').textContent === 'Ouvrir sa fiche', 'Code-barres lu automatiquement : le scanner reste ouvert, « Ouvrir sa fiche »');
+  cam.code = null;
+  await click('.scan-done', 20);
+  log(!$('.scanner') && cam.stops >= 1, 'Scanner refermé, caméra bien libérée');
   await tick(50);
   log(sheet()?.querySelector('[name="name"]').value === 'Lait demi-écrémé (Lactel)', `Fiche ouverte avec le produit : ${sheet()?.querySelector('[name="name"]').value}`);
   await click(sheet().querySelector('[data-action="close"]'), 350);

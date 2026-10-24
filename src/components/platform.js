@@ -3,22 +3,34 @@
 import { t } from '../services/i18n/i18n.js';
 import { toast } from './toast.js';
 
-export function pickImage({ camera = false } = {}) {
+/** Ouvre le choix de photos de l'iPhone ; renvoie les fichiers choisis (aucun si annulé). */
+function pickFiles({ camera = false, multiple = false } = {}) {
   return new Promise((resolve) => {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
     if (camera) input.setAttribute('capture', 'environment');
+    input.multiple = multiple;
     input.hidden = true;
-    const done = (file) => {
-      resolve(file);
+    const done = (files) => {
+      resolve(files);
       input.remove();
     };
-    input.addEventListener('change', () => done(input.files?.[0] ?? null), { once: true });
-    input.addEventListener('cancel', () => done(null), { once: true });
+    input.addEventListener('change', () => done([...(input.files ?? [])]), { once: true });
+    input.addEventListener('cancel', () => done([]), { once: true });
     document.body.append(input);
     input.click();
   });
+}
+
+/** Une photo (camera : appareil photo directement), ou null. */
+export function pickImage({ camera = false } = {}) {
+  return pickFiles({ camera }).then((files) => files[0] ?? null);
+}
+
+/** Plusieurs photos d'un coup (sélection multiple dans la photothèque), dans l'ordre choisi. */
+export function pickImages() {
+  return pickFiles({ multiple: true });
 }
 
 export async function copyText(text) {

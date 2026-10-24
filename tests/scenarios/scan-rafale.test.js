@@ -1,4 +1,5 @@
-// Scénario : scanner plusieurs produits à la suite (menu +), puis vérifier et tout ajouter d'un coup.
+// Scénario : « Scanner » (menu +) : plusieurs produits à la suite, puis vérifier et tout ajouter d'un coup ;
+// un seul produit : sa fiche complète.
 import { test, expect } from 'vitest';
 import { createPhone } from '../helpers/phone.js';
 import { iso } from '../helpers/dates.js';
@@ -20,7 +21,9 @@ test('Scanner plusieurs produits', async () => {
     3228021170015: { product_name_fr: 'Yaourt nature', brands: 'Danone', quantity: '4 x 125 g', categories_tags: ['en:yogurts'], image_front_small_url: 'https://images.openfoodfacts.org/y.jpg' },
     2000000000017: { product_name_fr: 'Escalopes de poulet', brands: '', quantity: '300 g', categories_tags: ['en:chickens'] }
   };
+  let lookups = 0;
   globalThis.fetch = async (url) => {
+    lookups++;
     const code = Object.keys(OFF).find((c) => String(url).includes(c));
     if (code) return { ok: true, status: 200, json: async () => ({ status: 1, product: OFF[code] }) };
     return { ok: false, status: 404, json: async () => ({ status: 0 }) };
@@ -42,11 +45,13 @@ test('Scanner plusieurs produits', async () => {
 
   console.log('\n— Rafale —');
   await click('[data-action="add-menu"]');
-  log(sheet().textContent.includes('Scanner plusieurs produits') && sheet().textContent.includes('Un bip par produit, vérification à la fin'), 'Menu + : « Scanner plusieurs produits »');
-  await click(sheet().querySelector('[data-action="scan-many"]'), 450);
+  const items = () => $$('.menu .menu-item').map((b) => b.childNodes[1].childNodes[0].textContent.trim());
+  log(items().join(' · ') === 'Scanner · Ticket de caisse · Fruits et légumes · Autre produit' && sheet().textContent.includes('Un ou plusieurs produits'), `Menu + : 4 choix (${items().join(' · ')})`);
+  await click(sheet().querySelector('[data-action="scan"]'), 450);
   log($('.scanner.continuous') && $('.scan-done').hidden && $('.scan-top button').textContent === 'Terminer', 'Scanner ouvert en rafale ; « Vérifier » caché tant que rien n\'est scanné');
   await scan('3228021170015');
   log($('.scanner') && $('.scan-manual input').value === '' && tray()[0] === 'Yaourt nature (Danone) × 1', `Premier bip : le scanner reste ouvert, la ligne apparaît (${tray().join(' | ')})`);
+  log($('.scan-done').textContent === 'Ouvrir sa fiche', 'Un seul produit : « Ouvrir sa fiche »');
   await scan('3228021170015');
   log(tray()[0] === 'Yaourt nature (Danone) × 2' && tray().length === 1, 'Même produit tapé deux fois : × 2');
   await scan('3017620422003');
@@ -84,6 +89,22 @@ test('Scanner plusieurs produits', async () => {
   const history = docs('historique').sort((a, b) => a.clientAt - b.clientAt).at(-1);
   log(history?.scope === 'stock' && history.action === 'ajout' && history.name === '4 produits', 'Historique : « a ajouté 4 produits »');
   log(docs('mouvements').filter((m) => m.type === 'achat').length === 4, 'Statistiques : 4 achats notés');
+
+  console.log('\n— Un seul produit : sa fiche —');
+  await click('[data-action="add-menu"]');
+  await click(sheet().querySelector('[data-action="scan"]'), 450);
+  lookups = 0;
+  await scan('3017620422003');
+  await scan('3017620422003');
+  log(tray().join() === 'Pâte à tartiner (Nutella) × 2' && $('.scan-done').textContent === 'Ouvrir sa fiche', `Même produit deux fois : « Ouvrir sa fiche » (${tray().join()})`);
+  await click('.scan-done', 120);
+  log(!$('.scanner') && sheet().querySelector('[name="name"]').value === 'Pâte à tartiner (Nutella)' && sheet().querySelector('.stepper output').textContent === '2', 'Fiche complète : nom trouvé, 2 unités');
+  log(lookups === 1, `Recherche faite une seule fois (${lookups})`);
+  await click(sheet().querySelector('[data-action="close"]'), 350);
+  await click('[data-action="add-menu"]');
+  await click(sheet().querySelector('[data-action="scan"]'), 450);
+  await click('.scan-top [data-action="close"]', 120);
+  log(!$('.scanner') && !$$('.sheet').length, 'Terminer sans rien scanner : rien ne s\'ouvre');
   console.log('\nErreurs JS :', P.errors.length ? P.errors : 'aucune');
   log(!P.errors.length, 'Aucune erreur JS');
 });

@@ -6,9 +6,16 @@ import { state } from '../../data/store/state.js';
 import { t } from '../../services/i18n/i18n.js';
 import * as S from '../../services/index.js';
 import { showTab } from '../app/router.js';
-import { removals as listRemovals, selected } from './receipt-render.js';
+import { MAX_PHOTOS, removals as listRemovals, selected } from './receipt-render.js';
 
-export async function addPhoto(ctx, file) {
+/** Photos choisies d'un coup (un même long ticket, de haut en bas) : ajoutées dans l'ordre, 10 au plus en tout. */
+export async function addPhotos(ctx, files) {
+  const kept = files.slice(0, Math.max(0, MAX_PHOTOS - ctx.view.photos.length));
+  for (const file of kept) await addPhoto(ctx, file);
+  if (files.length > kept.length) toast(t('ticket.tooMany', { n: MAX_PHOTOS }));
+}
+
+async function addPhoto(ctx, file) {
   const { view } = ctx;
   try {
     const { dataUrl, base64 } = await S.resizeImage(file, 1568, 0.85);

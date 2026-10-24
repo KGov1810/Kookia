@@ -5,7 +5,8 @@ import { showTab } from '../app/router.js';
 import { ui } from '../app/ui-state.js';
 import { openProduceSheet } from '../produce/produce-sheet.js';
 import { openEditor } from '../product-editor/product-editor.js';
-import { openAddMenu, scanThenEdit } from './add-menu.js';
+import { openBatchScan } from '../scanner/batch-scan.js';
+import { openAddMenu } from './add-menu.js';
 import { consume, discard, openPart, quickDate } from './stock-gestures.js';
 import { closeSwipedRow } from './stock-swipe.js';
 import { fridgeView } from './stock-view.js';
@@ -13,7 +14,7 @@ import { fridgeView } from './stock-view.js';
 /** Actions des boutons (attribut data-action). */
 export const stockActions = {
   'add-menu': () => openAddMenu(),
-  'add-scan': () => scanThenEdit(),
+  'add-scan': () => openBatchScan(),
   'add-produce': () => openProduceSheet(),
   'set-location': (el) => {
     ui.location = el.dataset.value;

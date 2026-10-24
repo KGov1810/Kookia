@@ -10,13 +10,27 @@ import * as S from '../../services/index.js';
 
 // Choix du type de date : libellé court (kindShort.*), le libellé complet (kind.*) reste lu par VoiceOver.
 
-/** Ligne « Date limite … date » ; « Photo » lit la date sur l'emballage (produit déjà en stock). */
+/** Date en toutes lettres (« 27 octobre 2026 »), ou « Choisir la date » tant qu'il n'y en a pas. */
+export function dateText(iso) {
+  return S.hasDate(iso) ? S.formatDate(iso, { day: 'numeric', month: 'long', year: 'numeric' }) : t('date.choose');
+}
+
+/**
+ * Un vrai bouton de date (vide, le champ de date d'iOS n'affiche rien) ; le champ, invisible, est posé dessus et
+ * ouvre le calendrier. refreshStatus met le texte à jour.
+ */
+function datePick(name, value, label) {
+  return html`<label class="date-pick${S.hasDate(value) ? '' : ' missing'}">${I.calendar}<span class="date-text">${dateText(value)}</span>
+    <input type="date" name="${name}" value="${value}" aria-label="${label}"></label>`;
+}
+
+/** Ligne « Date limite » ; « Photo » lit la date sur l'emballage (produit déjà en stock). */
 function dateField(ctx, kind) {
   const label = t(`field.${kind}`);
   const photo = !ctx.isNew && ['dlc', 'ddm'].includes(kind)
     ? html`<button class="pill-btn small" data-action="date-photo" aria-label="${t('date.readPackage')}">${I.camera}${t('date.photo')}</button>`
     : '';
-  return html`<div class="field date-field"><span>${label}</span><input type="date" name="expiry" value="${ctx.p.expiry}" aria-label="${label}">${photo}</div>`;
+  return html`<div class="field date-field"><span>${label}</span>${datePick('expiry', ctx.p.expiry, label)}${photo}</div>`;
 }
 
 /** Raccourcis : « +3 j », « +1 sem »… ou en mois pour une date « de préférence ». */
@@ -43,7 +57,7 @@ export function dateSection(ctx) {
   if (kind === 'aucune') {
     fields = html`<p class="hint inset">${t('date.noneHint', { at: S.placeAt(p.location) })}</p>`;
   } else if (kind === 'congele') {
-    fields = html`<label class="field"><span>${t('field.congele')}</span><input type="date" name="frozenAt" value="${p.frozenAt}"></label>
+    fields = html`<div class="field date-field"><span>${t('field.congele')}</span>${datePick('frozenAt', p.frozenAt, t('field.congele'))}</div>
       <p class="hint inset">${t('date.freezerHint', { category: S.categoryName(p.category).toLocaleLowerCase(), n: R.FREEZER_MONTHS[p.category] ?? 6 })}</p>`;
   } else {
     fields = html`${dateField(ctx, kind)}${quickRow(kind)}`;

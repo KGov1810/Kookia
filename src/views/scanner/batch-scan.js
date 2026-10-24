@@ -1,5 +1,5 @@
-// Kookia — Scanner plusieurs produits : un bip par produit, la liste se remplit en bas de l'écran, puis
-// « Vérifier N produits » ouvre la fiche de vérification (comme pour un ticket).
+// Kookia — Scanner (menu +) : un bip par produit, la liste se remplit en bas de l'écran. Un seul produit : « Ouvrir
+// sa fiche » ouvre sa fiche complète ; plusieurs : « Vérifier N produits » ouvre la vérification (comme un ticket).
 
 import { html } from '../../components/html.js';
 import { I } from '../../components/icons.js';
@@ -7,6 +7,7 @@ import * as R from '../../data/reference/index.js';
 import * as store from '../../data/store/index.js';
 import { t } from '../../services/i18n/i18n.js';
 import * as S from '../../services/index.js';
+import { openEditor } from '../product-editor/product-editor.js';
 import { openBatchReview } from './batch-review.js';
 import { openScanner, refreshTray } from './scanner.js';
 
@@ -42,7 +43,12 @@ function trayLine(entry, index) {
     </div>`;
 }
 
-/** Ouvre le scanner en rafale (menu +). */
+/** Un seul produit scanné : sa fiche, avec la recherche déjà faite (ou en cours) et le nombre scanné. */
+function openSingle(entry) {
+  openEditor({ barcode: entry.code, lookup: entry.lookup, draft: { count: entry.count } });
+}
+
+/** Ouvre le scanner (menu +), qui reste ouvert pour enchaîner les produits. */
 export function openBatchScan() {
   const entries = []; // le plus récent en premier
   let review = null;
@@ -65,16 +71,18 @@ export function openBatchScan() {
     const entry = { code: digits, scans: 1, units: 1, count: 1, status: 'loading', name: '', category: 'autre', quantity: '', imageUrl: '', location: 'frigo', selected: false };
     entries.unshift(entry);
     changed();
-    S.lookupBarcode(digits)
+    entry.lookup = S.lookupBarcode(digits); // reprise par la fiche s'il n'y a qu'un produit
+    entry.lookup
       .then((info) => (info ? describe(entry, info) : (entry.status = 'unknown')))
       .catch(() => { entry.status = 'offline'; })
       .finally(changed);
   }, {
     continuous: true,
     tray: () => (entries.length ? html`${entries.map(trayLine)}<p class="tray-hint">${t('multi.trayHint')}</p>` : ''),
-    doneLabel: () => (entries.length ? t('multi.done', { n: entries.length }) : ''),
+    doneLabel: () => (entries.length > 1 ? t('multi.done', { n: entries.length }) : entries.length ? t('multi.openOne') : ''),
     onDone: () => {
-      if (entries.length) review = openBatchReview(entries);
+      if (entries.length === 1) openSingle(entries[0]);
+      else if (entries.length) review = openBatchReview(entries);
     },
     actions: {
       'tray-plus': (el) => {

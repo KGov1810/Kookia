@@ -67,6 +67,7 @@ export const CAPTURE = {
   // Scanner plusieurs produits (rafale)
   'multi.close': ['Terminer', 'Done', 'Listo', 'Concluir'],
   'multi.done': [['Vérifier {n} produit', 'Vérifier {n} produits'], ['Check {n} product', 'Check {n} products'], ['Revisar {n} producto', 'Revisar {n} productos'], ['Conferir {n} produto', 'Conferir {n} produtos']],
+  'multi.openOne': ['Ouvrir sa fiche', 'Open its page', 'Abrir su ficha', 'Abrir a ficha'],
   'multi.searching': ['Recherche du produit…', 'Looking up the product…', 'Buscando el producto…', 'Buscando o produto…'],
   'multi.unknown': ['Code {code} inconnu', 'Unknown code {code}', 'Código {code} desconocido', 'Código {code} desconhecido'],
   'multi.offline': ['Code {code} : pas de réseau', 'Code {code}: no network', 'Código {code}: sin conexión', 'Código {code}: sem rede'],

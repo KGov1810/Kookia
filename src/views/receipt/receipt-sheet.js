@@ -1,10 +1,10 @@
 // Kookia — Ticket de caisse : ouverture de la fiche et boutons.
 
-import { pickImage } from '../../components/platform.js';
+import { pickImages } from '../../components/platform.js';
 import { openSheet } from '../../components/sheet.js';
 import { markUnit } from '../../components/unit-input.js';
 import * as S from '../../services/index.js';
-import { addPhoto, analyze, confirmItems } from './receipt-analysis.js';
+import { addPhotos, analyze, confirmItems } from './receipt-analysis.js';
 import { receiptTotal, renderReceipt } from './receipt-render.js';
 
 /**
@@ -19,7 +19,7 @@ export function openReceipt(firstFilePromise) {
     render: () => renderReceipt(ctx),
     actions: {
       'add-photo': () => {
-        pickImage({ camera: false }).then((file) => file && addPhoto(ctx, file));
+        pickImages().then((files) => addPhotos(ctx, files)); // plusieurs photos d'un coup (photothèque)
       },
       'remove-photo': (el) => {
         ctx.view.photos.splice(Number(el.dataset.index), 1);

@@ -28,6 +28,7 @@ test("Nombre d'unités et quantités des courses", async () => {
   await click('[data-action="add-menu"]'); await click('.menu [data-action="scan"]', 40);
   await type('.scan-manual input', '3270190207924');
   $('.scan-manual').dispatchEvent(new w.Event('submit', { bubbles: true, cancelable: true })); await tick(80);
+  await click('.scan-done', 80);
   log([sheet().querySelector('[name="quantity"]').value, sheet().querySelector('.unit-field [aria-pressed="true"]')?.dataset.unit].join(' ') === '2 kg' && sheet().querySelector('.stepper output').textContent === '1', 'Scan : poids « 2 kg », nombre 1');
   log(sheet().querySelector('[data-action="count-minus"]').disabled, 'Bouton − désactivé à 1');
   await click(sheet().querySelector('[data-action="count-plus"]'));
@@ -53,6 +54,7 @@ test("Nombre d'unités et quantités des courses", async () => {
   await click('[data-action="add-menu"]'); await click('.menu [data-action="scan"]', 40);
   await type('.scan-manual input', '3270190207924');
   $('.scan-manual').dispatchEvent(new w.Event('submit', { bubbles: true, cancelable: true })); await tick(80);
+  await click('.scan-done', 80);
   log(sheet().textContent.includes('Déjà avec les fruits et légumes : Pommes de terre'), 'Même code-barres : « Déjà avec les fruits et légumes » proposé');
   await click(sheet().querySelector('[data-action="add-to-same"]'), 350);
   const merged = docs(P0).filter((d) => d.barcode === '3270190207924');
@@ -63,6 +65,7 @@ test("Nombre d'unités et quantités des courses", async () => {
   await click('[data-action="add-menu"]'); await click('.menu [data-action="scan"]', 40);
   await type('.scan-manual input', '3033490004743');
   $('.scan-manual').dispatchEvent(new w.Event('submit', { bubbles: true, cancelable: true })); await tick(80);
+  await click('.scan-done', 80);
   log(sheet().querySelector('.stepper output').textContent === '4' && [sheet().querySelector('[name="quantity"]').value, sheet().querySelector('.unit-field [aria-pressed="true"]')?.dataset.unit].join(' ') === '125 g', 'Pack « 4 x 125 g » → 4 pots de 125 g');
   await click(sheet().querySelector('[data-action="close"]'), 350);
 

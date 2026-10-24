@@ -65,6 +65,17 @@ test('Dates du frigo : estimation, mémoire, boutons sur la ligne', async () => 
   await click(quick('Jambon blanc', 7), 60);
   log(product('Jambon blanc').expiry === iso(7) && $$('.date-quick').length === 1, 'Jambon : +1 sem ; il ne reste que le poulet à compléter');
 
+  console.log('\n— Date à choisir : un vrai bouton —');
+  const longDate = (d) => new Date(`${d}T12:00`).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+  await click(row('Escalopes de poulet').querySelector('.product-main'), 400);
+  const pick = () => sheet().querySelector('#date-section .date-pick');
+  log(pick()?.classList.contains('missing') && pick().querySelector('.date-text').textContent === 'Choisir la date' && pick().querySelector('[name="expiry"]'), 'Sans date : bouton « Choisir la date » (le champ de date, invisible, est posé dessus)');
+  const field = sheet().querySelector('[name="expiry"]');
+  field.value = iso(2); await type(field, iso(2), 'change');
+  log(!pick().classList.contains('missing') && pick().querySelector('.date-text').textContent === longDate(iso(2)), `Date choisie : écrite en toutes lettres (${pick().querySelector('.date-text').textContent})`);
+  await click(sheet().querySelector('.sheet-head [data-action="close"]'), 400);
+  log(product('Escalopes de poulet').expiry === iso(2), 'Enregistrée à la fermeture');
+
   console.log('\n— Nouveau produit : estimation, puis date de l\'emballage retenue —');
   const manual = async (name) => {
     await click('[data-action="add-menu"]');

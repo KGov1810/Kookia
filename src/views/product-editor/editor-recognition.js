@@ -27,7 +27,7 @@ export async function run(ctx, message, task) {
   }
 }
 
-export function handleBarcode(ctx, code) {
+export function handleBarcode(ctx, code, lookup = null) {
   const { p, view } = ctx;
   const digits = String(code).replace(/\D/g, '');
   if (!digits) return;
@@ -35,7 +35,7 @@ export function handleBarcode(ctx, code) {
     p.barcode = digits;
     let info;
     try {
-      info = await S.lookupBarcode(digits);
+      info = await (lookup ?? S.lookupBarcode(digits));
     } catch {
       throw new Error(t('rec.offline'));
     }
