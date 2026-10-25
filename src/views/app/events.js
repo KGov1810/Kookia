@@ -1,11 +1,9 @@
 // Kookia — Branchement des événements (touchers, saisie, visibilité).
 
 import { setHTML } from '../../components/html.js';
-import { toast } from '../../components/toast.js';
 import * as store from '../../data/store/index.js';
-import * as S from '../../services/index.js';
 import { needsOnboarding } from '../onboarding/onboarding.js';
-import { stockNote } from '../shopping/shopping-view.js';
+import { addFromInput } from '../shopping/shopping-actions.js';
 import { openAddMenu } from '../stock/add-menu.js';
 import { setStatsFilter } from '../stats/stats-actions.js';
 import { fridgeList } from '../stock/stock-list.js';
@@ -51,24 +49,7 @@ export function wireEvents() {
   screen.addEventListener('submit', (event) => {
     if (event.target.id !== 'add-item') return;
     event.preventDefault();
-    const nameInput = document.getElementById('new-item');
-    // Un seul champ : « 2 lait » ou « lait x2 » → 2 × Lait ; un poids reste dans le nom (« Farine 1 kg »).
-    const { name, quantity } = S.parseShoppingInput(nameInput.value);
-    if (!name) {
-      if (nameInput.value.trim()) toast(S.t('shop.needName'));
-      nameInput.focus();
-      return;
-    }
-    const result = store.addShoppingItem(name, quantity, { updateQuantity: true });
-    if (result) {
-      nameInput.value = '';
-      const inStock = stockNote({ name });
-      if (result === 'updated') toast(S.t('shop.qtyUpdated', { name, qty: quantity }));
-      else if (inStock) toast(S.t('shop.addedInStock', { name, left: inStock }));
-    } else {
-      toast(S.t('shop.already'));
-    }
-    nameInput.focus();
+    addFromInput(document.getElementById('new-item'));
   });
 
   document.querySelector('.tabbar').addEventListener('click', (event) => {

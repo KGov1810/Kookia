@@ -121,7 +121,8 @@ test("Régimes, portions, calories, ticket de caisse", async () => {
   w.HTMLCanvasElement.prototype.getContext = () => ({ fillRect() {}, drawImage() {}, set fillStyle(v) {} });
   w.HTMLCanvasElement.prototype.toDataURL = () => 'data:image/jpeg;base64,VElDS0VU';
   globalThis.URL.createObjectURL = () => 'blob:fake'; globalThis.URL.revokeObjectURL = () => {};
-  globalThis.Image = class { set src(v) { this.naturalWidth = 1200; this.naturalHeight = 3000; setTimeout(() => this.onload(), 1); } };
+  let badPhotos = 0; // prochaines photos illisibles
+  globalThis.Image = class { set src(v) { if (badPhotos > 0) { badPhotos--; setTimeout(() => this.onerror?.(new Error('illisible')), 1); return; } this.naturalWidth = 1200; this.naturalHeight = 3000; setTimeout(() => this.onload(), 1); } };
   const origCreate = w.document.createElement.bind(w.document);
   let picked = 1; // photos choisies d'un coup dans la photothèque
   let lastInput = null;
@@ -149,6 +150,10 @@ test("Régimes, portions, calories, ticket de caisse", async () => {
   log(sheet().querySelectorAll('.receipt-photo').length === 10 && !sheet().querySelector('[data-action="add-photo"]') && $('#toast').textContent.includes('10 photos au plus par ticket'), '10 photos au plus : les suivantes sont laissées, le bouton disparaît');
   for (let i = 0; i < 7; i++) await click(sheet().querySelectorAll('[data-action="remove-photo"]')[3]);
   log(sheet().querySelectorAll('.receipt-photo').length === 3 && sheet().querySelector('[data-action="add-photo"]'), 'Photos retirées : on peut en rajouter');
+  badPhotos = 1; picked = 2;
+  await click(sheet().querySelector('[data-action="add-photo"]'), 80);
+  log(sheet().querySelectorAll('.receipt-photo').length === 4 && sheet().querySelector('.note.warn'), 'Une photo illisible puis une bonne : la bonne est ajoutée, l\'erreur reste affichée');
+  await click(sheet().querySelectorAll('[data-action="remove-photo"]')[3]);
   await click(sheet().querySelector('[data-action="analyze"]'), 80);
   log(globalThis.__images === 3, 'Les 3 photos envoyées à Claude');
   const lines = () => [...sheet().querySelectorAll('.receipt-line')];

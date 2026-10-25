@@ -1,13 +1,14 @@
-// Kookia — Actions de l'écran Courses : cocher, supprimer, ranger (un ou tout le panier), vider le panier, ticket.
+// Kookia — Actions de l'écran Courses : ajouter, cocher, supprimer, ranger (un ou tout le panier), vider le panier, ticket.
 
 import { toast } from '../../components/toast.js';
 import * as store from '../../data/store/index.js';
 import { state } from '../../data/store/state.js';
+import { t } from '../../services/i18n/i18n.js';
+import * as S from '../../services/index.js';
 import { openReceipt } from '../receipt/receipt-sheet.js';
 import { openPutAway } from './put-away-sheet.js';
 import { openShoppingItem } from './shopping-item-sheet.js';
-import { moveItemToFridge } from './shopping-view.js';
-import { t } from '../../services/i18n/i18n.js';
+import { moveItemToFridge, stockNote } from './shopping-view.js';
 
 /** Actions des boutons (attribut data-action). */
 export const shoppingActions = {
@@ -28,3 +29,23 @@ export const shoppingActions = {
   'clear-checked': () => store.clearCheckedShopping(),
   'scan-ticket': () => openReceipt()
 };
+
+/** Champ « Ajouter » des Courses. Un seul champ : « 2 lait » ou « lait x2 » → 2 × Lait ; un poids reste dans le nom (« Farine 1 kg »). */
+export function addFromInput(nameInput) {
+  const { name, quantity } = S.parseShoppingInput(nameInput.value);
+  if (!name) {
+    if (nameInput.value.trim()) toast(t('shop.needName'));
+    nameInput.focus();
+    return;
+  }
+  const result = store.addShoppingItem(name, quantity, { updateQuantity: true });
+  if (result) {
+    nameInput.value = '';
+    const inStock = stockNote({ name });
+    if (result === 'updated') toast(t('shop.qtyUpdated', { name, qty: quantity }));
+    else if (inStock) toast(t('shop.addedInStock', { name, left: inStock }));
+  } else {
+    toast(t('shop.already'));
+  }
+  nameInput.focus();
+}

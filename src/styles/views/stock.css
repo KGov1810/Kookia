@@ -1,7 +1,5 @@
 /* Kookia — Écran Stock : lieux, sections, date à compléter. */
 
-.add-hint { margin-top: 0; }
-
 .same-product { display: flex; flex-direction: column; gap: 8px; }
 
 .same-product small { color: var(--muted); font-size: 13px; }

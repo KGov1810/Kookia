@@ -47,6 +47,11 @@ export function openRecipe(id) {
   const baseServings = (recipe) => Math.max(1, recipe.servings || 2);
   const shownServings = (recipe) => servings ?? baseServings(recipe);
   const factorFor = (recipe) => shownServings(recipe) / baseServings(recipe);
+  // Bouton d'une recette encore là (textes dans la langue de l'iPhone) ; rien si elle a été supprimée.
+  const withRecipe = (fn) => () => {
+    const recipe = store.recipeById(id);
+    if (recipe) fn(recipe);
+  };
 
   const sheet = openSheet({
     tall: true,
@@ -54,32 +59,20 @@ export function openRecipe(id) {
     onData: () => sheet.update(),
     actions: {
       favorite: () => store.toggleFavorite(id),
-      'portions-minus': () => {
-        const recipe = findRecipe();
-        if (!recipe) return;
+      'portions-minus': withRecipe((recipe) => {
         servings = Math.max(1, shownServings(recipe) - 1);
         sheet.update();
-      },
-      'portions-plus': () => {
-        const recipe = findRecipe();
-        if (!recipe) return;
+      }),
+      'portions-plus': withRecipe((recipe) => {
         servings = Math.min(24, shownServings(recipe) + 1);
         sheet.update();
-      },
-      'add-missing': () => {
-        const recipe = findRecipe();
-        if (!recipe) return;
+      }),
+      'add-missing': withRecipe((recipe) => {
         const added = store.addMissingIngredients(recipe, factorFor(recipe));
         toast(added ? t('detail.added', { n: added }) : t('detail.already'));
-      },
-      cooked: () => {
-        const recipe = findRecipe();
-        if (recipe) cookRecipe(recipe, { factor: factorFor(recipe), confirm: true });
-      },
-      share: () => {
-        const recipe = findRecipe();
-        if (recipe) shareText(recipeShareText(recipe, shownServings(recipe)), recipe.title);
-      },
+      }),
+      cooked: withRecipe((recipe) => cookRecipe(recipe, { factor: factorFor(recipe), confirm: true })),
+      share: withRecipe((recipe) => shareText(recipeShareText(recipe, shownServings(recipe)), recipe.title)),
       delete: () => {
         if (!window.confirm(t('detail.confirmDelete'))) return;
         store.deleteRecipe(id);
@@ -90,12 +83,8 @@ export function openRecipe(id) {
   // Pas encore dans la langue de cet iPhone : Claude la traduit (bandeau pendant la traduction).
   translateIfNeeded(id, () => sheet.isOpen && sheet.update());
 
-  function findRecipe() {
-    return store.recipeById(id); // textes dans la langue de l'iPhone
-  }
-
   function render() {
-    const recipe = findRecipe();
+    const recipe = store.recipeById(id);
     if (!recipe) {
       return html`
         <header class="sheet-head"><span></span><h2>${t('detail.title')}</h2><button class="link strong" data-action="close">${t('common.close')}</button></header>
@@ -104,6 +93,7 @@ export function openRecipe(id) {
     const availability = store.recipeAvailability(recipe);
     const used = availability.inFridge;
     const missing = availability.missing;
+    const onMenu = planned(recipe);
     const prep = recipe.prepMinutes && recipe.prepMinutes < recipe.totalMinutes
       ? t('detail.prep', { time: S.formatMinutes(recipe.prepMinutes) }) : '';
     return html`
@@ -115,7 +105,7 @@ export function openRecipe(id) {
       <div class="sheet-body">
         ${translationNote(recipe)}
         <div class="recipe-hero">
-          ${planned(recipe) ? html`<p class="planned-on">${I.calendar}${t('detail.onMenu', { when: planned(recipe) })}</p>` : ''}
+          ${onMenu ? html`<p class="planned-on">${I.calendar}${t('detail.onMenu', { when: onMenu })}</p>` : ''}
           <h2>${recipe.title}</h2>
           ${recipe.summary ? html`<p>${recipe.summary}</p>` : ''}
           <div class="facts">
@@ -155,7 +145,7 @@ export function openRecipe(id) {
           </section>` : ''}
 
         <section class="group">
-          ${used.length || planned(recipe) ? html`<button class="row-button" data-action="cooked">${I.check}${t('detail.cooked')}</button>` : ''}
+          ${used.length || onMenu ? html`<button class="row-button" data-action="cooked">${I.check}${t('detail.cooked')}</button>` : ''}
           <button class="row-button" data-action="share">${I.share}${t('detail.share')}</button>
           <button class="row-button danger" data-action="delete">${I.trash}${t('detail.delete')}</button>
         </section>

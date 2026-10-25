@@ -23,6 +23,12 @@ export function openProduceSheet() {
     sheet.update();
   };
 
+  // Bouton d'une ligne déjà choisie (data-name) ; rien si elle a été retirée entre-temps.
+  const withEntry = (fn) => (el) => {
+    const entry = picked.get(el.dataset.name);
+    if (entry) fn(entry, el);
+  };
+
   const sheet = openSheet({
     tall: true,
     render,
@@ -34,24 +40,13 @@ export function openProduceSheet() {
         picked.set(item.name, entry);
         setCount(entry, entry.count + 1);
       },
-      minus: (el) => {
-        const entry = picked.get(el.dataset.name);
-        if (entry) setCount(entry, entry.count - 1);
-      },
-      plus: (el) => {
-        const entry = picked.get(el.dataset.name);
-        if (entry) setCount(entry, entry.count + 1);
-      },
-      'set-line-cold': (el) => {
-        const entry = picked.get(el.dataset.name);
-        if (!entry) return;
+      minus: withEntry((entry) => setCount(entry, entry.count - 1)),
+      plus: withEntry((entry) => setCount(entry, entry.count + 1)),
+      'set-line-cold': withEntry((entry, el) => {
         setEntryCold(entry, el.dataset.value === 'frigo');
         sheet.update();
-      },
-      'set-unit': (el) => {
-        const entry = picked.get(el.dataset.name);
-        if (entry) setEntryUnit(entry, el.dataset.unit, sheet.panel);
-      },
+      }),
+      'set-unit': withEntry((entry, el) => setEntryUnit(entry, el.dataset.unit, sheet.panel)),
       confirm: () => {
         const entries = [...picked.values()];
         if (!entries.length) return;

@@ -10,6 +10,7 @@ import { MAX_PHOTOS, removals as listRemovals, selected } from './receipt-render
 
 /** Photos choisies d'un coup (un même long ticket, de haut en bas) : ajoutées dans l'ordre, 10 au plus en tout. */
 export async function addPhotos(ctx, files) {
+  ctx.view.error = ''; // une photo illisible de ce choix reste signalée, même si les suivantes passent
   const kept = files.slice(0, Math.max(0, MAX_PHOTOS - ctx.view.photos.length));
   for (const file of kept) await addPhoto(ctx, file);
   if (files.length > kept.length) toast(t('ticket.tooMany', { n: MAX_PHOTOS }));
@@ -20,7 +21,6 @@ async function addPhoto(ctx, file) {
   try {
     const { dataUrl, base64 } = await S.resizeImage(file, 1568, 0.85);
     view.photos.push({ preview: dataUrl, base64 });
-    view.error = '';
   } catch (error) {
     view.error = error?.message || t('device.badPhoto');
   }
