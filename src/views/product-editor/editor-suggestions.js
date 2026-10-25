@@ -17,7 +17,7 @@ const asked = new Map();
  * Applique une catégorie proposée (et le lieu retenu ou habituel) sans tout redessiner,
  * pour ne pas perdre le toucher en cours. Renvoie vrai si la date doit être redessinée.
  */
-export function applyCategory(ctx, category, rememberedLocation = null) {
+function applyCategory(ctx, category, rememberedLocation = null) {
   const { p, view } = ctx;
   const panel = ctx.sheet.panel;
   let changed = false;

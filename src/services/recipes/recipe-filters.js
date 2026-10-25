@@ -43,7 +43,7 @@ export function matchesFilters(recipe, filters) {
 }
 
 /** Recettes enregistrées avant l'arrivée du régime et des calories. */
-export function lacksNutrition(recipe) {
+function lacksNutrition(recipe) {
   return !recipe.diet || !(recipe.kcal > 0);
 }
 

@@ -13,7 +13,7 @@ import { NO_FILTERS, ui } from '../app/ui-state.js';
 import { openOriginPicker, originSummary } from './origin-picker.js';
 
 /** Applique un changement de filtres et le mémorise sur cet iPhone (l'envie libre n'est pas gardée). */
-export function applyFilters(patch = {}) {
+function applyFilters(patch = {}) {
   Object.assign(ui.filters, patch);
   ui.recipeNote = null;
   const { wish: _wish, ...kept } = ui.filters;
@@ -77,7 +77,7 @@ function segmented(label, action, options, current) {
 }
 
 /** Fiche « Plus de filtres » : régime, temps, difficulté, origine. Chaque choix s'applique tout de suite. */
-export function openFiltersSheet() {
+function openFiltersSheet() {
   const sheet = openSheet({
     tall: true,
     render: () => {

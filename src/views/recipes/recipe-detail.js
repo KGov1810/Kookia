@@ -91,7 +91,7 @@ export function openRecipe(id) {
   translateIfNeeded(id, () => sheet.isOpen && sheet.update());
 
   function findRecipe() {
-    return S.localRecipe(state.recipes.find((r) => r.id === id)) ?? null; // textes dans la langue de l'iPhone
+    return store.recipeById(id); // textes dans la langue de l'iPhone
   }
 
   function render() {

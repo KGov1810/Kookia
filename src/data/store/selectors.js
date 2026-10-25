@@ -2,6 +2,7 @@
 
 import { splitItemName } from '../../services/quantities/quantities.js';
 import { hasDate } from '../../services/dates/dates.js';
+import { localRecipe } from '../../services/recipes/localize.js';
 import { ageInDays } from '../../services/stock/stock-dates.js';
 import { stockStatus } from '../../services/stock/stock-status.js';
 import { nameMatchScore } from '../../services/text/text.js';
@@ -45,6 +46,11 @@ export function soonProducts() {
 
 export function productById(id) {
   return state.products.find((p) => p.id === id) ?? null;
+}
+
+/** Recette, avec ses textes dans la langue de l'iPhone ; null si elle n'existe plus. */
+export function recipeById(id) {
+  return localRecipe(state.recipes.find((r) => r.id === id)) ?? null;
 }
 
 export function uncheckedCount() {

@@ -6,7 +6,7 @@ import { t } from '../../services/i18n/i18n.js';
 import * as S from '../../services/index.js';
 
 /** Texte sous le champ : origine du prix proposé et total pour plusieurs unités. */
-export function priceHint(ctx) {
+function priceHint(ctx) {
   const { p, view } = ctx;
   const parts = [];
   if (view.priceSuggested) parts.push(t('price.lastPaid'));
@@ -35,7 +35,7 @@ export function onPriceInput(ctx, value) {
   refreshPriceHint(ctx);
 }
 
-export function refreshPriceHint(ctx) {
+function refreshPriceHint(ctx) {
   const element = ctx.sheet?.panel.querySelector('.price-hint');
   if (!element) return;
   const hint = priceHint(ctx);

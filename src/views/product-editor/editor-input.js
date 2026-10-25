@@ -1,9 +1,10 @@
 // Kookia — Fiche produit : saisie dans les champs (nom, quantité, catégorie, dates).
 
 import * as S from '../../services/index.js';
+import { refreshStatus } from './editor-date-section.js';
 import { onPriceInput } from './editor-price.js';
 import { onQuantityInput, refreshQuantityUnit } from './editor-quantity.js';
-import { enterDate, refreshStatus } from './editor-state.js';
+import { enterDate } from './editor-state.js';
 import { suggestFromName } from './editor-suggestions.js';
 
 export function handleEditorInput(ctx, event) {

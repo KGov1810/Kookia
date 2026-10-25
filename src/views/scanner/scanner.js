@@ -18,6 +18,7 @@ const SAME_CODE_MS = 2500; // rafale : le même code relu tant qu'il reste devan
  */
 export function openScanner(onCode, options = {}) {
   const sc = createScannerOverlay(onCode, options);
+  sc.read = (code) => found(sc, code); // code lu par la caméra
   document.body.append(sc.overlay);
   document.body.classList.add('scanning');
   // iOS coupe la caméra quand l'app passe en arrière-plan : on la relance au retour.
@@ -112,7 +113,7 @@ export function finish(sc, code) {
 }
 
 /** Caméra coupée en arrière-plan, relancée au retour. */
-export function onVisibility(sc) {
+function onVisibility(sc) {
   if (sc.finished) return;
   if (document.visibilityState === 'hidden') stopCamera(sc);
   else begin(sc);

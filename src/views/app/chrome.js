@@ -26,7 +26,7 @@ export function updateChrome() {
 }
 
 /** Apparence choisie dans Réglages : forcée en clair ou en sombre, ou comme l'iPhone. */
-export function applyTheme(theme = state.settings.theme) {
+function applyTheme(theme = state.settings.theme) {
   const forced = theme === 'light' || theme === 'dark' ? theme : '';
   const root = document.documentElement;
   if (forced) root.dataset.theme = forced;

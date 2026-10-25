@@ -8,7 +8,7 @@ import { monthKey } from './periods.js';
 
 const KEY_OF_TYPE = { achat: 'spent', consomme: 'consumed', jete: 'wasted' };
 
-export function movementAmount(movement) {
+function movementAmount(movement) {
   return lineAmount(movement.unitPrice, movement.count);
 }
 

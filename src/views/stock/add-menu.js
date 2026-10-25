@@ -10,14 +10,6 @@ import { openEditor } from '../product-editor/product-editor.js';
 import { openReceipt } from '../receipt/receipt-sheet.js';
 import { openBatchScan } from '../scanner/batch-scan.js';
 
-/**
- * Ticket de caisse : la fiche s'ouvre d'abord ; « Photographier le ticket » ouvre ensuite le menu de l'iPhone
- * (photothèque, appareil photo, fichier), placé sous le bouton. Sans clé, la fiche explique quoi faire.
- */
-export function openTicket() {
-  openReceipt(null);
-}
-
 export function openAddMenu() {
   const hasKey = hasClaudeKey();
   const sheet = openSheet({
@@ -34,9 +26,10 @@ export function openAddMenu() {
         sheet.close();
         openBatchScan(); // ouvert dans le geste (caméra acceptée par iOS)
       },
+      // Ticket : la fiche s'ouvre d'abord, « Photographier le ticket » ouvre ensuite le choix des photos.
       ticket: () => {
         sheet.close();
-        openTicket();
+        openReceipt();
       },
       produce: () => {
         sheet.close();

@@ -2,7 +2,7 @@
 
 import { t } from '../i18n/i18n.js';
 
-export class ClaudeError extends Error {}
+class ClaudeError extends Error {}
 
 export async function callTool({ key, model, system, content, tool, maxTokens, timeoutMs }) {
   if (!key) throw new ClaudeError(t('claude.noKey'));

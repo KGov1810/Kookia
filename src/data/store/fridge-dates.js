@@ -5,7 +5,7 @@ import { setDoc, writeBatch } from 'firebase/firestore';
 import { DAY, addDays, hasDate, isoInDays, parseISODate, startOfDay, toISODate } from '../../services/dates/dates.js';
 import { fridgeEstimable } from '../../services/stock/fridge-days.js';
 import { remainingOf } from '../../services/stock/opened.js';
-import { dateKindOf, estimateFreshDays, estimatedByDefault, freezerLimit, keptCold } from '../../services/stock/stock-dates.js';
+import { dateKindOf, estimateFreshDays, freezerLimit, isDateEstimated, keptCold } from '../../services/stock/stock-dates.js';
 import { db } from './connection.js';
 import { reportStatsDenied } from './movements.js';
 import { priceKeys } from './prices.js';
@@ -44,9 +44,7 @@ export function initialDates(product) {
     const today = isoInDays(0);
     return { dateKind: 'congele', frozenAt: today, expiry: freezerLimit(product.category, today) };
   }
-  const estimated = estimatedByDefault(product.category, product.name) || location === 'fruits'
-    || fridgeEstimable(product.category, location);
-  if (estimated) return { dateKind: 'estimee', expiry: isoInDays(estimatedDays({ ...product, location })), frozenAt: '' };
+  if (isDateEstimated({ ...product, location })) return { dateKind: 'estimee', expiry: isoInDays(estimatedDays({ ...product, location })), frozenAt: '' };
   return { dateKind: location === 'placard' ? 'aucune' : 'dlc', expiry: '', frozenAt: '' };
 }
 

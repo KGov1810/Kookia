@@ -11,12 +11,12 @@ import * as S from '../../services/index.js';
 import { cookedPreview } from './recipe-cooking.js';
 
 /** Repas d'aujourd'hui encore à cuisiner (le midi jusqu'à 15 h, puis le soir) : { slot, index, recipe } ou null. */
-export function todayMeal(now = new Date()) {
+function todayMeal(now = new Date()) {
   const plan = state.plan;
   if (!plan) return null;
   const today = S.planDayIndex(plan.start);
   const open = plan.slots
-    .map((slot, index) => ({ slot, index, recipe: S.localRecipe(state.recipes.find((r) => r.id === slot.recipeId)) }))
+    .map((slot, index) => ({ slot, index, recipe: store.recipeById(slot.recipeId) }))
     .filter(({ slot, recipe }) => slot.day === today && !slot.done && !slot.leftovers && recipe);
   if (!open.length) return null;
   const prefer = now.getHours() < 15 ? 'midi' : 'soir';

@@ -1,5 +1,6 @@
 // Kookia — Ticket de caisse : ouverture de la fiche et boutons.
 
+import { lineActions } from '../../components/line-actions.js';
 import { pickImages } from '../../components/platform.js';
 import { openSheet } from '../../components/sheet.js';
 import { markUnit } from '../../components/unit-input.js';
@@ -12,7 +13,7 @@ import { receiptTotal, renderReceipt } from './receipt-render.js';
  * Pas de date sur un ticket : frigo « date à compléter », congélateur et fruits/légumes
  * en date estimée, placard sans date (ancienneté).
  */
-export function openReceipt(firstFilePromise) {
+export function openReceipt() {
   const ctx = { view: { stage: 'photos', photos: [], items: [], busy: '', error: '' }, sheet: null };
   ctx.sheet = openSheet({
     tall: true,
@@ -26,24 +27,10 @@ export function openReceipt(firstFilePromise) {
         ctx.sheet.update();
       },
       analyze: () => analyze(ctx),
-      'toggle-line': (el) => {
-        const item = ctx.view.items[Number(el.dataset.index)];
-        item.selected = !item.selected;
-        ctx.sheet.update();
-      },
+      ...lineActions(() => ctx.view.items, () => ctx.sheet.update()),
       'toggle-list': (el) => {
         const item = ctx.view.items[Number(el.dataset.index)];
         item.removeFromList = !item.removeFromList;
-        ctx.sheet.update();
-      },
-      'line-minus': (el) => {
-        const item = ctx.view.items[Number(el.dataset.index)];
-        item.count = Math.max(1, item.count - 1);
-        ctx.sheet.update();
-      },
-      'line-plus': (el) => {
-        const item = ctx.view.items[Number(el.dataset.index)];
-        item.count = Math.min(99, item.count + 1);
         ctx.sheet.update();
       },
       'back-to-photos': () => {
@@ -83,11 +70,5 @@ export function openReceipt(firstFilePromise) {
       }
     }
   });
-
-  if (firstFilePromise) {
-    firstFilePromise.then((file) => {
-      if (file && ctx.sheet.isOpen) addPhoto(ctx, file);
-    });
-  }
   return ctx.sheet;
 }

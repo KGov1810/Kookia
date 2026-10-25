@@ -48,7 +48,7 @@ export function suggestLinePrice(entry) {
 }
 
 /** Ligne d'aide : poids et prix par pièce, origine du prix, ou saisie illisible. */
-export function lineHint(entry) {
+function lineHint(entry) {
   const parts = [];
   const weight = weightText(entry);
   if (weight === null) parts.push(t('produce.badWeight'));

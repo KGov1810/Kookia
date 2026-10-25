@@ -1,15 +1,10 @@
 // Kookia — Fiche produit : état (produit en cours, lieu, type de date).
 
-import { fmt } from '../../components/html.js';
 import * as R from '../../data/reference/index.js';
 import * as store from '../../data/store/index.js';
-import { state } from '../../data/store/state.js';
-import { t } from '../../services/i18n/i18n.js';
 import * as S from '../../services/index.js';
 import { ui } from '../app/ui-state.js';
-import { dateText } from './editor-date-section.js';
 import { applyKnownPrice } from './editor-price.js';
-import { draftStatus } from './editor-top-actions.js';
 
 /** Prépare le produit affiché et l'état de la fiche (ajout ou modification). */
 export function createEditorContext({ product = null, draft = null, mode = 'manual', filePromise = null, shoppingItemId = null, barcode = '' } = {}) {
@@ -40,15 +35,10 @@ export function createEditorContext({ product = null, draft = null, mode = 'manu
   return ctx;
 }
 
-/** Fruits, légumes, pain, et produits du frigo hors viande, poisson, charcuterie et traiteur : date estimée. */
-export function dateEstimated(p) {
-  return S.estimatedByDefault(p.category, p.name) || S.fridgeEstimable(p.category, p.location);
-}
-
 /** Type de date d'un nouveau produit à ce lieu : estimée si le produit s'y prête, sinon le premier du lieu. */
 function defaultKind(p) {
   const kinds = R.KINDS_BY_LOCATION[p.location] ?? ['dlc'];
-  return p.name && dateEstimated(p) && kinds.includes('estimee') ? 'estimee' : kinds[0];
+  return p.name && S.isDateEstimated(p) && kinds.includes('estimee') ? 'estimee' : kinds[0];
 }
 
 /** Catégorie ou lieu trouvés (nom tapé, code-barres) : la date estimée suit, tant qu'elle n'a pas été saisie. */
@@ -57,8 +47,8 @@ export function followCategoryDate(ctx) {
   if (view.dateTouched) return;
   const kinds = R.KINDS_BY_LOCATION[p.location] ?? [];
   const kind = S.dateKindOf(p);
-  if (dateEstimated(p) && (kind === 'dlc' || kind === 'aucune' || kind === 'estimee') && kinds.includes('estimee')) setKind(ctx, 'estimee');
-  else if (!dateEstimated(p) && kind === 'estimee' && kinds[0] !== 'estimee') setKind(ctx, kinds[0]);
+  if (S.isDateEstimated(p) && (kind === 'dlc' || kind === 'aucune' || kind === 'estimee') && kinds.includes('estimee')) setKind(ctx, 'estimee');
+  else if (!S.isDateEstimated(p) && kind === 'estimee' && kinds[0] !== 'estimee') setKind(ctx, kinds[0]);
 }
 
 /** Date choisie à la main : pour un produit du frigo estimé en attendant, c'est celle de l'emballage (DLC). */
@@ -88,9 +78,9 @@ export function setLocation(ctx, location) {
   p.location = location;
   const kinds = R.KINDS_BY_LOCATION[location];
   const kind = S.dateKindOf(p);
-  if (!kinds.includes(kind) || (kind === 'estimee' && !dateEstimated(p) && kinds[0] !== 'estimee')) {
+  if (!kinds.includes(kind) || (kind === 'estimee' && !S.isDateEstimated(p) && kinds[0] !== 'estimee')) {
     view.dateTouched = false;
-    setKind(ctx, dateEstimated(p) && kinds.includes('estimee') ? 'estimee' : kinds[0]);
+    setKind(ctx, S.isDateEstimated(p) && kinds.includes('estimee') ? 'estimee' : kinds[0]);
   } else {
     followEstimate(ctx, previous);
   }
@@ -124,32 +114,4 @@ export function applyReadDate(ctx, date) {
   view.dateTouched = true;
   if (p.location === 'placard' || p.location === 'congelateur') p.dateKind = 'ddm';
   else if (p.location === 'frigo' && S.dateKindOf(p) === 'estimee') p.dateKind = 'dlc';
-}
-
-/** Mise à jour du statut sans tout redessiner (le sélecteur de date d'iOS resterait sinon bloqué). */
-export function refreshStatus(ctx) {
-  const { p } = ctx;
-  // Date de l'emballage saisie sur un produit estimé : le type affiché devient « DLC ».
-  const kind = S.dateKindOf(p);
-  ctx.sheet.panel.querySelectorAll('#date-section [data-action="set-kind"]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.value === kind)));
-  ctx.sheet.panel.querySelectorAll('#date-section .date-pick').forEach((pick) => {
-    const value = p[pick.querySelector('input').name]; // date limite, ou date de congélation
-    pick.classList.toggle('missing', !S.hasDate(value));
-    pick.querySelector('.date-text').textContent = dateText(value);
-  });
-  const label = ctx.sheet.panel.querySelector('#date-section .date-field > span');
-  if (label && ['dlc', 'ddm', 'estimee'].includes(kind)) {
-    label.textContent = t(`field.${kind}`);
-    ctx.sheet.panel.querySelector('#date-section [name="expiry"]')?.setAttribute('aria-label', t(`field.${kind}`));
-  }
-  const card = ctx.sheet.panel.querySelector('.status-card');
-  if (card) {
-    card.outerHTML = fmt(draftStatus(ctx)); // produit en stock : la carte d'état du haut suit la date
-    return;
-  }
-  const status = ctx.sheet.panel.querySelector('#date-section .expiry-status');
-  if (status) {
-    status.className = `expiry-status ${S.stockStatus(p, state.settings.alertDays)}`;
-    status.textContent = S.stockLabel(p);
-  }
 }

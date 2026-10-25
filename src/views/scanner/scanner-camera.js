@@ -3,7 +3,6 @@
 import { t } from '../../services/i18n/i18n.js';
 import * as S from '../../services/index.js';
 import { say, showActions } from './scanner-overlay.js';
-import { finish, found } from './scanner.js';
 
 /** Coupe la caméra et invalide la session en cours (analyse, surveillance). */
 export function stopCamera(sc) {
@@ -15,7 +14,7 @@ export function stopCamera(sc) {
 }
 
 /** Vrai si la vidéo affiche réellement une image. */
-export function isShowingImage(sc) {
+function isShowingImage(sc) {
   return sc.video.readyState >= 2 && sc.video.videoWidth > 0 && !sc.video.paused;
 }
 
@@ -69,7 +68,7 @@ export async function begin(sc) {
 }
 
 /** Analyse la bande centrale de l'image environ 6 fois par seconde. */
-export async function scanLoop(sc, current) {
+async function scanLoop(sc, current) {
   if (current !== sc.session || sc.finished) return;
   if (isShowingImage(sc)) {
     const w = sc.video.videoWidth;
@@ -89,13 +88,7 @@ export async function scanLoop(sc, current) {
     }
 
     const code = await sc.decode(sc.canvas);
-    if (code && current === sc.session && !sc.finished) {
-      if (!sc.continuous) {
-        finish(sc, code);
-        return;
-      }
-      found(sc, code); // rafale : on continue avec le produit suivant
-    }
+    if (code && current === sc.session && !sc.finished) sc.read(code); // un produit : fermé ; rafale : on continue
   }
   sc.loopTimer = setTimeout(() => scanLoop(sc, current), 160);
 }

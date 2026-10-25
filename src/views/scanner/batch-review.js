@@ -3,6 +3,7 @@
 
 import { html, raw } from '../../components/html.js';
 import { I } from '../../components/icons.js';
+import { lineActions } from '../../components/line-actions.js';
 import { openSheet } from '../../components/sheet.js';
 import { toast } from '../../components/toast.js';
 import * as R from '../../data/reference/index.js';
@@ -80,24 +81,7 @@ export function openBatchReview(entries) {
         <div id="batch-confirm">${confirmButtons()}</div>
       </div>`,
     actions: {
-      'toggle-line': (el) => {
-        const entry = entries[Number(el.dataset.index)];
-        entry.selected = !entry.selected;
-        entry.selectedTouched = true;
-        sheet.update();
-      },
-      'line-minus': (el) => {
-        const entry = entries[Number(el.dataset.index)];
-        entry.count = Math.max(1, entry.count - 1);
-        entry.countTouched = true;
-        sheet.update();
-      },
-      'line-plus': (el) => {
-        const entry = entries[Number(el.dataset.index)];
-        entry.count += 1;
-        entry.countTouched = true;
-        sheet.update();
-      },
+      ...lineActions(() => entries, () => sheet.update()),
       confirm: () => confirm(entries, sheet)
     },
     onInput: (event) => {

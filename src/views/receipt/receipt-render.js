@@ -59,7 +59,7 @@ export function renderReceipt(ctx) {
 /** Photos d'un même ticket, au plus. */
 export const MAX_PHOTOS = 10;
 
-export function photosStep(ctx) {
+function photosStep(ctx) {
   const { view } = ctx;
   const more = view.photos.length < MAX_PHOTOS;
   return html`
@@ -114,7 +114,7 @@ function receiptLine(item, index) {
     </div>`;
 }
 
-export function reviewStep(ctx) {
+function reviewStep(ctx) {
   const { view } = ctx;
   if (!view.items.length) {
     return html`

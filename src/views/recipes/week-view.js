@@ -32,7 +32,7 @@ function cookedButton(recipe) {
 }
 
 function slotRow(plan, slot, index) {
-  const recipe = S.localRecipe(state.recipes.find((r) => r.id === slot.recipeId));
+  const recipe = store.recipeById(slot.recipeId);
   const busy = ui.week.slotBusy === index;
   const change = html`<button class="icon-btn week-change" data-action="week-slot" data-index="${index}" aria-label="${t('week.change', { slot: slotTitle(plan, slot) })}" ${busy ? raw('disabled') : ''}>${busy ? html`<span class="spinner"></span>` : I.refresh}</button>`;
   if (!recipe) {
@@ -54,7 +54,7 @@ function slotRow(plan, slot, index) {
 }
 
 function batchCard(plan) {
-  const titles = plan.batch.recipeIds.map((id) => S.localRecipe(state.recipes.find((r) => r.id === id))?.title.toLowerCase()).filter(Boolean);
+  const titles = plan.batch.recipeIds.map((id) => store.recipeById(id)?.title.toLowerCase()).filter(Boolean);
   return html`
     <button class="week-batch" data-action="week-batch">
       <span class="batch-icon" aria-hidden="true">${I.box}</span>

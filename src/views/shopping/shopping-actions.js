@@ -3,7 +3,7 @@
 import { toast } from '../../components/toast.js';
 import * as store from '../../data/store/index.js';
 import { state } from '../../data/store/state.js';
-import { openTicket } from '../stock/add-menu.js';
+import { openReceipt } from '../receipt/receipt-sheet.js';
 import { openPutAway } from './put-away-sheet.js';
 import { openShoppingItem } from './shopping-item-sheet.js';
 import { moveItemToFridge } from './shopping-view.js';
@@ -26,5 +26,5 @@ export const shoppingActions = {
   restock: (el) => store.addShoppingItem(el.dataset.name), // « À racheter » : un toucher, l'article rejoint la liste
   'put-away-all': () => openPutAway(),
   'clear-checked': () => store.clearCheckedShopping(),
-  'scan-ticket': () => openTicket()
+  'scan-ticket': () => openReceipt()
 };

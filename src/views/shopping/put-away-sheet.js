@@ -3,6 +3,7 @@
 
 import { html, raw } from '../../components/html.js';
 import { I } from '../../components/icons.js';
+import { lineActions } from '../../components/line-actions.js';
 import { openSheet } from '../../components/sheet.js';
 import { toast } from '../../components/toast.js';
 import * as R from '../../data/reference/index.js';
@@ -59,11 +60,7 @@ export function openPutAway() {
         <button class="primary" data-action="confirm" ${kept().length ? '' : raw('disabled')}>${I.check}${t('away.putN', { n: kept().length })}</button>
       </div>`,
     actions: {
-      'toggle-line': (el) => {
-        const item = items[Number(el.dataset.index)];
-        item.selected = !item.selected;
-        sheet.update();
-      },
+      ...lineActions(() => items, () => sheet.update()),
       confirm: () => {
         const chosen = kept();
         if (!chosen.length) return;

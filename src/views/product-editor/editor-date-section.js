@@ -1,12 +1,13 @@
 // Kookia — Fiche produit : la date, dans la liste « Modifier » (type de date selon le lieu, date, raccourcis).
 
-import { html } from '../../components/html.js';
+import { fmt, html } from '../../components/html.js';
 import { I } from '../../components/icons.js';
 import * as R from '../../data/reference/index.js';
 import * as store from '../../data/store/index.js';
 import { state } from '../../data/store/state.js';
 import { t } from '../../services/i18n/i18n.js';
 import * as S from '../../services/index.js';
+import { draftStatus } from './editor-top-actions.js';
 
 // Choix du type de date : libellé court (kindShort.*), le libellé complet (kind.*) reste lu par VoiceOver.
 
@@ -73,4 +74,32 @@ export function dateSection(ctx) {
       ${isNew && kind === 'dlc' && !view.dateTouched ? html`<p class="hint inset default-date">${t('date.defaultHint')}</p>` : ''}
       ${kind === 'estimee' && !view.dateTouched ? html`<p class="hint inset default-date">${estimateHint(p)}</p>` : ''}
     </div>`;
+}
+
+/** Mise à jour du statut sans tout redessiner (le sélecteur de date d'iOS resterait sinon bloqué). */
+export function refreshStatus(ctx) {
+  const { p } = ctx;
+  // Date de l'emballage saisie sur un produit estimé : le type affiché devient « DLC ».
+  const kind = S.dateKindOf(p);
+  ctx.sheet.panel.querySelectorAll('#date-section [data-action="set-kind"]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.value === kind)));
+  ctx.sheet.panel.querySelectorAll('#date-section .date-pick').forEach((pick) => {
+    const value = p[pick.querySelector('input').name]; // date limite, ou date de congélation
+    pick.classList.toggle('missing', !S.hasDate(value));
+    pick.querySelector('.date-text').textContent = dateText(value);
+  });
+  const label = ctx.sheet.panel.querySelector('#date-section .date-field > span');
+  if (label && ['dlc', 'ddm', 'estimee'].includes(kind)) {
+    label.textContent = t(`field.${kind}`);
+    ctx.sheet.panel.querySelector('#date-section [name="expiry"]')?.setAttribute('aria-label', t(`field.${kind}`));
+  }
+  const card = ctx.sheet.panel.querySelector('.status-card');
+  if (card) {
+    card.outerHTML = fmt(draftStatus(ctx)); // produit en stock : la carte d'état du haut suit la date
+    return;
+  }
+  const status = ctx.sheet.panel.querySelector('#date-section .expiry-status');
+  if (status) {
+    status.className = `expiry-status ${S.stockStatus(p, state.settings.alertDays)}`;
+    status.textContent = S.stockLabel(p);
+  }
 }

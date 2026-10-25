@@ -86,7 +86,7 @@ export function renderEditor(ctx) {
 }
 
 /** Produit identique (même code-barres) déjà en stock : proposer d'augmenter son nombre. */
-export function sameProductNote(ctx) {
+function sameProductNote(ctx) {
   const { p, view, isNew } = ctx;
   const same = isNew && view.sameProductId ? store.productById(view.sameProductId) : null;
   if (!same) return '';

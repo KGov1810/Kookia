@@ -28,7 +28,7 @@ function formatNumber(value) {
 }
 
 /** Arrondi lisible selon l'unité : 437 g → 440 g ; 1,5 oignon → 1 ½ oignon. */
-export function formatAmount(value, unit = '') {
+function formatAmount(value, unit = '') {
   const u = unit.trim();
   const key = u.toLowerCase();
   let text;

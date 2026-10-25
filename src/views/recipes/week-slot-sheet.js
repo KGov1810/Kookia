@@ -27,7 +27,7 @@ export function openSlotSheet(index) {
     render: () => {
       const slot = slotNow();
       if (!slot) return html`<header class="sheet-head"><span></span><h2>${t('slot.title')}</h2><button class="link strong" data-action="close">${t('common.close')}</button></header>`;
-      const recipe = S.localRecipe(state.recipes.find((r) => r.id === slot.recipeId));
+      const recipe = store.recipeById(slot.recipeId);
       const plan = state.plan;
       return html`
         <header class="sheet-head">
@@ -84,7 +84,7 @@ export function openBatchSheet() {
     render: () => {
       const plan = S.localPlan(state.plan); // étapes du batch dans la langue de l'iPhone
       const batch = plan?.batch;
-      const recipes = (batch?.recipeIds ?? []).map((id) => S.localRecipe(state.recipes.find((r) => r.id === id))).filter(Boolean);
+      const recipes = (batch?.recipeIds ?? []).map((id) => store.recipeById(id)).filter(Boolean);
       return html`
         <header class="sheet-head"><span></span><h2>${t('batch.title')}</h2><button class="link strong" data-action="close">${t('common.close')}</button></header>
         <div class="sheet-body">

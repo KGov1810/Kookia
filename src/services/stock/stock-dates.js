@@ -43,6 +43,14 @@ export function estimatedByDefault(category, name) {
 }
 
 /**
+ * Date estimée plutôt que celle de l'emballage (règle unique : fiche, ticket, scan, « Tout ranger ») : fruits,
+ * légumes, pain, tout ce qui est rangé avec les fruits et légumes, et le frigo hors viande, poisson, charcuterie et traiteur.
+ */
+export function isDateEstimated({ category = '', name = '', location = 'frigo' }) {
+  return estimatedByDefault(category, name) || location === 'fruits' || fridgeEstimable(category, location);
+}
+
+/**
  * Au frais : au frigo, ou rangé avec les fruits et légumes dans le frigo. Pour « Fruits & légumes », le choix
  * fait dans la fiche (cold), sinon l'habitude du produit (carottes au frigo, bananes hors du frigo).
  */

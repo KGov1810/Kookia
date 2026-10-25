@@ -79,7 +79,7 @@ export function addPlanShopping(indexes) {
   return added;
 }
 
-export function clearWeekPlan() {
+function clearWeekPlan() {
   if (!state.plan || !canWrite()) return;
   state.plan = null;
   write(deleteDoc(planRef()));
