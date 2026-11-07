@@ -92,9 +92,15 @@ export async function searchProductImage(name, brand = '') {
   const wait = nextSearchAt - Date.now();
   nextSearchAt = Math.max(Date.now(), nextSearchAt) + SEARCH_GAP_MS;
   if (wait > 0) await new Promise((resolve) => setTimeout(resolve, wait));
-  const terms = encodeURIComponent(`${brand} ${name}`.trim());
+  // Peu de mots : la recherche exige qu'ils figurent tous dans la fiche (« tendres et fondants » en trop ne trouve rien).
+  const terms = encodeURIComponent(`${brand} ${name.trim().split(/\s+/).slice(0, 3).join(" ")}`.trim());
   const fields = 'product_name,product_name_fr,brands,image_front_small_url';
-  const response = await fetch(`https://world.openfoodfacts.org/cgi/search.pl?search_terms=${terms}&search_simple=1&json=1&page_size=5&fields=${fields}`);
+  const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${terms}&search_simple=1&json=1&page_size=10&fields=${fields}`;
+  // Une connexion refusée par le serveur (trop de recherches) : une seconde tentative après la pause.
+  const response = await fetch(url).catch(async () => {
+    await new Promise((resolve) => setTimeout(resolve, SEARCH_GAP_MS));
+    return fetch(url);
+  });
   if (!response.ok) return '';
   const hit = ((await response.json()).products ?? []).find((p) => {
     if (!p.image_front_small_url) return false;

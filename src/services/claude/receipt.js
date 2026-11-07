@@ -14,7 +14,7 @@ import { languageName } from './languages.js';
  * Tolère un cadre rendu en fractions (0 à 1) et un numéro de photo compté depuis 0.
  */
 function boxOf(v) {
-  if (!v || typeof v !== 'object') return null;
+  if (!v || typeof v !== 'object' || v.visible === false) return null;
   const values = [v.gauche, v.haut, v.droite, v.bas].map(Number);
   const scale = Math.max(...values) <= 1 ? 1 : 100; // 0.05 → 5 %
   const [left, top, right, bottom] = values.map((n) => n / scale);
@@ -25,7 +25,7 @@ function boxOf(v) {
 }
 
 /** Diagnostic temporaire : pourquoi une ligne n'a pas de cadre d'image. */
-const boxWhy = (v, box) => (box ? '' : v ? `Cadre refusé : ${JSON.stringify(v)}` : 'Cadre : Claude n\'en a pas donné');
+const boxWhy = (v, box) => (box ? '' : v?.visible === false ? 'Cadre : Claude voit pas d\'image' : v ? `Cadre refusé : ${JSON.stringify(v)}` : 'Cadre : Claude n\'en a pas donné');
 
 /** Repères des articles de la liste de courses envoyés à Claude : L1, L2… */
 const listRef = (index) => `L${index + 1}`;
@@ -58,7 +58,7 @@ Liste les articles achetés, alimentaires ou non.
 - prix : montant payé pour ce produit en euros, toutes unités regroupées (ex. « 2 x 1,19 » → 2.38). Déduis une remise immédiate imprimée juste sous le produit. Omets ce champ si le prix est illisible.
 - liste : identifiant (${list.length ? `${listRef(0)}, ${listRef(1)}…` : 'aucun'}) de l'article de la liste de courses que cette ligne achète, sinon chaîne vide. Rapproche un article général de sa version précise (« Glace » = « Glace Nutella en pot », « Steak haché » = « Viande hachée 5 % », « Éponges » = « Éponges grattantes x3 »), mais jamais deux produits différents qui partagent un mot (« Pommes » ≠ « Pommes de terre », « Lait » ≠ « Lait de coco », « Oranges » ≠ « Jus d'orange », « Pâtes » ≠ « Pâte feuilletée », « Crème » ≠ « Crème dessert »). Chaque article de la liste correspond au plus à une ligne.
 - marque : marque du produit si elle est écrite (« Findus », « Cassegrain »), sinon chaîne vide.
-- vignette : seulement pour une capture d'écran de commande en ligne qui montre une image à côté du nom de chaque produit. Dans ce cas, donne une vignette pour CHAQUE ligne, sans en oublier (boîtes de conserve, produits en bas de l'écran, images petites ou à moitié coupées comprises) : le numéro de la photo (1 = la première, 1 s'il n'y a qu'une photo) et le cadre de l'image de CE produit, en pourcentage de la largeur et de la hauteur de cette photo (gauche, haut, droite, bas, de 0 à 100). Encadre seulement l'emballage, sans le nom ni le prix. Omets ce champ pour un ticket papier, ou pour une ligne dont l'image n'est vraiment pas visible.
+- vignette : OBLIGATOIRE pour chaque ligne, à remplir ligne par ligne. visible = true si la photo est une capture d'écran de commande en ligne qui montre une image à côté du nom de CE produit (boîtes de conserve, produits en bas d'écran, images petites ou à moitié coupées comprises) ; false pour un ticket papier ou si l'image n'est pas visible. Si visible = true : le numéro de la photo (1 = la première, 1 s'il n'y a qu'une photo) et le cadre de l'image de ce produit, en pourcentage de la largeur et de la hauteur de cette photo (gauche, haut, droite, bas, de 0 à 100). Encadre seulement l'emballage, sans le nom ni le prix.
 - Si les photos se chevauchent, ne compte pas deux fois la même ligne.
 - Si la photo n'est pas un ticket de caisse, renvoie une liste vide.
 
@@ -91,17 +91,18 @@ ${CATEGORY_GUIDE}`
                 marque: { type: 'string', description: 'Marque si elle est écrite, sinon chaîne vide.' },
                 vignette: {
                   type: 'object',
-                  description: 'Capture de commande en ligne seulement : cadre de l\'image du produit, en % de la photo. Omis sinon.',
+                  description: 'Image du produit sur une capture de commande en ligne : cadre en % de la photo. visible = false sinon.',
                   properties: {
+                    visible: { type: 'boolean', description: 'true : une image de CE produit est visible sur la photo.' },
                     photo: { type: 'integer', description: 'Numéro de la photo (1 = la première).' },
                     gauche: { type: 'number' }, haut: { type: 'number' }, droite: { type: 'number' }, bas: { type: 'number' }
                   },
-                  required: ['photo', 'gauche', 'haut', 'droite', 'bas']
+                  required: ['visible']
                 },
                 alimentaire: { type: 'boolean', description: 'true : aliment ou boisson du foyer ; false : hygiène, entretien, animaux, emballages, fleurs…' },
                 liste: { type: 'string', description: 'Identifiant de l\'article de la liste de courses acheté (L1, L2…), sinon chaîne vide.' }
               },
-              required: ['nom', 'texte_ticket', 'categorie', 'nombre', 'contenance', 'lieu', 'alimentaire', 'liste']
+              required: ['nom', 'texte_ticket', 'categorie', 'nombre', 'contenance', 'lieu', 'alimentaire', 'liste', 'vignette']
             }
           }
         },
