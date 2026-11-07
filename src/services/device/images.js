@@ -1,6 +1,7 @@
 // Kookia — Redimensionnement des photos.
 
 import { t } from '../i18n/i18n.js';
+import { fitSquare } from './image-trim.js';
 
 function loadImage(src) {
   return new Promise((resolve, reject) => {
@@ -33,9 +34,9 @@ export async function resizeImage(blob, maxDimension = 1568, quality = 0.8) {
 
 /**
  * Vignettes découpées dans une photo (images des produits d'une capture de commande en ligne) : un cadre en fractions
- * de la photo { left, top, right, bottom }, élargi d'une petite marge → une image JPEG (data URL) d'au plus size px.
+ * de la photo { left, top, right, bottom }, élargi d'une petite marge, puis resserré sur l'emballage → une image JPEG carrée (data URL).
  */
-export async function cropImages(blob, boxes, size = 240) {
+export async function cropImages(blob, boxes, size = 320) {
   const url = URL.createObjectURL(blob);
   try {
     const img = await loadImage(url); // décodée une seule fois pour toutes les vignettes
@@ -56,7 +57,7 @@ export async function cropImages(blob, boxes, size = 240) {
       context.fillStyle = '#fff';
       context.fillRect(0, 0, canvas.width, canvas.height);
       context.drawImage(img, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
-      return canvas.toDataURL('image/jpeg', 0.75);
+      return fitSquare(canvas).toDataURL('image/jpeg', 0.8);
     });
   } finally {
     URL.revokeObjectURL(url);
