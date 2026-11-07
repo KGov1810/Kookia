@@ -98,6 +98,7 @@ export async function searchProductImage(name, brand = '') {
   const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${terms}&search_simple=1&json=1&page_size=10&fields=${fields}`;
   // Une connexion refusée par le serveur (trop de recherches) : une seconde tentative après la pause.
   const response = await fetch(url).catch(async () => {
+    nextSearchAt += SEARCH_GAP_MS; // la recherche suivante attend après cette seconde tentative
     await new Promise((resolve) => setTimeout(resolve, SEARCH_GAP_MS));
     return fetch(url);
   });

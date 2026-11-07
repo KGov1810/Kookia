@@ -77,25 +77,15 @@ export async function analyze(ctx) {
 
 /** Capture de commande en ligne : l'image de chaque produit est découpée sur la photo (une illisible est ignorée). */
 async function cutImages(view) {
-  if (!view.items.some((item) => item.pictured)) return; // ticket papier : rien à découper
-  // Images repérées sur les photos : plus sûres que les coordonnées estimées par Claude, décalées par une remise.
+  // Images repérées sur les photos (captures d'écran seulement) : plus sûres que les coordonnées estimées par Claude,
+  // qu'une ligne de remise décale ; sans image repérée, son cadre reste.
   const blocks = await Promise.all(view.photos.map((photo) => S.findImageBlocks(photo.file).catch(() => [])));
-  S.assignBlocks(view.items, blocks).forEach((box, i) => {
-    view.items[i].box = box;
-    if (box) view.items[i].why = '';
-  });
-  for (const item of view.items) {
-    if (item.box && !view.photos[item.box.photo]) item.why = `Cadre : photo n°${item.box.photo + 1} inexistante`;
-  }
+  S.assignBlocks(view.items, blocks).forEach((box, i) => { view.items[i].box = box; });
   for (const [index, photo] of view.photos.entries()) {
     const items = view.items.filter((item) => item.box?.photo === index);
     if (!items.length) continue;
-    let error = '';
-    const images = await S.cropImages(photo.file, items.map((item) => item.box)).catch((e) => { error = e?.message || String(e); return []; });
-    items.forEach((item, i) => {
-      item.image = images[i] ?? '';
-      item.why = item.image ? '' : `Découpe impossible : ${error || 'image vide'}`;
-    });
+    const images = await S.cropImages(photo.file, items.map((item) => item.box)).catch(() => []);
+    items.forEach((item, i) => { item.image = images[i] ?? ''; });
   }
 }
 
@@ -107,18 +97,10 @@ const MAX_SEARCHES = 10; // Open Food Facts : 10 recherches par minute, au-delà
  */
 async function findImages(ctx) {
   const missing = ctx.view.items.filter((item) => item.food && item.brand && !item.image).slice(0, MAX_SEARCHES);
-  for (const item of ctx.view.items) {
-    if (!item.image && !missing.includes(item)) item.why = `${item.why ?? ''} · OFF : pas de recherche (${item.food ? 'sans marque' : 'non alimentaire'})`;
-  }
   for (const item of missing) {
     if (!ctx.sheet.isOpen || ctx.view.stage !== 'review') return;
-    let error = '';
-    item.imageUrl = await S.searchProductImage(item.name, item.brand).catch((e) => { error = e?.message || String(e); return ''; });
-    item.why = `${item.why ?? ''}${item.imageUrl ? '' : ` · OFF : ${error || 'aucun résultat'}`}`;
-    const index = ctx.view.items.indexOf(item);
-    const thumb = ctx.sheet.panel.querySelector(`[data-thumb="${index}"]`);
-    const why = ctx.sheet.panel.querySelector(`[data-why="${index}"]`);
-    if (why) why.textContent = item.why;
+    item.imageUrl = await S.searchProductImage(item.name, item.brand).catch(() => '');
+    const thumb = ctx.sheet.panel.querySelector(`[data-thumb="${ctx.view.items.indexOf(item)}"]`);
     // Sur place, sans tout redessiner : un nom ou un prix en cours de saisie garde le clavier.
     if (item.imageUrl && thumb) thumb.innerHTML = fmt(html`<img src="${item.imageUrl}" alt="">`);
   }

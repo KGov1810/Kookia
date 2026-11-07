@@ -55,3 +55,10 @@ describe('assignBlocks', () => {
     expect(boxes[1]).toBeNull();
   });
 });
+
+describe('imageBands sur une photo de ticket papier', () => {
+  it("ne repère rien : le fond n'est pas blanc", () => {
+    const pixels = new Uint8ClampedArray(400 * 600 * 4).fill(205); // papier gris sous la lumière de la pièce
+    expect(imageBands(pixels, 400, 600)).toEqual([]);
+  });
+});

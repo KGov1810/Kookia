@@ -59,22 +59,25 @@ export function fitSquare(canvas) {
 /**
  * Images de produits d'une capture de commande en ligne, repérées dans la colonne de gauche : les bandes hautes de
  * pixels non blancs (une ligne de texte, prix ou remise, est trop basse pour compter). → [{ left, top, right, bottom }]
- * en fractions, de haut en bas.
+ * en fractions, de haut en bas ; [] pour une photo qui n'est pas une capture d'écran (ticket papier).
  */
 export function imageBands(pixels, width, height) {
   const [x0, x1] = [Math.floor(width * 0.02), Math.ceil(width * 0.27)];
   const gap = width * 0.02;
   const runs = [];
+  let blank = 0;
   for (let y = 0; y < height; y++) {
     let ink = 0;
     for (let x = x0; x < x1; x++) {
       const i = (y * width + x) * 4;
       if (pixels[i] < INK || pixels[i + 1] < INK || pixels[i + 2] < INK) ink++;
     }
-    if (ink < Math.max(2, width * 0.005)) continue;
+    if (ink < Math.max(2, width * 0.005)) { blank++; continue; }
     const last = runs.at(-1);
     if (last && y - last.end <= gap) last.end = y; else runs.push({ start: y, end: y });
   }
+  // Une capture d'écran a un fond blanc entre les produits ; une photo de ticket papier, non : rien n'y est repéré.
+  if (blank < height * 0.4) return [];
   return runs.filter((r) => r.end - r.start >= width * 0.08)
     .map((r) => ({ left: x0 / width, top: r.start / height, right: x1 / width, bottom: (r.end + 1) / height }));
 }
