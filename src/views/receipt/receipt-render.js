@@ -86,7 +86,7 @@ function receiptLine(item, index) {
     <div class="receipt-item ${item.food ? '' : 'nonfood'}">
       <div class="receipt-line ${item.selected ? '' : 'off'}">
         <button class="pick-box" role="checkbox" aria-checked="${String(item.selected)}" data-action="toggle-line" data-index="${index}" aria-label="${t('ticket.lineAdd', { name: item.name })}"><span class="box">${I.check}</span></button>
-        <span class="thumb">${item.food ? R.category(item.category).emoji : '🧴'}</span>
+        <span class="thumb" data-thumb="${index}">${item.image || item.imageUrl ? html`<img src="${item.image || item.imageUrl}" alt="">` : item.food ? R.category(item.category).emoji : '🧴'}</span>
         <div class="receipt-fields">
           <input data-field="name" data-index="${index}" value="${item.name}" aria-label="${t('editor.productName')}" autocomplete="off">
           <small>${item.receiptText ? `« ${item.receiptText} »` : ''}</small>

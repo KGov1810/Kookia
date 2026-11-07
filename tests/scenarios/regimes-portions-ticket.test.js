@@ -29,16 +29,23 @@ test("Régimes, portions, calories, ticket de caisse", async () => {
 
   // Faux Claude : recettes ou ticket selon l'outil demandé
   let lastPrompt = '';
+  const searches = [];
   globalThis.fetch = async (url, opts) => {
+    if (String(url).includes('openfoodfacts.org/cgi/search.pl')) { // photo cherchée par nom et marque
+      searches.push(decodeURIComponent(String(url).split('search_terms=')[1].split('&')[0]));
+      return { ok: true, status: 200, json: async () => ({ products: [
+        { product_name_fr: 'Farine de blé T55', brands: 'Leclerc', image_front_small_url: 'https://images.openfoodfacts.org/leclerc.jpg' },
+        { product_name_fr: 'Farine de blé T45', brands: 'Francine', image_front_small_url: 'https://images.openfoodfacts.org/francine.jpg' }] }) };
+    }
     const body = JSON.parse(opts.body);
     const tool = body.tools[0].name;
     lastPrompt = body.messages[0].content.find((c) => c.type === 'text')?.text ?? '';
     globalThis.__images = body.messages[0].content.filter((c) => c.type === 'image').length;
     const input = tool === 'lister_produits'
       ? { produits: [
-          { nom: 'Lait demi-écrémé', texte_ticket: 'LAIT 1/2 ECR 1L', categorie: 'laitier', nombre: 2, contenance: '1 L' },
-          { nom: 'Farine de blé', texte_ticket: 'FARINE T45 1KG', categorie: 'epicerie', nombre: 1, contenance: '1 kg' },
-          { nom: 'Tomates', texte_ticket: 'TOMATE GRAPPE', categorie: 'fruits_legumes', nombre: 1, contenance: '' }] }
+          { nom: 'Lait demi-écrémé', texte_ticket: 'LAIT 1/2 ECR 1L', categorie: 'laitier', nombre: 2, contenance: '1 L', marque: 'Lactel', vignette: { photo: 1, gauche: 4, haut: 10, droite: 24, bas: 18 } },
+          { nom: 'Tomates', texte_ticket: 'TOMATE GRAPPE', categorie: 'fruits_legumes', nombre: 1, contenance: '' },
+          { nom: 'Farine de blé', texte_ticket: 'FARINE T45 1KG', categorie: 'epicerie', nombre: 1, contenance: '1 kg', marque: 'Francine', vignette: { photo: 9, gauche: 4, haut: 10, droite: 24, bas: 18 } }] }
       : { recettes: [
           { titre: 'Gratin de courgettes', resume: 'Fondant.', difficulte: 'facile', temps_total_minutes: 35, temps_preparation_minutes: 10, portions: 3, regime: 'vegetarien', calories_par_portion: 420, batch_cooking: false, conservation_jours: 2, conseils_conservation: '',
             ingredients: [
@@ -158,6 +165,11 @@ test("Régimes, portions, calories, ticket de caisse", async () => {
   log(globalThis.__images === 3, 'Les 3 photos envoyées à Claude');
   const lines = () => [...sheet().querySelectorAll('.receipt-line')];
   log(lines().length === 3, '3 produits reconnus');
+  const thumbOf = (name) => lines().find((l) => l.querySelector('input').value === name).querySelector('.thumb img')?.getAttribute('src') ?? '';
+  log(thumbOf('Lait demi-écrémé').startsWith('data:image/jpeg'), `Capture de commande : image du lait découpée sur la photo (${thumbOf('Lait demi-écrémé').slice(0, 20)})`);
+  await tick(60);
+  log(thumbOf('Farine de blé') === 'https://images.openfoodfacts.org/francine.jpg' && searches.join() === 'Francine Farine de blé', `Cadre sur une photo qui n'existe pas : photo cherchée par nom et marque, la Farine de blé de la bonne marque (${searches.join()})`);
+  log(!thumbOf('Tomates') && lines().find((l) => l.querySelector('input').value === 'Tomates').querySelector('.thumb').textContent.trim(), 'Tomates (sans marque) : pas de recherche, l\'emoji reste');
   const laitLine = lines().find((l) => l.querySelector('input').value === 'Lait demi-écrémé');
   const itemOf = (line) => line.closest('.receipt-item');
   log(laitLine.textContent.includes('« LAIT 1/2 ECR 1L »') && itemOf(laitLine).querySelector('.list-toggle')?.textContent.includes('Retirer « Lait » de la liste') && laitLine.querySelector('output').textContent === '2', 'Lait : libellé du ticket, « Retirer « Lait » de la liste », nombre 2');
@@ -169,6 +181,7 @@ test("Régimes, portions, calories, ticket de caisse", async () => {
   await type(lines().find((l) => l.querySelector('input').value === 'Lait demi-écrémé').querySelector('input'), 'Lait');
   await click(sheet().querySelector('.sheet-body [data-action="confirm"]'), 350);
   const added = docs(P0).filter((d) => ['Lait', 'Farine de blé'].includes(d.name));
+  log(added.find((d) => d.name === 'Lait')?.image.startsWith('data:image/jpeg') && added.find((d) => d.name === 'Farine de blé')?.imageUrl === 'https://images.openfoodfacts.org/francine.jpg', 'Images enregistrées avec les produits');
   log(added.length === 2 && added.every((d) => d.location === 'frigo' && d.dateKind === 'estimee' && d.expiry === iso(5)), 'Lait et farine (rangés au frigo) : date estimée ≈ 5 jours, plus « à compléter »');
   log(added.find((d) => d.name === 'Lait').count === 2 && added.find((d) => d.name === 'Lait').quantity === '1 L' && added.find((d) => d.name === 'Farine de blé').count === 2, 'Nombres et contenances repris (Lait 2 × 1 L, Farine × 2)');
   log(!docs(C0).some((d) => ['Lait', 'Farine'].includes(d.name)) && docs(C0).some((d) => d.name === 'Sel'), 'Lait et Farine retirés des courses, Sel conservé');

@@ -1,5 +1,6 @@
 // Kookia — Ticket de caisse : photos, lecture par Claude et ajout au stock.
 
+import { fmt, html } from '../../components/html.js';
 import { toast } from '../../components/toast.js';
 import * as store from '../../data/store/index.js';
 import { state } from '../../data/store/state.js';
@@ -20,7 +21,7 @@ async function addPhoto(ctx, file) {
   const { view } = ctx;
   try {
     const { dataUrl, base64 } = await S.resizeImage(file, 1568, 0.85);
-    view.photos.push({ preview: dataUrl, base64 });
+    view.photos.push({ preview: dataUrl, base64, file }); // file : l'original, pour découper les images nettes
   } catch (error) {
     view.error = error?.message || t('device.badPhoto');
   }
@@ -63,12 +64,41 @@ export async function analyze(ctx) {
         shoppingId: match?.id ?? null, shoppingName: match?.name ?? '', removeFromList: Boolean(match)
       };
     });
+    await cutImages(view);
     view.stage = 'review';
+    findImages(ctx); // ticket papier : photos cherchées sur Open Food Facts pendant la vérification
   } catch (error) {
     view.error = error?.message || String(error);
   } finally {
     view.busy = '';
     if (ctx.sheet.isOpen) ctx.sheet.update();
+  }
+}
+
+/** Capture de commande en ligne : l'image de chaque produit est découpée sur la photo (une illisible est ignorée). */
+async function cutImages(view) {
+  for (const [index, photo] of view.photos.entries()) {
+    const items = view.items.filter((item) => item.box?.photo === index);
+    if (!items.length) continue;
+    const images = await S.cropImages(photo.file, items.map((item) => item.box)).catch(() => []);
+    items.forEach((item, i) => { item.image = images[i] ?? ''; });
+  }
+}
+
+const MAX_SEARCHES = 10; // Open Food Facts : 10 recherches par minute, au-delà les lignes gardent leur emoji
+
+/**
+ * Aliments de marque sans image : leur photo cherchée par nom et marque, une à une ; la ligne la montre dès qu'elle
+ * arrive. Sans marque (« Tomates »), pas de recherche : le risque de montrer un autre produit est trop grand.
+ */
+async function findImages(ctx) {
+  const missing = ctx.view.items.filter((item) => item.food && item.brand && !item.image).slice(0, MAX_SEARCHES);
+  for (const item of missing) {
+    if (!ctx.sheet.isOpen || ctx.view.stage !== 'review') return;
+    item.imageUrl = await S.searchProductImage(item.name, item.brand).catch(() => '');
+    const thumb = ctx.sheet.panel.querySelector(`[data-thumb="${ctx.view.items.indexOf(item)}"]`);
+    // Sur place, sans tout redessiner : un nom ou un prix en cours de saisie garde le clavier.
+    if (item.imageUrl && thumb) thumb.innerHTML = fmt(html`<img src="${item.imageUrl}" alt="">`);
   }
 }
 

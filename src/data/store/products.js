@@ -121,7 +121,7 @@ export function addReceiptProducts(items, shoppingIdsToRemove = [], { source = '
       barcode: item.barcode || '', // scan en rafale : code-barres et photo d'Open Food Facts
       addedBy: state.settings.userName,
       createdAt: now + index,
-      image: '',
+      image: item.image || '', // ticket : image découpée sur la capture de commande en ligne
       imageUrl: item.imageUrl || '',
       unitPrice: cleanPrice(item.unitPrice)
     });

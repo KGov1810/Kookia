@@ -31,6 +31,38 @@ export async function resizeImage(blob, maxDimension = 1568, quality = 0.8) {
   }
 }
 
+/**
+ * Vignettes découpées dans une photo (images des produits d'une capture de commande en ligne) : un cadre en fractions
+ * de la photo { left, top, right, bottom }, élargi d'une petite marge → une image JPEG (data URL) d'au plus size px.
+ */
+export async function cropImages(blob, boxes, size = 240) {
+  const url = URL.createObjectURL(blob);
+  try {
+    const img = await loadImage(url); // décodée une seule fois pour toutes les vignettes
+    const w = img.naturalWidth;
+    const h = img.naturalHeight;
+    return boxes.map((box) => {
+      const padX = (box.right - box.left) * 0.06;
+      const padY = (box.bottom - box.top) * 0.06;
+      const sx = Math.max(0, box.left - padX) * w;
+      const sy = Math.max(0, box.top - padY) * h;
+      const sw = Math.min(w, (box.right + padX) * w) - sx;
+      const sh = Math.min(h, (box.bottom + padY) * h) - sy;
+      const scale = Math.min(1, size / Math.max(sw, sh));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(sw * scale));
+      canvas.height = Math.max(1, Math.round(sh * scale));
+      const context = canvas.getContext('2d');
+      context.fillStyle = '#fff';
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      context.drawImage(img, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
+      return canvas.toDataURL('image/jpeg', 0.75);
+    });
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
 /** Vignette légère (≈ 30 Ko) stockée avec le produit. */
 export async function thumbnail(blob) {
   return (await resizeImage(blob, 400, 0.6)).dataUrl;

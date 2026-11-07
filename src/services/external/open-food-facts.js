@@ -2,6 +2,7 @@
 
 import { t } from '../i18n/i18n.js';
 import { guessCategory } from '../stock/categorization.js';
+import { nameTokens, simplify } from '../text/text.js';
 
 // Étiquettes Open Food Facts (« en:dry-pastas ») → catégorie. On teste la fin de l'étiquette
 // (mot entier), de la plus précise à la plus générale.
@@ -75,4 +76,31 @@ export async function lookupBarcode(code) {
     category: categoryFromTags(product.categories_tags ?? []) ?? guessCategory(baseName) ?? ((product.categories_tags ?? []).length ? 'epicerie' : 'autre'),
     imageUrl: product.image_front_small_url ?? ''
   };
+}
+
+// Recherche par nom : 10 par minute au plus chez Open Food Facts (par appareil) ; les recherches s'espacent d'autant.
+const SEARCH_GAP_MS = 6500;
+let nextSearchAt = 0;
+
+/**
+ * Photo d'un produit trouvé par son nom (et sa marque) : celle du premier résultat qui lui ressemble (au moins deux
+ * mots du nom en commun, et la même marque si elle est connue), sinon ''. Sert aux tickets papier, sans image.
+ */
+export async function searchProductImage(name, brand = '') {
+  const wanted = nameTokens(name);
+  if (!wanted.length) return '';
+  const wait = nextSearchAt - Date.now();
+  nextSearchAt = Math.max(Date.now(), nextSearchAt) + SEARCH_GAP_MS;
+  if (wait > 0) await new Promise((resolve) => setTimeout(resolve, wait));
+  const terms = encodeURIComponent(`${brand} ${name}`.trim());
+  const fields = 'product_name,product_name_fr,brands,image_front_small_url';
+  const response = await fetch(`https://world.openfoodfacts.org/cgi/search.pl?search_terms=${terms}&search_simple=1&json=1&page_size=5&fields=${fields}`);
+  if (!response.ok) return '';
+  const hit = ((await response.json()).products ?? []).find((p) => {
+    if (!p.image_front_small_url) return false;
+    const words = new Set(nameTokens(`${p.product_name_fr ?? ''} ${p.product_name ?? ''}`));
+    const shared = wanted.filter((w) => words.has(w)).length;
+    return shared >= Math.min(2, wanted.length) && (!brand || simplify(p.brands ?? '').includes(simplify(brand)));
+  });
+  return hit?.image_front_small_url ?? '';
 }

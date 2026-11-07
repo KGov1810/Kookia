@@ -9,13 +9,25 @@ import { CATEGORY_GUIDE } from './category-guide.js';
 import { callTool } from './client.js';
 import { languageName } from './languages.js';
 
+/** Cadre d'une vignette (en %) → { photo, left, top, right, bottom } en fractions, ou null s'il est incohérent. */
+function boxOf(v) {
+  if (!v || typeof v !== 'object') return null;
+  const [left, top, right, bottom] = [v.gauche, v.haut, v.droite, v.bas].map((n) => Number(n) / 100);
+  const photo = Math.round(Number(v.photo)) - 1;
+  const ok = [left, top, right, bottom].every((n) => n >= 0 && n <= 1)
+    && right - left >= 0.02 && bottom - top >= 0.02; // une photo qui n'existe pas : ignorée au découpage
+  return ok ? { photo, left, top, right, bottom } : null;
+}
+
 /** Repères des articles de la liste de courses envoyés à Claude : L1, L2… */
 const listRef = (index) => `L${index + 1}`;
 
 /**
  * Lit un ticket de caisse (une ou plusieurs photos, de haut en bas).
  * shopping : la liste de courses [{ id, name }], que Claude rapproche des lignes du ticket.
- * Renvoie [{ name, receiptText, category, count, quantity, location, price, food, shoppingId }] :
+ * Renvoie [{ name, receiptText, brand, box, category, count, quantity, location, price, food, shoppingId }] :
+ * box = cadre de l'image du produit sur une capture de commande en ligne { photo, left, top, right, bottom }
+ * (photo : son rang, cadre en fractions de la photo), ou null (ticket papier) ;
  * food = false pour un article non alimentaire (hygiène, entretien, animaux…) ;
  * shoppingId = article de la liste acheté (null : aucun ; undefined : Claude n'a pas répondu, rapprochement local).
  * price : montant payé pour la ligne (toutes unités), ou null s'il est illisible.
@@ -37,6 +49,8 @@ Liste les articles achetés, alimentaires ou non.
 - lieu : où ranger le produit à la maison : « frigo » (produits frais), « congelateur » (surgelés, glaces), « placard » (épicerie, conserves, boissons, produits secs, pain), « fruits » (fruits et légumes qui se gardent hors du frigo : bananes, pommes de terre, oignons…).
 - prix : montant payé pour ce produit en euros, toutes unités regroupées (ex. « 2 x 1,19 » → 2.38). Déduis une remise immédiate imprimée juste sous le produit. Omets ce champ si le prix est illisible.
 - liste : identifiant (${list.length ? `${listRef(0)}, ${listRef(1)}…` : 'aucun'}) de l'article de la liste de courses que cette ligne achète, sinon chaîne vide. Rapproche un article général de sa version précise (« Glace » = « Glace Nutella en pot », « Steak haché » = « Viande hachée 5 % », « Éponges » = « Éponges grattantes x3 »), mais jamais deux produits différents qui partagent un mot (« Pommes » ≠ « Pommes de terre », « Lait » ≠ « Lait de coco », « Oranges » ≠ « Jus d'orange », « Pâtes » ≠ « Pâte feuilletée », « Crème » ≠ « Crème dessert »). Chaque article de la liste correspond au plus à une ligne.
+- marque : marque du produit si elle est écrite (« Findus », « Cassegrain »), sinon chaîne vide.
+- vignette : seulement pour une capture d'écran de commande en ligne qui montre l'image de chaque produit à côté de son nom : le numéro de la photo (1 = la première) et le cadre de l'image de CE produit, en pourcentage de la largeur et de la hauteur de cette photo (gauche, haut, droite, bas, de 0 à 100). Encadre seulement l'emballage, sans le nom ni le prix. Omets ce champ pour un ticket papier ou si l'image n'est pas visible.
 - Si les photos se chevauchent, ne compte pas deux fois la même ligne.
 - Si la photo n'est pas un ticket de caisse, renvoie une liste vide.
 
@@ -66,6 +80,16 @@ ${CATEGORY_GUIDE}`
                 contenance: { type: 'string', description: 'Poids ou volume d\'une unité, sinon chaîne vide.' },
                 lieu: { type: 'string', enum: ['frigo', 'congelateur', 'placard', 'fruits'] },
                 prix: { type: 'number', description: 'Montant payé pour la ligne, en euros (toutes unités). Omis si illisible.' },
+                marque: { type: 'string', description: 'Marque si elle est écrite, sinon chaîne vide.' },
+                vignette: {
+                  type: 'object',
+                  description: 'Capture de commande en ligne seulement : cadre de l\'image du produit, en % de la photo. Omis sinon.',
+                  properties: {
+                    photo: { type: 'integer', description: 'Numéro de la photo (1 = la première).' },
+                    gauche: { type: 'number' }, haut: { type: 'number' }, droite: { type: 'number' }, bas: { type: 'number' }
+                  },
+                  required: ['photo', 'gauche', 'haut', 'droite', 'bas']
+                },
                 alimentaire: { type: 'boolean', description: 'true : aliment ou boisson du foyer ; false : hygiène, entretien, animaux, emballages, fleurs…' },
                 liste: { type: 'string', description: 'Identifiant de l\'article de la liste de courses acheté (L1, L2…), sinon chaîne vide.' }
               },
@@ -88,6 +112,8 @@ ${CATEGORY_GUIDE}`
     .map((item) => ({
       name: item.nom.trim(),
       receiptText: (item.texte_ticket ?? '').trim(),
+      brand: typeof item.marque === 'string' ? item.marque.trim() : '',
+      box: boxOf(item.vignette),
       category: categoryIds.includes(item.categorie) ? item.categorie : normalizeCategory(item.categorie, item.nom),
       count: Math.min(99, Math.max(1, Math.round(Number(item.nombre) || 1))),
       quantity: (item.contenance ?? '').trim(),
