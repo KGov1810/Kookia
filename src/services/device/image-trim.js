@@ -55,3 +55,57 @@ export function fitSquare(canvas) {
     return canvas;
   }
 }
+
+/**
+ * Images de produits d'une capture de commande en ligne, repérées dans la colonne de gauche : les bandes hautes de
+ * pixels non blancs (une ligne de texte, prix ou remise, est trop basse pour compter). → [{ left, top, right, bottom }]
+ * en fractions, de haut en bas.
+ */
+export function imageBands(pixels, width, height) {
+  const [x0, x1] = [Math.floor(width * 0.02), Math.ceil(width * 0.27)];
+  const gap = width * 0.02;
+  const runs = [];
+  for (let y = 0; y < height; y++) {
+    let ink = 0;
+    for (let x = x0; x < x1; x++) {
+      const i = (y * width + x) * 4;
+      if (pixels[i] < INK || pixels[i + 1] < INK || pixels[i + 2] < INK) ink++;
+    }
+    if (ink < Math.max(2, width * 0.005)) continue;
+    const last = runs.at(-1);
+    if (last && y - last.end <= gap) last.end = y; else runs.push({ start: y, end: y });
+  }
+  return runs.filter((r) => r.end - r.start >= width * 0.08)
+    .map((r) => ({ left: x0 / width, top: r.start / height, right: x1 / width, bottom: (r.end + 1) / height }));
+}
+
+const middle = (box) => (box.top + box.bottom) / 2;
+
+/**
+ * Cadre de chaque article parmi les images repérées sur les photos (blocks[photo] = images de haut en bas).
+ * Autant d'images que d'articles : dans l'ordre (le ticket se lit de haut en bas, photo après photo). Sinon, photo par
+ * photo : dans l'ordre si les nombres concordent, au plus proche du cadre estimé par Claude sinon. Sans image
+ * repérée sur une photo, le cadre de Claude reste.
+ */
+export function assignBlocks(items, blocks) {
+  const all = blocks.flatMap((list, photo) => list.map((box) => ({ ...box, photo })));
+  if (all.length && all.length === items.length) return all;
+  const result = items.map((item) => item.box ?? null);
+  blocks.forEach((list, photo) => {
+    if (!list.length) return;
+    const mine = items.flatMap((item, i) => (item.box?.photo === photo ? [i] : []));
+    if (mine.length === list.length) {
+      mine.forEach((i, k) => { result[i] = { ...list[k], photo }; });
+      return;
+    }
+    const free = new Set(list.keys());
+    for (const i of mine) {
+      const y = middle(items[i].box);
+      const k = [...free].sort((a, b) => Math.abs(middle(list[a]) - y) - Math.abs(middle(list[b]) - y))[0];
+      if (k === undefined) { result[i] = null; continue; }
+      free.delete(k);
+      result[i] = { ...list[k], photo };
+    }
+  });
+  return result;
+}

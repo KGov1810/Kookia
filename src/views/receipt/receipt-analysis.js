@@ -77,6 +77,13 @@ export async function analyze(ctx) {
 
 /** Capture de commande en ligne : l'image de chaque produit est découpée sur la photo (une illisible est ignorée). */
 async function cutImages(view) {
+  if (!view.items.some((item) => item.pictured)) return; // ticket papier : rien à découper
+  // Images repérées sur les photos : plus sûres que les coordonnées estimées par Claude, décalées par une remise.
+  const blocks = await Promise.all(view.photos.map((photo) => S.findImageBlocks(photo.file).catch(() => [])));
+  S.assignBlocks(view.items, blocks).forEach((box, i) => {
+    view.items[i].box = box;
+    if (box) view.items[i].why = '';
+  });
   for (const item of view.items) {
     if (item.box && !view.photos[item.box.photo]) item.why = `Cadre : photo n°${item.box.photo + 1} inexistante`;
   }

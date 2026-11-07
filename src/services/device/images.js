@@ -1,7 +1,7 @@
 // Kookia — Redimensionnement des photos.
 
 import { t } from '../i18n/i18n.js';
-import { fitSquare } from './image-trim.js';
+import { fitSquare, imageBands } from './image-trim.js';
 
 function loadImage(src) {
   return new Promise((resolve, reject) => {
@@ -67,4 +67,24 @@ export async function cropImages(blob, boxes, size = 320) {
 /** Vignette légère (≈ 30 Ko) stockée avec le produit. */
 export async function thumbnail(blob) {
   return (await resizeImage(blob, 400, 0.6)).dataUrl;
+}
+
+/** Images de produits repérées sur une capture de commande en ligne (analysée en petit : 400 px de large). */
+export async function findImageBlocks(blob) {
+  const url = URL.createObjectURL(blob);
+  try {
+    const img = await loadImage(url);
+    const width = 400;
+    const height = Math.max(1, Math.round(img.naturalHeight * (width / img.naturalWidth)));
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const context = canvas.getContext('2d');
+    context.fillStyle = '#fff';
+    context.fillRect(0, 0, width, height);
+    context.drawImage(img, 0, 0, width, height);
+    return imageBands(context.getImageData(0, 0, width, height).data, width, height);
+  } finally {
+    URL.revokeObjectURL(url);
+  }
 }

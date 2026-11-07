@@ -15,6 +15,7 @@ export * from './dates/dates.js';
 export * from './dates/expiry-parser.js';
 export * from './device/barcode.js';
 export * from './device/camera.js';
+export * from './device/image-trim.js';
 export * from './device/images.js';
 export * from './device/ocr.js';
 export * from './device/script-loader.js';

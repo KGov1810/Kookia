@@ -124,6 +124,7 @@ ${CATEGORY_GUIDE}`
       brand: typeof item.marque === 'string' ? item.marque.trim() : '',
       box: boxOf(item.vignette),
       why: boxWhy(item.vignette, boxOf(item.vignette)),
+      pictured: item.vignette?.visible === true || Boolean(boxOf(item.vignette)), // capture de commande en ligne
       category: categoryIds.includes(item.categorie) ? item.categorie : normalizeCategory(item.categorie, item.nom),
       count: Math.min(99, Math.max(1, Math.round(Number(item.nombre) || 1))),
       quantity: (item.contenance ?? '').trim(),
