@@ -9,15 +9,23 @@ import { CATEGORY_GUIDE } from './category-guide.js';
 import { callTool } from './client.js';
 import { languageName } from './languages.js';
 
-/** Cadre d'une vignette (en %) → { photo, left, top, right, bottom } en fractions, ou null s'il est incohérent. */
+/**
+ * Cadre d'une vignette (en %) → { photo, left, top, right, bottom } en fractions, ou null s'il est incohérent.
+ * Tolère un cadre rendu en fractions (0 à 1) et un numéro de photo compté depuis 0.
+ */
 function boxOf(v) {
   if (!v || typeof v !== 'object') return null;
-  const [left, top, right, bottom] = [v.gauche, v.haut, v.droite, v.bas].map((n) => Number(n) / 100);
-  const photo = Math.round(Number(v.photo)) - 1;
+  const values = [v.gauche, v.haut, v.droite, v.bas].map(Number);
+  const scale = Math.max(...values) <= 1 ? 1 : 100; // 0.05 → 5 %
+  const [left, top, right, bottom] = values.map((n) => n / scale);
+  const photo = Math.max(0, Math.round(Number(v.photo)) - 1);
   const ok = [left, top, right, bottom].every((n) => n >= 0 && n <= 1)
     && right - left >= 0.02 && bottom - top >= 0.02; // une photo qui n'existe pas : ignorée au découpage
   return ok ? { photo, left, top, right, bottom } : null;
 }
+
+/** Diagnostic temporaire : pourquoi une ligne n'a pas de cadre d'image. */
+const boxWhy = (v, box) => (box ? '' : v ? `Cadre refusé : ${JSON.stringify(v)}` : 'Cadre : Claude n\'en a pas donné');
 
 /** Repères des articles de la liste de courses envoyés à Claude : L1, L2… */
 const listRef = (index) => `L${index + 1}`;
@@ -114,6 +122,7 @@ ${CATEGORY_GUIDE}`
       receiptText: (item.texte_ticket ?? '').trim(),
       brand: typeof item.marque === 'string' ? item.marque.trim() : '',
       box: boxOf(item.vignette),
+      why: boxWhy(item.vignette, boxOf(item.vignette)),
       category: categoryIds.includes(item.categorie) ? item.categorie : normalizeCategory(item.categorie, item.nom),
       count: Math.min(99, Math.max(1, Math.round(Number(item.nombre) || 1))),
       quantity: (item.contenance ?? '').trim(),

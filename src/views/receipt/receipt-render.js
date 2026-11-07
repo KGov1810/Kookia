@@ -90,6 +90,7 @@ function receiptLine(item, index) {
         <div class="receipt-fields">
           <input data-field="name" data-index="${index}" value="${item.name}" aria-label="${t('editor.productName')}" autocomplete="off">
           <small>${item.receiptText ? `« ${item.receiptText} »` : ''}</small>
+          <small class="why" data-why="${index}">${item.why ?? ''}</small>
           <div class="receipt-qty">
             <div class="stepper small">
               <button data-action="line-minus" data-index="${index}" aria-label="${t('editor.oneLess')}" ${item.count <= 1 ? raw('disabled') : ''}>−</button>

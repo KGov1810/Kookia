@@ -43,7 +43,7 @@ test("Régimes, portions, calories, ticket de caisse", async () => {
     globalThis.__images = body.messages[0].content.filter((c) => c.type === 'image').length;
     const input = tool === 'lister_produits'
       ? { produits: [
-          { nom: 'Lait demi-écrémé', texte_ticket: 'LAIT 1/2 ECR 1L', categorie: 'laitier', nombre: 2, contenance: '1 L', marque: 'Lactel', vignette: { photo: 1, gauche: 4, haut: 10, droite: 24, bas: 18 } },
+          { nom: 'Lait demi-écrémé', texte_ticket: 'LAIT 1/2 ECR 1L', categorie: 'laitier', nombre: 2, contenance: '1 L', marque: 'Lactel', vignette: { photo: 0, gauche: 0.04, haut: 0.1, droite: 0.24, bas: 0.18 } },
           { nom: 'Tomates', texte_ticket: 'TOMATE GRAPPE', categorie: 'fruits_legumes', nombre: 1, contenance: '' },
           { nom: 'Farine de blé', texte_ticket: 'FARINE T45 1KG', categorie: 'epicerie', nombre: 1, contenance: '1 kg', marque: 'Francine', vignette: { photo: 9, gauche: 4, haut: 10, droite: 24, bas: 18 } }] }
       : { recettes: [
