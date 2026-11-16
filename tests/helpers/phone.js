@@ -2,6 +2,8 @@
 // pour toucher les boutons et remplir les champs.
 import fs from 'node:fs';
 import path from 'node:path';
+import { setImmediate as realImmediate } from 'node:timers';
+import { vi } from 'vitest';
 
 export async function createPhone(_name, { standalone = true, storage = {} } = {}) {
   const page = fs.readFileSync(path.join(process.cwd(), 'index.html'), 'utf8');
@@ -18,9 +20,19 @@ export async function createPhone(_name, { standalone = true, storage = {} } = {
   const errors = [];
   window.addEventListener('error', (e) => errors.push(e.error ?? e.message));
 
+  // Horloge simulée : une pause de 400 ms s'écoule aussitôt (minuteries de l'app, animations, faux chargements),
+  // au lieu de faire attendre la suite de tests.
+  vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'Date', 'requestAnimationFrame', 'cancelAnimationFrame'] });
   await import('../../src/main.js');
+  const { lazyLoaded } = await import('../../src/views/app/lazy.js');
 
-  const tick = (ms = 20) => new Promise((resolve) => setTimeout(resolve, ms));
+  /** Laisse passer ms millisecondes d'horloge simulée, et les opérations réelles (lecture de fichiers) en attente. */
+  const tick = async (ms = 20) => {
+    await vi.advanceTimersByTimeAsync(ms);
+    await lazyLoaded(); // écran rare chargé à son premier usage (import réel, hors horloge simulée)
+    for (let i = 0; i < 3; i++) await new Promise((resolve) => realImmediate(resolve));
+    await vi.advanceTimersByTimeAsync(0);
+  };
   await tick();
   const $ = (selector) => document.querySelector(selector);
   const $$ = (selector) => [...document.querySelectorAll(selector)];

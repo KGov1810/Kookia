@@ -244,6 +244,10 @@ test('Prix, produits jetés et statistiques', async () => {
   await click('.tab[data-tab="frigo"]');
   await click(row('Yaourt').querySelector('.consume'), 300);
   log(!product('Yaourt') && !$('.note.error'), 'Le stock fonctionne quand même, sans erreur de synchronisation');
+  // Les écoutes en cours restent servies : le refus apparaît à la reconnexion (ou au prochain lancement).
+  await click('[data-action="open-settings"]');
+  await click('[data-action="open-advanced"]');
+  await click('[data-action="reconnect"]', 60);
   await click('.tab[data-tab="stats"]');
   await click('[data-action="stats-period"][data-value="3mois"]', 60);
   log(text().includes('Les statistiques ne sont pas encore autorisées : recollez les règles Firestore'), 'Onglet Stats : explication claire');

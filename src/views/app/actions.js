@@ -1,14 +1,16 @@
 // Kookia — Actions déclenchées par les boutons (attribut data-action), tous écrans confondus.
 
-import { openHistory } from '../history/history-sheet.js';
 import { onboardingActions } from '../onboarding/onboarding-actions.js';
 import { recipesActions } from '../recipes/recipes-actions.js';
 import { settingsActions } from '../settings/settings-actions.js';
 import { shoppingActions } from '../shopping/shopping-actions.js';
 import { statsActions } from '../stats/stats-actions.js';
 import { stockActions } from '../stock/stock-actions.js';
-import { showTab } from './router.js';
+import { showTab } from './navigation.js';
+import { lazy } from './lazy.js';
 import { ui } from './ui-state.js';
+
+const openHistory = lazy(() => import('../history/history-sheet.js'), 'openHistory');
 
 let actions = null;
 

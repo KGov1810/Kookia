@@ -5,7 +5,7 @@ import { isStandalone } from '../../components/platform.js';
 import * as store from '../../data/store/index.js';
 import { state } from '../../data/store/state.js';
 import { t } from '../../services/i18n/i18n.js';
-import { render } from '../app/router.js';
+import { render } from '../app/navigation.js';
 import { screen, ui } from '../app/ui-state.js';
 import { ONBOARDING } from './onboarding-steps.js';
 

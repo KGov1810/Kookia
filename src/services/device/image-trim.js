@@ -37,19 +37,24 @@ export function productBounds(pixels, width, height) {
   return { x: horizontal[0], y: vertical[0], w: horizontal[1] - horizontal[0], h: vertical[1] - vertical[0] };
 }
 
-/** Le produit seul, centré dans un carré blanc avec une petite marge ; le canvas d'origine si la lecture échoue. */
-export function fitSquare(canvas) {
+/**
+ * Le produit seul, centré dans un carré blanc avec une petite marge, de maxSide px au plus (216 : la plus grande
+ * vignette, 72 points sur un écran Retina ×3) ; le canvas d'origine si la lecture échoue.
+ */
+export function fitSquare(canvas, maxSide = 216) {
   try {
     const context = canvas.getContext('2d');
     const { x, y, w, h } = productBounds(context.getImageData(0, 0, canvas.width, canvas.height).data, canvas.width, canvas.height);
-    const side = Math.round(Math.max(w, h) * 1.12);
+    const scale = Math.min(1, maxSide / (Math.max(w, h) * 1.12));
+    const [dw, dh] = [Math.round(w * scale), Math.round(h * scale)];
+    const side = Math.round(Math.max(dw, dh) * 1.12);
     const square = document.createElement('canvas');
     square.width = side;
     square.height = side;
     const target = square.getContext('2d');
     target.fillStyle = '#fff';
     target.fillRect(0, 0, side, side);
-    target.drawImage(canvas, x, y, w, h, Math.round((side - w) / 2), Math.round((side - h) / 2), w, h);
+    target.drawImage(canvas, x, y, w, h, Math.round((side - dw) / 2), Math.round((side - dh) / 2), dw, dh);
     return square;
   } catch {
     return canvas;

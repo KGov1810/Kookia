@@ -1,7 +1,9 @@
 // Kookia — Connexion à Firebase.
 
 import { initializeFirestore, memoryLocalCache, persistentLocalCache } from 'firebase/firestore';
-import { getAuth, signInAnonymously } from 'firebase/auth';
+import {
+  browserLocalPersistence, browserSessionPersistence, indexedDBLocalPersistence, initializeAuth, signInAnonymously
+} from 'firebase/auth';
 import { initializeApp } from 'firebase/app';
 import { firebaseConfig } from './household-codes.js';
 
@@ -16,7 +18,9 @@ export function ensureFirebase() {
   const config = firebaseConfig();
   if (!config) return false;
   app = initializeApp(config);
-  auth = getAuth(app);
+  // Comme getAuth, sans le code des connexions par fenêtre ou redirection (Google, Apple…) : seule la connexion
+  // anonyme sert. Mêmes lieux d'enregistrement, dans le même ordre : l'iPhone garde son identifiant.
+  auth = initializeAuth(app, { persistence: [indexedDBLocalPersistence, browserLocalPersistence, browserSessionPersistence] });
   try {
     db = initializeFirestore(app, { localCache: persistentLocalCache(), ignoreUndefinedProperties: true });
   } catch {

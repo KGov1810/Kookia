@@ -5,10 +5,13 @@ import { I } from '../../components/icons.js';
 import { openSheet } from '../../components/sheet.js';
 import { hasClaudeKey } from '../../data/store/selectors.js';
 import { t } from '../../services/i18n/i18n.js';
-import { openProduceSheet } from '../produce/produce-sheet.js';
+import { lazy } from '../app/lazy.js';
 import { openEditor } from '../product-editor/product-editor.js';
-import { openReceipt } from '../receipt/receipt-sheet.js';
+// Le scanner est chargé d'avance : iOS n'accorde la caméra que dans le geste qui l'ouvre, sans attente.
 import { openBatchScan } from '../scanner/batch-scan.js';
+
+const openProduceSheet = lazy(() => import('../produce/produce-sheet.js'), 'openProduceSheet');
+const openReceipt = lazy(() => import('../receipt/receipt-sheet.js'), 'openReceipt');
 
 export function openAddMenu() {
   const hasKey = hasClaudeKey();

@@ -10,7 +10,8 @@ import { fridgeList } from '../stock/stock-list.js';
 import { wireSwipe } from '../stock/stock-swipe.js';
 import { getAction } from './actions.js';
 import { updateChrome } from './chrome.js';
-import { onStoreChange, showTab, viewFor } from './router.js';
+import { showTab, viewFor } from './navigation.js';
+import { onStoreChange } from './router.js';
 import { screen, ui } from './ui-state.js';
 
 export function wireEvents() {

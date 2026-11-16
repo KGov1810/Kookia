@@ -7,7 +7,7 @@ import { openSheet } from '../../components/sheet.js';
 import * as store from '../../data/store/index.js';
 import { t } from '../../services/i18n/i18n.js';
 import * as S from '../../services/index.js';
-import { rerenderIf } from '../app/router.js';
+import { rerenderIf } from '../app/navigation.js';
 import { ui } from '../app/ui-state.js';
 
 export function openProductPicker() {

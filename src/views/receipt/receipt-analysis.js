@@ -6,7 +6,7 @@ import * as store from '../../data/store/index.js';
 import { state } from '../../data/store/state.js';
 import { t } from '../../services/i18n/i18n.js';
 import * as S from '../../services/index.js';
-import { showTab } from '../app/router.js';
+import { showTab } from '../app/navigation.js';
 import { MAX_PHOTOS, removals as listRemovals, selected } from './receipt-render.js';
 
 /** Photos choisies d'un coup (un même long ticket, de haut en bas) : ajoutées dans l'ordre, 10 au plus en tout. */

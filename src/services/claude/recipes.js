@@ -41,7 +41,7 @@ export async function generateRecipes({ key, model, priority, others, shopping, 
   ].join('\n');
 
   const input = await callTool({
-    key, model, system: RECIPE_SYSTEM, tool: RECIPE_TOOL,
+    key, model, system: RECIPE_SYSTEM, tool: RECIPE_TOOL, cache: true, // « Proposer » est souvent relancé
     // Chaque langue en plus ajoute environ 75 % de texte à écrire.
     content: [{ type: 'text', text: prompt }], maxTokens: Math.min(20_000, Math.round(8000 * (1 + 0.75 * (langs.length - 1)))), timeoutMs: langs.length > 1 ? 240_000 : 180_000
   });

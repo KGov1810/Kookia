@@ -30,7 +30,7 @@ L'offre gratuite « Spark » suffit, sans carte bancaire.
 1. Sur GitHub, créez un dépôt **public**.
 2. Envoyez-y le contenu du dossier `kookia` (pas le dossier lui-même), avec `git add -A`, `git commit` et `git push`.
 3. **Settings → Pages → Source : GitHub Actions**.
-4. Onglet **Actions** : quand « Tests et mise en ligne » est vert (2 à 3 minutes), l'adresse de l'app apparaît dans **Settings → Pages**.
+4. Onglet **Actions** : quand « Tests et mise en ligne » est vert (1 à 2 minutes), l'adresse de l'app apparaît dans **Settings → Pages**.
 
 ### Étape 3 — Premier iPhone
 

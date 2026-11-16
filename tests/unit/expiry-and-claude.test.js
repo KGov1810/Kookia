@@ -35,6 +35,7 @@ test('génération de recettes : références au stock et ingrédients à achete
     const body = JSON.parse(opts.body);
     expect(body.messages[0].content[0].text).toContain('[P1] Yaourt');
     expect(opts.headers['anthropic-dangerous-direct-browser-access']).toBe('true');
+    expect(body.system[0].cache_control).toEqual({ type: 'ephemeral' }); // consigne gardée en cache : « Proposer » est souvent relancé
     const input = { recettes: [{
       titre: 'Gratin', resume: 'Bon', difficulte: 'facile', temps_total_minutes: 40, temps_preparation_minutes: 15, portions: 4,
       batch_cooking: true, conservation_jours: 3, conseils_conservation: 'Boîte', etapes: ['a', 'b'],
@@ -63,6 +64,11 @@ test('génération de recettes : références au stock et ingrédients à achete
 });
 
 test('clé Claude refusée : message clair', async () => {
-  globalThis.fetch = async () => ({ ok: false, status: 401, json: async () => ({ error: { message: 'invalid x-api-key' } }) });
+  let system;
+  globalThis.fetch = async (_url, opts) => {
+    system = JSON.parse(opts.body).system;
+    return { ok: false, status: 401, json: async () => ({ error: { message: 'invalid x-api-key' } }) };
+  };
   await expect(S.analyzeProduct({ key: 'k', model: 'm', base64: 'x' })).rejects.toThrow('Clé API Claude refusée : vérifiez-la dans Réglages.');
+  expect(typeof system).toBe('string'); // appel ponctuel : consigne sans cache (l'écriture en cache coûte plus cher)
 });

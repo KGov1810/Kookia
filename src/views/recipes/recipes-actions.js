@@ -2,16 +2,18 @@
 
 import * as store from '../../data/store/index.js';
 import { state } from '../../data/store/state.js';
-import { rerenderKeepScroll } from '../app/router.js';
+import { lazy } from '../app/lazy.js';
+import { rerenderKeepScroll } from '../app/navigation.js';
 import { ui } from '../app/ui-state.js';
 import { openProductPicker } from './product-picker.js';
 import { cookRecipe } from './recipe-cooking.js';
 import { openRecipe } from './recipe-detail.js';
 import { quickFilterActions } from './recipe-filters.js';
 import { startRecipeGeneration } from './recipe-generation.js';
-import { openWeekSetup } from './week-setup.js';
 import { addWeekShopping, openWeekShopping } from './week-shopping-sheet.js';
 import { openBatchSheet, openSlotSheet } from './week-slot-sheet.js';
+
+const openWeekSetup = lazy(() => import('./week-setup.js'), 'openWeekSetup');
 
 function cook(id) {
   const recipe = store.recipeById(id);

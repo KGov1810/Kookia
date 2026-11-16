@@ -11,7 +11,7 @@ import * as store from '../../data/store/index.js';
 import { state } from '../../data/store/state.js';
 import { t } from '../../services/i18n/i18n.js';
 import * as S from '../../services/index.js';
-import { showTab } from '../app/router.js';
+import { showTab } from '../app/navigation.js';
 
 /** Ce que « Tout ranger » propose pour un article : catégorie, lieu habituel, dernier prix. */
 export function proposal(item) {

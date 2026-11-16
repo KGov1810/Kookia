@@ -4,7 +4,7 @@ import * as store from '../../data/store/index.js';
 import { state } from '../../data/store/state.js';
 import { t } from '../../services/i18n/i18n.js';
 import * as S from '../../services/index.js';
-import { rerenderIf } from '../app/router.js';
+import { rerenderIf } from '../app/navigation.js';
 import { currentFilters, ui } from '../app/ui-state.js';
 
 export async function startRecipeGeneration() {

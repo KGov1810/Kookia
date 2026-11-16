@@ -5,13 +5,13 @@ import { toast } from '../../components/toast.js';
 import * as store from '../../data/store/index.js';
 import { t } from '../../services/i18n/i18n.js';
 import * as S from '../../services/index.js';
-import { openScanner } from '../scanner/scanner.js';
 import { openingActions } from './editor-opening.js';
 import { setQuantityUnit } from './editor-quantity.js';
 import { handleBarcode, handleDatePhoto, handleProductPhoto } from './editor-recognition.js';
 import { persist } from './editor-save.js';
 import { enterDate, setCold, setKind, setLocation } from './editor-state.js';
 import { unitsActions } from './editor-units.js';
+import { openScanner } from '../scanner/scanner.js';
 
 /** Actions des boutons de la fiche, liées au produit en cours. */
 export function editorActions(ctx) {

@@ -1,15 +1,14 @@
 // Kookia — Mouvements du stock (achats, consommations, produits jetés) pour les statistiques.
 // Écrits à part : si les règles Firestore ne les autorisent pas encore, le stock fonctionne quand même.
 
-import { collection, deleteDoc, onSnapshot, query, serverTimestamp, setDoc, where } from 'firebase/firestore';
+import { deleteDoc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { t } from '../../services/i18n/i18n.js';
 import { cleanPrice } from '../../services/stats/money.js';
 import { auth, db } from './connection.js';
 import { errorMessage } from './errors.js';
-import { toMovement } from './mappers.js';
+import { readMovements, stopReading } from './movement-feed.js';
 import { emit, state } from './state.js';
 import { canWrite, ref } from './writes.js';
-
 
 /** Refus des règles Firestore : message clair dans l'onglet Stats. Renvoie vrai si c'était le cas. */
 export function reportStatsDenied(error) {
@@ -56,18 +55,17 @@ export function cancelLastMovements(productIds) {
   }
 }
 
-let watched = null; // { code, since, stop }
+let watched = null; // { code, since }
 
 /** Écoute les mouvements depuis « since » (ms). Sans effet si c'est déjà le cas. */
 export function watchMovements(since) {
   const code = state.settings.householdCode;
   if (!db || !code) return;
   if (watched && watched.code === code && watched.since === since) return;
-  watched?.stop();
+  watched = { code, since };
   state.movementsLoaded = false;
-  const q = query(collection(db, 'foyers', code, 'mouvements'), where('clientAt', '>=', since));
-  const stop = onSnapshot(q, (snapshot) => {
-    state.movements = snapshot.docs.map((d) => toMovement(d.id, d.data())).filter(Boolean);
+  readMovements(code, 'stats', since, (movements) => {
+    state.movements = movements;
     state.movementsLoaded = true;
     state.movementsError = null;
     emit('movements');
@@ -79,11 +77,10 @@ export function watchMovements(since) {
       emit('movements');
     }
   });
-  watched = { code, since, stop };
 }
 
 export function stopMovements() {
-  watched?.stop();
+  stopReading('stats');
   watched = null;
   state.movements = [];
   state.movementsLoaded = false;

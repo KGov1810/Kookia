@@ -1,6 +1,6 @@
 // Kookia — Actions de l'écran Statistiques : période, mois touché, filtres.
 
-import { showTab } from '../app/router.js';
+import { showTab } from '../app/navigation.js';
 import { ui } from '../app/ui-state.js';
 import { statsView } from './stats-view.js';
 

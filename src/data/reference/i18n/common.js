@@ -11,6 +11,7 @@ export const COMMON = {
   'common.cancel': ['Annuler', 'Cancel', 'Cancelar', 'Cancelar'],
   'common.ok': ['OK', 'OK', 'OK', 'OK'],
   'common.close': ['Fermer', 'Close', 'Cerrar', 'Fechar'],
+  'common.loadFailed': ['Cet écran ne s\'est pas chargé : vérifiez la connexion, puis réessayez.', 'This screen didn\'t load: check your connection, then try again.', 'Esta pantalla no se cargó: revisa la conexión y vuelve a intentarlo.', 'Esta tela não carregou: confira a conexão e tente de novo.'],
   'common.unit': ['Unité', 'Unit', 'Unidad', 'Unidade'],
   'common.edit': ['Modifier', 'Edit', 'Editar', 'Editar'],
   'common.copied': ['Copié', 'Copied', 'Copiado', 'Copiado'],

@@ -9,7 +9,7 @@ import { hasClaudeKey } from '../../data/store/selectors.js';
 import { state } from '../../data/store/state.js';
 import { t } from '../../services/i18n/i18n.js';
 import * as S from '../../services/index.js';
-import { rerenderKeepScroll } from '../app/router.js';
+import { rerenderKeepScroll } from '../app/navigation.js';
 import { currentFilters, ui } from '../app/ui-state.js';
 import { recipeCard } from './recipe-card.js';
 import { tonightCard } from './tonight-card.js';

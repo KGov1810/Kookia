@@ -53,3 +53,25 @@ describe(`fichiers de ${MAX_LINES} lignes au plus`, () => {
     expect(fs.readFileSync(file, 'utf8').split('\n').length).toBeLessThanOrEqual(MAX_LINES);
   });
 });
+
+describe("pas d'import circulaire", () => {
+  it('aucun module ne se réimporte lui-même par une chaîne d\'imports', () => {
+    const graph = new Map(jsFiles.map((file) => [file, [...fs.readFileSync(file, 'utf8').matchAll(/(?:import|export)[^'";]*?from '(\.[^']+)'/g)]
+      .map((m) => path.resolve(path.dirname(file), m[1])).filter((target) => fs.existsSync(target))]));
+    const cycles = [];
+    const status = new Map(); // 1 : en cours de visite, 2 : visité
+    const stack = [];
+    const visit = (file) => {
+      status.set(file, 1);
+      stack.push(file);
+      for (const next of graph.get(file) ?? []) {
+        if (status.get(next) === 1) cycles.push(stack.slice(stack.indexOf(next)).map((f) => path.relative(SRC, f)).join(' → '));
+        else if (!status.get(next)) visit(next);
+      }
+      stack.pop();
+      status.set(file, 2);
+    };
+    jsFiles.forEach((file) => status.get(file) || visit(file));
+    expect(cycles).toEqual([]);
+  });
+});

@@ -3,7 +3,8 @@
 import './styles/index.css';
 import * as store from './data/store/index.js';
 import { wireEvents } from './views/app/events.js';
-import { onStoreChange, render } from './views/app/router.js';
+import { render } from './views/app/navigation.js';
+import { onStoreChange } from './views/app/router.js';
 
 function boot() {
   wireEvents();

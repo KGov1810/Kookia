@@ -121,7 +121,7 @@ test("Stock de toute la maison : lieux, dates, congélation, ticket", async () =
   globalThis.fetch = async (url, opts) => {
     const body = JSON.parse(opts.body);
     prompt = body.messages[0].content[0].text;
-    globalThis.__system = body.system;
+    globalThis.__system = body.system[0].text; // consigne mise en cache : un bloc de texte
     return { ok: true, status: 200, json: async () => ({ stop_reason: 'tool_use', content: [{ type: 'tool_use', input: { recettes: [] } }] }) };
   };
   await click('.tab[data-tab="recettes"]');

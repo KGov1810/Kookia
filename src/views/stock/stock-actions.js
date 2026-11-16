@@ -1,15 +1,17 @@
 // Kookia — Actions de l'écran Stock : ajout, lieu, consommation, ouverture d'un produit.
 
 import * as store from '../../data/store/index.js';
-import { showTab } from '../app/router.js';
+import { lazy } from '../app/lazy.js';
+import { showTab } from '../app/navigation.js';
 import { ui } from '../app/ui-state.js';
-import { openProduceSheet } from '../produce/produce-sheet.js';
 import { openEditor } from '../product-editor/product-editor.js';
-import { openBatchScan } from '../scanner/batch-scan.js';
+import { openBatchScan } from '../scanner/batch-scan.js'; // chargé d'avance : caméra ouverte dans le geste
 import { openAddMenu } from './add-menu.js';
 import { consume, discard, openPart, quickDate } from './stock-gestures.js';
 import { closeSwipedRow } from './stock-swipe.js';
 import { fridgeView } from './stock-view.js';
+
+const openProduceSheet = lazy(() => import('../produce/produce-sheet.js'), 'openProduceSheet');
 
 /** Actions des boutons (attribut data-action). */
 export const stockActions = {

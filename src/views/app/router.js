@@ -1,6 +1,5 @@
-// Kookia — Affichage des écrans et navigation.
+// Kookia — Assemblage des écrans et réaction aux changements de données.
 
-import { fmt } from '../../components/html.js';
 import { openSheets } from '../../components/sheet.js';
 import * as store from '../../data/store/index.js';
 import { state } from '../../data/store/state.js';
@@ -12,52 +11,14 @@ import { shoppingView } from '../shopping/shopping-view.js';
 import { statsView } from '../stats/stats-view.js';
 import { fridgeView } from '../stock/stock-view.js';
 import { updateChrome } from './chrome.js';
-import { screen, ui } from './ui-state.js';
+import { registerScreens, render, viewFor } from './navigation.js';
+import { ui } from './ui-state.js';
 
-let views = null;
-
-/** Écran d'un onglet (liste assemblée au premier usage, une fois tous les écrans chargés). */
-export function viewFor(tab) {
-  views ??= { frigo: fridgeView, recettes: recipesView, courses: shoppingView, stats: statsView, reglages: settingsView };
-  return views[tab];
-}
-
-export function render() {
-  setLanguage(state.settings.language);
-  const onboarding = needsOnboarding();
-  document.body.classList.toggle('onboarding', onboarding);
-  if (onboarding) {
-    renderOnboarding();
-    return;
-  }
-  const view = viewFor(ui.tab);
-  screen.innerHTML = fmt(view.render());
-  view.mounted?.();
-  updateChrome();
-}
-
-export function rerenderKeepScroll() {
-  const y = window.scrollY;
-  screen.innerHTML = fmt(viewFor(ui.tab).render());
-  viewFor(ui.tab).mounted?.();
-  window.scrollTo(0, y);
-}
-
-export function rerenderIf(tab) {
-  if (ui.tab === tab && !document.body.classList.contains('onboarding')) rerenderKeepScroll();
-}
-
-export function showTab(name) {
-  if (!viewFor(name)) return;
-  ui.tab = name;
-  if (name === 'recettes') { // à chaque visite : Réalisables d'abord, sans badge « Nouvelle »
-    ui.recipeNote = null;
-    ui.freshIds = new Set();
-    ui.recipeTab = '';
-  }
-  render();
-  window.scrollTo(0, 0);
-}
+registerScreens({
+  views: { frigo: fridgeView, recettes: recipesView, courses: shoppingView, stats: statsView, reglages: settingsView },
+  needsOnboarding,
+  renderOnboarding
+});
 
 export function onStoreChange(what) {
   if (what === 'settings' && setLanguage(state.settings.language)) {

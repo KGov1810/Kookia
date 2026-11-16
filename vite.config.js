@@ -8,7 +8,8 @@ export default defineConfig({
     outDir: 'dist',
     target: 'es2022',
     sourcemap: false,
-    // Firebase seul dépasse 500 Ko (normal pour ce SDK) ; le code de l'app en fait environ 140.
+    // Firebase seul dépasse 500 Ko (normal pour ce SDK) ; le code de l'app en fait environ 380, plus les écrans rares
+    // chargés à leur premier usage (views/app/lazy.js).
     chunkSizeWarningLimit: 650,
     rolldownOptions: {
       output: {

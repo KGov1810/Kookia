@@ -64,9 +64,12 @@ export async function cropImages(blob, boxes, size = 320) {
   }
 }
 
-/** Vignette légère (≈ 30 Ko) stockée avec le produit. */
+/**
+ * Vignette légère (≈ 15 Ko) stockée avec le produit : 288 px de long, assez pour la plus grande vignette affichée
+ * (72 points, soit 216 px sur un écran Retina ×3, sur le petit côté d'une photo 4:3).
+ */
 export async function thumbnail(blob) {
-  return (await resizeImage(blob, 400, 0.6)).dataUrl;
+  return (await resizeImage(blob, 288, 0.7)).dataUrl;
 }
 
 /** Images de produits repérées sur une capture de commande en ligne (analysée en petit : 400 px de large). */

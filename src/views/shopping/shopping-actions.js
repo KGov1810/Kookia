@@ -5,10 +5,12 @@ import * as store from '../../data/store/index.js';
 import { state } from '../../data/store/state.js';
 import { t } from '../../services/i18n/i18n.js';
 import * as S from '../../services/index.js';
-import { openReceipt } from '../receipt/receipt-sheet.js';
+import { lazy } from '../app/lazy.js';
 import { openPutAway } from './put-away-sheet.js';
 import { openShoppingItem } from './shopping-item-sheet.js';
 import { moveItemToFridge, stockNote } from './shopping-view.js';
+
+const openReceipt = lazy(() => import('../receipt/receipt-sheet.js'), 'openReceipt');
 
 /** Actions des boutons (attribut data-action). */
 export const shoppingActions = {

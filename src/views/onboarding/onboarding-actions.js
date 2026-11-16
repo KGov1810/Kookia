@@ -1,7 +1,7 @@
 // Kookia — Actions de l'Accueil : installation, connexion, foyer.
 
 import * as store from '../../data/store/index.js';
-import { render } from '../app/router.js';
+import { render } from '../app/navigation.js';
 import { ui } from '../app/ui-state.js';
 import { onboardingConnect, onboardingCreate, onboardingJoin } from './onboarding.js';
 

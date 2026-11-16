@@ -124,7 +124,7 @@ export async function generateWeekPlan({ key, model, products, shopping, filters
   ].join('\n');
 
   const input = await callTool({
-    key, model, system: RECIPE_SYSTEM, tool: WEEK_TOOL,
+    key, model, system: RECIPE_SYSTEM, tool: WEEK_TOOL, cache: true, // planning souvent régénéré
     content: [{ type: 'text', text: prompt }], maxTokens: Math.min(32_000, Math.round(16_000 * (1 + 0.75 * (langs.length - 1)))), timeoutMs: 300_000
   });
 

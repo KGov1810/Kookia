@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
-import { assignBlocks, imageBands, productBounds } from '../../src/services/device/image-trim.js';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { assignBlocks, fitSquare, imageBands, productBounds } from '../../src/services/device/image-trim.js';
 
 /** Pixels RGBA blancs, avec des rectangles sombres { x, y, w, h }. */
 function picture(width, height, blocks) {
@@ -60,5 +60,23 @@ describe('imageBands sur une photo de ticket papier', () => {
   it("ne repère rien : le fond n'est pas blanc", () => {
     const pixels = new Uint8ClampedArray(400 * 600 * 4).fill(205); // papier gris sous la lumière de la pièce
     expect(imageBands(pixels, 400, 600)).toEqual([]);
+  });
+});
+
+describe('fitSquare', () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it('rend une vignette de 216 px au plus, le produit centré', () => {
+    const drawn = [];
+    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({ fillRect() {}, drawImage: (...args) => drawn.push(args.slice(5)) });
+    const pixels = picture(320, 160, [{ x: 0, y: 0, w: 320, h: 160 }]);
+    const source = { width: 320, height: 160, getContext: () => ({ getImageData: () => ({ data: pixels }) }) };
+    const square = fitSquare(source);
+    expect(square.width).toBeLessThanOrEqual(216);
+    expect(square.height).toBe(square.width);
+    const [x, y, w, h] = drawn[0];
+    expect(w).toBeLessThan(square.width);
+    expect(Math.abs(x + w / 2 - square.width / 2)).toBeLessThanOrEqual(1);
+    expect(Math.abs(y + h / 2 - square.height / 2)).toBeLessThanOrEqual(1);
   });
 });

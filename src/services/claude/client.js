@@ -4,7 +4,12 @@ import { t } from '../i18n/i18n.js';
 
 class ClaudeError extends Error {}
 
-export async function callTool({ key, model, system, content, tool, maxTokens, timeoutMs }) {
+/**
+ * cache : garde la consigne (outil + système) 5 minutes chez Anthropic. Utile seulement pour un appel souvent relancé
+ * (recettes, planning) avec une consigne assez longue : l'écriture coûte 25 % de plus, chaque relecture 5 à 10 % du
+ * prix normal. En dessous de la taille minimale du modèle, Anthropic l'ignore sans erreur.
+ */
+export async function callTool({ key, model, system, content, tool, maxTokens, timeoutMs, cache = false }) {
   if (!key) throw new ClaudeError(t('claude.noKey'));
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -23,7 +28,7 @@ export async function callTool({ key, model, system, content, tool, maxTokens, t
       body: JSON.stringify({
         model,
         max_tokens: maxTokens,
-        system,
+        system: cache ? [{ type: 'text', text: system, cache_control: { type: 'ephemeral' } }] : system,
         tools: [tool],
         tool_choice: { type: 'tool', name: tool.name },
         messages: [{ role: 'user', content }]

@@ -6,7 +6,7 @@ import * as store from '../../data/store/index.js';
 import { state } from '../../data/store/state.js';
 import { t } from '../../services/i18n/i18n.js';
 import { updateAppBadge } from '../app/chrome.js';
-import { rerenderKeepScroll } from '../app/router.js';
+import { rerenderKeepScroll } from '../app/navigation.js';
 import { ui } from '../app/ui-state.js';
 import { inviteMessage, renderProfile, settingsView } from './settings-view.js';
 
