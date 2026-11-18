@@ -16,7 +16,7 @@ test("Origine des recettes", async () => {
     [R0 + 'ancienne', { title: 'Poulet rôti', summary: '', difficulty: 'facile', totalMinutes: 40, prepMinutes: 10, servings: 2, batchCooking: false, storageDays: 0, storageTips: '', favorite: false, steps: [], createdAt: 5, usedProductIds: ['poulet'],
       ingredients: [{ name: 'Filet de poulet', quantity: '300 g', source: 'stock', productId: 'poulet' }] }]
   ]), listeners: new Set(), writes: 0, network: [] };
-  const settings = { userName: 'Kevin', alertDays: 2, claudeKey: 'sk-ant-x', model: 'claude-haiku-4-5', householdCode: CODE,
+  const settings = { userName: 'Kevin', alertDays: 2, claudeKey: 'sk-ant-x', model: 'claude-haiku-5-5', householdCode: CODE,
     firebaseConfig: { apiKey: 'k', projectId: 'p', appId: 'a' }, onboardingDone: true, installHintDismissed: true };
   const P = await createPhone('origine', { standalone: true, storage: { 'frigo.settings.v1': JSON.stringify(settings) } });
   const { $, $$, click, type, text, w, tick } = P;

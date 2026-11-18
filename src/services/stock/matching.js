@@ -1,8 +1,17 @@
 // Kookia — Rapprochement d'un ingrédient de recette avec un produit du stock.
 
-import { categoryFamily } from '../../data/reference/categories.js';
-import { nameMatchScore, nameTokens, normalizeBarcode } from '../text/text.js';
+import { category, categoryFamily } from '../../data/reference/categories.js';
+import { categoryName } from '../i18n/labels.js';
+import { nameMatchScore, nameTokens, normalizeBarcode, simplify } from '../text/text.js';
 import { guessCategory } from './categorization.js';
+
+/** Recherche dans le stock : le nom ou la catégorie (« laitier », « Produits laitiers ») contient le texte tapé. */
+export function matchesSearch(product, search) {
+  const query = simplify(String(search ?? '').trim());
+  return !query || simplify(product.name).includes(query)
+    || simplify(category(product.category).label).includes(query)
+    || simplify(categoryName(product.category)).includes(query);
+}
 
 /**
  * Retrouve le produit du frigo correspondant à un ingrédient :

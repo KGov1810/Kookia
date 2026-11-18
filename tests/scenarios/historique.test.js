@@ -22,7 +22,7 @@ test("Historique des changements", async () => {
     [H0 + 'ancienne', { scope: 'stock', action: 'ajout', name: 'Très vieux', details: [], by: 'Marie', clientAt: Date.now() - 100 * DAY }],
     [H0 + 'recente', { scope: 'stock', action: 'ajout', name: 'Récent', details: [], by: 'Marie', clientAt: Date.now() - 2 * DAY }]
   ]), listeners: new Set(), writes: 0, network: [] };
-  const settings = { userName: 'Kevin', alertDays: 2, claudeKey: 'sk-ant-x', model: 'claude-haiku-4-5', householdCode: CODE,
+  const settings = { userName: 'Kevin', alertDays: 2, claudeKey: 'sk-ant-x', model: 'claude-haiku-5-5', householdCode: CODE,
     firebaseConfig: { apiKey: 'k', projectId: 'p', appId: 'a' }, onboardingDone: true, installHintDismissed: true };
   const P = await createPhone('historique', { standalone: true, storage: { 'frigo.settings.v1': JSON.stringify(settings) } });
   const { $, $$, click, type, text, w, tick } = P;

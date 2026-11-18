@@ -8,7 +8,6 @@ import * as store from '../../data/store/index.js';
 import { state } from '../../data/store/state.js';
 import { t } from '../../services/i18n/i18n.js';
 import * as S from '../../services/index.js';
-import { simplify } from '../../services/text/text.js';
 import { ui } from '../app/ui-state.js';
 
 export function fridgeList() {
@@ -23,11 +22,8 @@ export function fridgeList() {
         <button class="secondary" data-action="add-manual">${I.pencil}${t('add.manual')}</button>
       </div>`;
   }
-  const query = simplify(ui.search.trim());
-  const items = store.productsIn(ui.location).filter((p) => !query
-    || simplify(p.name).includes(query)
-    || simplify(R.category(p.category).label).includes(query)
-    || simplify(S.categoryName(p.category)).includes(query));
+  const query = ui.search.trim();
+  const items = store.productsIn(ui.location).filter((p) => S.matchesSearch(p, query));
   if (!items.length) {
     if (query) return html`<p class="hint">${t('stock.noMatch', { query: ui.search.trim() })}</p>`;
     return html`<div class="empty small"><p>${t('stock.nothingAt', { at: S.placeAt(ui.location) })}</p>

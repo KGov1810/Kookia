@@ -56,7 +56,7 @@ test('Catégories : proposition, Claude, mémoire des corrections', async () => 
   console.log('\n— Nom inconnu : Claude —');
   await manual('Gomasio');
   log(category() === 'condiments' && place() === 'placard', `« Gomasio » : proposé par Claude (${category()}, ${place()})`);
-  log(calls.length === 1 && calls[0].tool === 'ranger_produit' && calls[0].model === 'claude-haiku-4-5', 'Un seul appel, modèle économique');
+  log(calls.length === 1 && calls[0].tool === 'ranger_produit' && calls[0].model === 'claude-haiku-5-5', 'Un seul appel, modèle économique');
   await close();
   await manual('Gomasio');
   log(calls.length === 1 && category() === 'condiments', 'Même nom : réponse réutilisée, pas de nouvel appel');

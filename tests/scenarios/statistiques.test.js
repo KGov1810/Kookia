@@ -25,7 +25,7 @@ test('Prix, produits jetés et statistiques', async () => {
     [F + 'mouvements/m-ancien', old('achat', 'Riz', 'feculents', 2.5, 4, 'Kevin', longAgo)],
     [F + 'mouvements/m-pain', old('jete', 'Pain', 'boulangerie', null, 1, 'Kevin', Date.now() - 1000)]
   ]), listeners: new Set(), writes: 0, network: [] };
-  const settings = { userName: 'Kevin', alertDays: 2, claudeKey: 'sk-ant-x', model: 'claude-haiku-4-5', householdCode: CODE,
+  const settings = { userName: 'Kevin', alertDays: 2, claudeKey: 'sk-ant-x', model: 'claude-haiku-5-5', householdCode: CODE,
     firebaseConfig: { apiKey: 'k', projectId: 'p', appId: 'a' }, onboardingDone: true, installHintDismissed: true };
   const P = await createPhone('statistiques', { standalone: true, storage: { 'frigo.settings.v1': JSON.stringify(settings) } });
   const { $, $$, click, type, text, w, tick } = P;

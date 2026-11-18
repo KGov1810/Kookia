@@ -17,7 +17,7 @@ test("Stock de toute la maison : lieux, dates, congélation, ticket", async () =
     [P0 + 'pates', prod('Pâtes', { location: 'placard', dateKind: 'ddm', expiry: iso(-10), category: 'epicerie' })],
     [P0 + 'yaourt', prod('Yaourt', { location: 'frigo', dateKind: 'dlc', expiry: iso(-2), category: 'laitier' })]
   ]), listeners: new Set(), writes: 0, network: [] };
-  const settings = { userName: 'Kevin', alertDays: 2, claudeKey: 'sk-ant-x', model: 'claude-haiku-4-5', householdCode: CODE,
+  const settings = { userName: 'Kevin', alertDays: 2, claudeKey: 'sk-ant-x', model: 'claude-haiku-5-5', householdCode: CODE,
     firebaseConfig: { apiKey: 'k', projectId: 'p', appId: 'a' }, onboardingDone: true, installHintDismissed: true };
   const P = await createPhone('kookia', { standalone: true, storage: { 'frigo.settings.v1': JSON.stringify(settings) } });
   const { $, $$, click, type, text, w, tick } = P;

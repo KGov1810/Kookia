@@ -1,5 +1,7 @@
 // Kookia — Réglages propres à chaque iPhone (lecture).
 
+import { MODELS, REPLACED_MODELS } from '../reference/models.js';
+
 export const SETTINGS_KEY = 'frigo.settings.v1';
 
 const DEFAULT_SETTINGS = {
@@ -17,9 +19,16 @@ const DEFAULT_SETTINGS = {
   language: ''          // langue : '' (celle de l'iPhone), 'fr', 'en', 'es' ou 'pt'
 };
 
+/** Modèle proposé : un ancien modèle passe à son remplaçant, un modèle inconnu au modèle conseillé. */
+function offeredModel(model) {
+  if (MODELS.some((m) => m.id === model)) return model;
+  return REPLACED_MODELS[model] ?? DEFAULT_SETTINGS.model;
+}
+
 export function loadSettings() {
   try {
-    return { ...DEFAULT_SETTINGS, ...JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? '{}') };
+    const settings = { ...DEFAULT_SETTINGS, ...JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? '{}') };
+    return { ...settings, model: offeredModel(settings.model) };
   } catch {
     return { ...DEFAULT_SETTINGS };
   }

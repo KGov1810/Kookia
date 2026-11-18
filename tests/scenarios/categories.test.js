@@ -19,7 +19,7 @@ test("Catégories détaillées et proposition automatique", async () => {
     [R0 + 'ancienne', { title: 'Poêlée de courgettes', summary: '', difficulty: 'facile', totalMinutes: 20, prepMinutes: 5, servings: 2, batchCooking: false, storageDays: 0, storageTips: '', createdAt: 1, favorite: false, steps: [], usedProductIds: ['partie'],
       ingredients: [{ name: 'Courgettes', quantity: '2', source: 'stock', productId: 'partie', category: 'fruits_legumes' }] }]
   ]), listeners: new Set(), writes: 0, network: [] };
-  const settings = { userName: 'Kevin', alertDays: 2, claudeKey: '', model: 'claude-haiku-4-5', householdCode: CODE,
+  const settings = { userName: 'Kevin', alertDays: 2, claudeKey: '', model: 'claude-haiku-5-5', householdCode: CODE,
     firebaseConfig: { apiKey: 'k', projectId: 'p', appId: 'a' }, onboardingDone: true, installHintDismissed: true };
   const P = await createPhone('categories', { standalone: true, storage: { 'frigo.settings.v1': JSON.stringify(settings) } });
   const { $, $$, click, type, text, w, tick } = P;

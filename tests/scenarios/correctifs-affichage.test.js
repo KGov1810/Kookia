@@ -12,7 +12,7 @@ test("Quantité numérique, réglages et styles", async () => {
     [C0 + 'sucre', { name: 'Sucre', quantity: '2 kg', checked: false, addedBy: 'Kevin', createdAt: 1 }],   // ancienne quantité en texte
     [C0 + 'concombre', { name: 'Concombre', quantity: '2', checked: false, addedBy: 'Kevin', createdAt: 2 }]
   ]), listeners: new Set(), writes: 0, network: [] };
-  const settings = { userName: 'Kevin', alertDays: 2, claudeKey: '', model: 'claude-haiku-4-5', householdCode: CODE, lightMaxKcal: 400,
+  const settings = { userName: 'Kevin', alertDays: 2, claudeKey: '', model: 'claude-haiku-5-5', householdCode: CODE, lightMaxKcal: 400,
     firebaseConfig: { apiKey: 'k', projectId: 'p', appId: 'a' }, onboardingDone: true, installHintDismissed: true };
   const P = await createPhone('fix', { standalone: true, storage: { 'frigo.settings.v1': JSON.stringify(settings) } });
   const { $, $$, click, type, text, w, tick } = P;
@@ -39,7 +39,7 @@ test("Quantité numérique, réglages et styles", async () => {
   await click('.tab[data-tab="frigo"]'); await click('[data-action="open-settings"]');
   log($('#kcal-max').textContent === '400 kcal', 'Recette légère : « 400 kcal » (plus de texte coupé)');
   await click('[data-action="open-advanced"]');
-  log([...$('#model').options].map((o) => o.textContent).join(' | ') === 'Sonnet 5.5 (conseillé) | Haiku 4.5 (économique)', 'Noms de modèles raccourcis (Avancé)');
+  log([...$('#model').options].map((o) => o.textContent).join(' | ') === 'Sonnet 5.5 (conseillé) | Haiku 5.5 (économique)', 'Noms de modèles raccourcis (Avancé)');
   await click('[data-action="close-advanced"]');
   const css = readAllCss();
   const rule = (sel) => { const i = css.lastIndexOf(`${sel} {`); return i < 0 ? '' : css.slice(i, css.indexOf('}', i)); };

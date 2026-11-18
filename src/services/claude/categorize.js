@@ -6,7 +6,7 @@ import { CATEGORY_GUIDE } from './category-guide.js';
 import { callTool } from './client.js';
 
 /** Modèle rapide et économique : une catégorie ne demande pas plus. */
-export const CATEGORIZE_MODEL = 'claude-haiku-4-5';
+export const CATEGORIZE_MODEL = 'claude-haiku-5-5';
 
 /** Renvoie { category, location } (chacun null s'il n'est pas sûr). */
 export async function categorizeProduct({ key, name }) {

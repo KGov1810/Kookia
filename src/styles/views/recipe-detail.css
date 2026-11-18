@@ -53,6 +53,13 @@
 
 .pick .product-text { flex: 1; }
 
+/* Filtres du sélecteur : restent en haut pendant le défilement de la liste. */
+.picker-filters { position: sticky; top: -8px; z-index: 1; background: var(--bg); margin: -8px -16px 0; padding: 8px 16px 0; }
+
+.picker-filters .search { margin: 0; }
+
+.picker-filters .chips { margin: 0 -16px; padding: 10px 16px 8px; }
+
 .steps-install { list-style: none; padding: 0; margin: 16px 0; counter-reset: s; text-align: left; }
 
 .steps-install li {
