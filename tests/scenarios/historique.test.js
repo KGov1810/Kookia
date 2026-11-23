@@ -56,7 +56,7 @@ test("Historique des changements", async () => {
   log(last().action === 'modification' && last().details.some((d) => d === 'Lieu : Frigo → Congélateur'), 'Congeler : « Lieu : Frigo → Congélateur »');
   await click(row('Crème fraîche').querySelector('.product-main'), 400);
   await click(sheet().querySelector('[data-action="consume"]'), 350);
-  log(last().action === 'suppression' && last().details[0] === 'tout consommé', 'Tout retirer : suppression « tout consommé »');
+  log(last().action === 'consommation' && last().details.includes('plus en stock'), `Consommé (tout) depuis la fiche : « a consommé », plus en stock (${last().action} ${last().details})`);
   await click('[data-action="add-menu"]'); await click(sheet().querySelector('[data-action="produce"]'), 400);
   await click([...sheet().querySelectorAll('.produce-chip')].find((c) => c.dataset.name === 'Bananes'));
   await click(sheet().querySelector('.sheet-body [data-action="confirm"]'), 350);

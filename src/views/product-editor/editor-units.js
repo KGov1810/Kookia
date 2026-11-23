@@ -62,17 +62,11 @@ function outMessage(product, taken, how) {
 }
 
 const RUN = {
+  // Une partie ou tout : « Marie a consommé … » dans l'historique (« 2 sur 10, il en reste 8 », « plus en stock »).
   consume(ctx, units) {
-    const { p } = ctx;
-    const total = inStock(ctx);
-    // Tout d'un coup : « tout consommé » dans l'historique ; une partie : « 2 sur 10, il en reste 8 ».
-    if (units >= total) {
-      const before = store.removeProducts([p.id], { reason: { k: 'hist.allConsumed' }, movement: 'consomme', ...price(ctx) });
-      if (before.length) toast(outMessage(before[0], total, 'consumed'), t('common.cancel'), () => store.restoreProducts(before));
-      return;
-    }
-    const done = store.consumeUnits(p.id, units, price(ctx));
-    if (done.before.length) toast(outMessage(done.before[0], units, 'consumed'), t('common.cancel'), () => store.undoTake(done));
+    const taken = Math.min(units, inStock(ctx));
+    const done = store.consumeUnits(ctx.p.id, taken, price(ctx));
+    if (done.before.length) toast(outMessage(done.before[0], taken, 'consumed'), t('common.cancel'), () => store.undoTake(done));
   },
   freeze(ctx, units) {
     const done = store.freezeUnits(ctx.p, units);

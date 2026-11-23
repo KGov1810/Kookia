@@ -3,7 +3,6 @@
 import { setDoc, updateDoc, writeBatch } from 'firebase/firestore';
 import { quantityLabel } from '../../services/quantities/quantities.js';
 import { cleanPrice } from '../../services/stats/money.js';
-import { stockAmount } from '../../services/stock/opened.js';
 import { locationOf } from '../reference/locations.js';
 import { db } from './connection.js';
 import { initialDates } from './fridge-dates.js';
@@ -58,19 +57,13 @@ export function removeEmptied(docs) {
 }
 
 /**
- * Retire des produits en entier. movement : 'consomme' ou 'jete' pour les statistiques
- * (unitPrice : prix affiché dans la fiche, s'il diffère). Renvoie les produits retirés, pour « Annuler ».
+ * Retire des produits en entier, sans rien noter : la sortie elle-même (consommé, jeté) est notée par takeAmounts,
+ * qui appelle cette fonction quand il ne reste plus rien. Renvoie les produits retirés.
  */
-export function removeProducts(ids, { log = true, reason = '', movement = '', unitPrice } = {}) {
+export function removeProducts(ids) {
   if (!canWrite()) return [];
   const removed = state.products.filter((p) => ids.includes(p.id));
   if (!removed.length) return [];
-  if (log) {
-    removed.forEach((p) => logChange({ scope: 'stock', action: 'suppression', name: p.name, itemId: p.id, details: [reason, { qty: { count: p.count ?? 1, quantity: p.quantity ?? '' } }] }));
-  }
-  if (movement) {
-    removed.forEach((p) => recordMovement(movement, unitPrice === undefined ? p : { ...p, unitPrice }, stockAmount(p)));
-  }
   rememberRecipeLinks(removed);
   const batch = writeBatch(db);
   removed.forEach((p) => batch.delete(ref('produits', p.id)));

@@ -73,7 +73,7 @@ export function freezeUnits(product, units) {
 /** « Annuler » une congélation : produit remis comme avant, ligne congelée à part supprimée. */
 export function undoFreeze({ before, frozenId }) {
   if (!canWrite()) return;
-  if (frozenId) removeProducts([frozenId], { log: false });
+  if (frozenId) removeProducts([frozenId]);
   logChange({ scope: 'stock', action: 'annulation', name: before.name, itemId: before.id, details: [{ k: 'hist.freezeUndone' }] });
   saveProduct(before, { log: false });
 }

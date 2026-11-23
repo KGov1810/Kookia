@@ -107,7 +107,7 @@ test('Prix, produits jetés et statistiques', async () => {
   log(box().querySelector('output').textContent === '2 sur 2' && box().querySelector('[data-action="units-all"]').getAttribute('aria-pressed') === 'true', 'Raccourci « Tout (2) »');
   await click(box().querySelector('[data-action="units-confirm"]'), 350);
   log(!product('Comté') && lastMove().type === 'consomme' && lastMove().count === 2 && lastMove().unitPrice === 6, 'Consommé (tout) : 2 × 6 € avec le prix saisi dans la fiche');
-  log(history().action === 'suppression' && history().details[0] === 'tout consommé', 'Tout consommer : historique « tout consommé »');
+  log(history().action === 'consommation' && history().details.join(', ') === '2 sur 2, plus en stock', `Tout consommer : historique « a consommé », 2 sur 2, plus en stock (${history().action} ${history().details})`);
 
   console.log('\n— Consommer ou congeler une partie —');
   await click(row('Œufs').querySelector('.product-main'), 400);

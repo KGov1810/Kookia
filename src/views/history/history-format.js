@@ -12,9 +12,19 @@ export const HISTORY_ICON = {
   generation: () => I.sparkle, planning: () => I.calendar, favori: () => I.star, 'favori-retire': () => I.star
 };
 
+/**
+ * Action affichée. Jusqu'à la version 2.38.0, « Consommé » (tout) depuis la fiche était noté comme un retrait du
+ * stock (« a retiré … », détail « tout consommé ») : ces entrées s'affichent comme une consommation.
+ */
+export function shownAction(entry) {
+  const first = entry.rich?.[0] ?? entry.details?.[0];
+  const allConsumed = first?.k === 'hist.allConsumed' || first === 'tout consommé';
+  return entry.scope === 'stock' && entry.action === 'suppression' && allConsumed ? 'consommation' : entry.action;
+}
+
 /** « Marie a consommé Yaourt » : la phrase de l'action, dans la langue de cet iPhone (le nom en gras). */
 export function historySentence(entry) {
-  const key = `hist.${entry.scope}:${entry.action}`;
+  const key = `hist.${entry.scope}:${shownAction(entry)}`;
   const template = t(key) === key ? t('hist.stock:modification') : t(key);
   const [before, after] = template.split('{n}');
   const name = entry.nameRich ? S.richText(entry.nameRich, entry.clientAt) : entry.name;

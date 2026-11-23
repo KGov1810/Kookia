@@ -23,7 +23,7 @@ function openedUnit(product, remaining) {
 /** Enregistre ce qui reste ; renvoie les lignes créées (unité entamée mise à part). */
 function applyRest(product, { whole, opened }) {
   if (!whole && opened === null) {
-    removeProducts([product.id], { log: false });
+    removeProducts([product.id]);
     return [];
   }
   const intact = { ...product, count: whole, remaining: 1, openedAt: '' };
@@ -84,7 +84,7 @@ export function takeAmounts(entries, { type, details, unitPrice, action }) {
 /** « Annuler » : produits remis comme avant (mouvements effacés), unités mises à part supprimées. */
 export function undoTake({ before = [], created = [] } = {}) {
   if (!canWrite()) return;
-  if (created.length) removeProducts(created, { log: false });
+  if (created.length) removeProducts(created);
   restoreProducts(before);
 }
 

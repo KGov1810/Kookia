@@ -6,7 +6,7 @@ import * as store from '../../data/store/index.js';
 import { state } from '../../data/store/state.js';
 import { t } from '../../services/i18n/i18n.js';
 import * as S from '../../services/index.js';
-import { HISTORY_ICON, historyDay, historyDetails, historySentence } from './history-format.js';
+import { HISTORY_ICON, historyDay, historyDetails, historySentence, shownAction } from './history-format.js';
 
 export function openHistory() {
   const view = { entries: [], loaded: false, limit: 100, scope: '', person: '' };
@@ -67,8 +67,8 @@ export function openHistory() {
             <h2 class="section">${group.label}</h2>
             <div class="group history-list">
               ${group.entries.map((entry) => html`
-                <div class="history-item ${entry.action}">
-                  <span class="history-icon" aria-hidden="true">${(HISTORY_ICON[entry.action] ?? HISTORY_ICON.modification)()}</span>
+                <div class="history-item ${shownAction(entry)}">
+                  <span class="history-icon" aria-hidden="true">${(HISTORY_ICON[shownAction(entry)] ?? HISTORY_ICON.modification)()}</span>
                   <div class="history-text">
                     <p>${historySentence(entry)}</p>
                     ${historyDetails(entry).map((d) => html`<small>${d}</small>`)}
