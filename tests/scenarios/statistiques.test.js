@@ -255,7 +255,8 @@ test('Prix, produits jetés et statistiques', async () => {
 
   const rules = readProjectFile('firestore.rules');
   const movesRule = rules.slice(rules.indexOf('match /mouvements'), rules.indexOf('match /historique'));
-  log(/allow read, create, delete/.test(movesRule) && !/update/.test(movesRule), 'Règles : mouvements lisibles, ajout et suppression, jamais modifiables');
+  log(/allow read, delete/.test(movesRule) && /allow create/.test(movesRule) && !/update/.test(movesRule), 'Règles : mouvements lisibles, ajout et suppression, jamais modifiables');
+  log(/request\.resource\.data\.type in \['achat', 'consomme', 'jete'\]/.test(movesRule), 'Règles : un mouvement est un achat, une consommation ou un produit jeté');
   log(/collection in \['produits', 'courses', 'recettes', 'prix'\]/.test(rules), 'Règles : mémoire des prix autorisée');
   log(/repeat\(5, minmax\(0, 1fr\)\)/.test(readAllCss()), 'Barre d\'onglets sur 5 colonnes (4 onglets et le +)');
   console.log('\nErreurs JS :', P.errors.length ? P.errors : 'aucune');

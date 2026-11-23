@@ -4,6 +4,31 @@ import { fmt } from './html.js';
 
 export const openSheets = new Set();
 
+let sheetCount = 0;
+let escapeWired = false;
+
+/** Échap (clavier branché à l'iPhone ou à l'iPad) : ferme la fiche du dessus (pas celle cachée sous le scanner). */
+function closeTopSheet(event) {
+  if (event.key !== 'Escape' || !openSheets.size || document.body.classList.contains('scanning')) return;
+  [...openSheets].at(-1).close();
+}
+
+/** Fiche nommée par son titre : VoiceOver annonce « Modifier le produit, boîte de dialogue ». */
+function nameAfterTitle(panel) {
+  const title = panel.querySelector('h1, h2');
+  if (!title) {
+    panel.removeAttribute('aria-labelledby');
+    return;
+  }
+  title.id ||= `${panel.id}-title`;
+  panel.setAttribute('aria-labelledby', title.id);
+}
+
+/** Élément touché pour ouvrir la fiche, pour y revenir à la fermeture (pas un champ : le clavier s'ouvrirait). */
+function focusBack(opener) {
+  if (opener?.isConnected && !opener.matches('input, textarea, select')) opener.focus({ preventScroll: true });
+}
+
 /**
  * render : () => Html ; actions : { nom: (élément, événement) => void }
  * onInput : écouteur input/change ; onData : appelé quand les données partagées changent.
@@ -15,7 +40,10 @@ export function openSheet({ render, actions = {}, onInput = null, onData = null,
   panel.className = `sheet${tall ? ' tall' : ''}`;
   panel.setAttribute('role', 'dialog');
   panel.setAttribute('aria-modal', 'true');
+  panel.id = `sheet-${++sheetCount}`;
+  panel.tabIndex = -1; // reçoit le focus à l'ouverture (VoiceOver, clavier)
   backdrop.append(panel);
+  const opener = document.activeElement;
 
   const sheet = {
     panel,
@@ -23,7 +51,10 @@ export function openSheet({ render, actions = {}, onInput = null, onData = null,
     onData,
     update() {
       const scroll = panel.querySelector('.sheet-body')?.scrollTop ?? 0;
+      const hadFocus = panel.contains(document.activeElement) && document.activeElement !== panel;
       panel.innerHTML = fmt(render());
+      nameAfterTitle(panel);
+      if (hadFocus && !panel.contains(document.activeElement)) panel.focus({ preventScroll: true }); // bouton redessiné
       const body = panel.querySelector('.sheet-body');
       if (body) body.scrollTop = scroll;
     },
@@ -36,6 +67,8 @@ export function openSheet({ render, actions = {}, onInput = null, onData = null,
       setTimeout(() => backdrop.remove(), 300);
       pushPageBack();
       onClose?.();
+      if (!panel.contains(document.activeElement) && document.activeElement !== document.body) return; // focus déjà ailleurs
+      focusBack(opener);
     }
   };
 
@@ -56,11 +89,18 @@ export function openSheet({ render, actions = {}, onInput = null, onData = null,
     if (event.target === backdrop) sheet.close();
   });
 
+  if (!escapeWired) {
+    document.addEventListener('keydown', closeTopSheet);
+    escapeWired = true;
+  }
   document.body.append(backdrop);
   sheet.update();
   openSheets.add(sheet);
   pushPageBack();
-  requestAnimationFrame(() => requestAnimationFrame(() => backdrop.classList.add('open')));
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    backdrop.classList.add('open');
+    if (!panel.contains(document.activeElement)) panel.focus({ preventScroll: true });
+  }));
   return sheet;
 }
 

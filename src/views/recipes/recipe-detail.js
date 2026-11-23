@@ -1,6 +1,7 @@
 // Kookia — Détail d'une recette.
 
-import { html, raw } from '../../components/html.js';
+import { html } from '../../components/html.js';
+import { stepper } from '../../components/stepper.js';
 import { I } from '../../components/icons.js';
 import { shareText } from '../../components/platform.js';
 import { ingredientRow, originFact } from '../../components/recipe-visuals.js';
@@ -122,11 +123,7 @@ export function openRecipe(id) {
         <section class="group">
           <h2>${t('detail.ingredients')}</h2>
           <div class="field"><span>${t('detail.portions')}</span>
-            <div class="stepper">
-              <button data-action="portions-minus" aria-label="${t('detail.lessPortion')}" ${shownServings(recipe) <= 1 ? raw('disabled') : ''}>−</button>
-              <output aria-live="polite">${shownServings(recipe)}</output>
-              <button data-action="portions-plus" aria-label="${t('detail.morePortion')}">+</button>
-            </div>
+            ${stepper({ actions: ['portions-minus', 'portions-plus'], value: shownServings(recipe), labels: [t('detail.lessPortion'), t('detail.morePortion')], canLess: shownServings(recipe) > 1, live: true })}
           </div>
           ${shownServings(recipe) !== baseServings(recipe) ? html`<p class="hint inset">${t('detail.rescaled', { n: baseServings(recipe) })}</p>` : ''}
           ${availability.rows.map((row) => ingredientRow(row, factorFor(recipe)))}

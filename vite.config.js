@@ -21,6 +21,9 @@ export default defineConfig({
   plugins: [serviceWorkerPlugin()],
   test: {
     environment: 'jsdom',
+    // Un navigateur de test par processus, réutilisé d'un fichier à l'autre (chaque fichier garde ses propres modules) :
+    // la suite passe d'environ 70 à 20 secondes, le navigateur n'étant plus recréé pour chacun des fichiers.
+    pool: 'vmThreads',
     environmentOptions: { jsdom: { url: 'https://exemple.github.io/kookia/' } },
     setupFiles: ['tests/setup.js'],
     include: ['tests/**/*.test.js'],

@@ -2,6 +2,7 @@
 // Le poids et le prix tapés valent pour toute la ligne ; ils sont enregistrés par pièce.
 
 import { html, raw } from '../../components/html.js';
+import { stepper } from '../../components/stepper.js';
 import { unitInput } from '../../components/unit-input.js';
 import * as store from '../../data/store/index.js';
 import { t } from '../../services/i18n/i18n.js';
@@ -68,11 +69,7 @@ export function selectionLines(entries) {
     return html`
       <div class="produce-line">
         <div class="field"><span class="label-stack">${item.emoji} ${name}<small>${t('produce.keeps', { place: S.placeName(entry.location), duration: S.durationText(entryDays(entry)) })}</small></span>
-          <div class="stepper small">
-            <button data-action="minus" data-name="${item.name}" aria-label="${t('produce.less', { name })}">−</button>
-            <output>${count}</output>
-            <button data-action="plus" data-name="${item.name}" aria-label="${t('produce.more', { name })}">+</button>
-          </div>
+          ${stepper({ actions: ['minus', 'plus'], value: count, labels: [t('produce.less', { name }), t('produce.more', { name })], data: { name: item.name }, small: true })}
         </div>
         ${coldLine(entry, name)}
         <div class="produce-extra">

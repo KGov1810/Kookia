@@ -45,8 +45,24 @@ function denied(path) {
     || (globalThis.__denyStats && /\/(mouvements|prix)(\/|$)/.test(path));
 }
 const deniedError = () => Object.assign(new Error('denied'), { code: 'permission-denied' });
+// Comme firestore.rules : produits, articles de courses et mouvements enregistrés avec un nom (texte, 300 caractères
+// au plus), mouvements d'un type connu. Une écriture de l'app qui ne les respecte pas échouerait aussi en vrai.
+const validName = (name) => typeof name === 'string' && name.length <= 300;
+function breaksRules(path, doc) {
+  if (/\/(produits|courses)\/[^/]+$/.test(path)) return !validName(doc.name);
+  if (/\/mouvements\/[^/]+$/.test(path)) return !['achat', 'consomme', 'jete'].includes(doc.type) || !validName(doc.name);
+  return false;
+}
+// Comme le vrai Firestore : docChanges() liste les documents ajoutés, modifiés ou retirés depuis la réponse précédente
+// (vide si seul l'état de la connexion a changé).
 function fire(l, fromCache = false) {
-  l.cb({ docs: docsIn(l.path, l.constraints), metadata: { fromCache, hasPendingWrites: false } });
+  const docs = docsIn(l.path, l.constraints);
+  const now = new Map(docs.map((d) => [d.id, JSON.stringify(d.data())]));
+  const before = l.last ?? new Map();
+  const changes = [...now].filter(([id, json]) => before.get(id) !== json).map(([id]) => ({ type: before.has(id) ? 'modified' : 'added', id }))
+    .concat([...before.keys()].filter((id) => !now.has(id)).map((id) => ({ type: 'removed', id })));
+  l.last = now;
+  l.cb({ docs, docChanges: () => changes, metadata: { fromCache, hasPendingWrites: false } });
 }
 export function query(ref, ...constraints) { return { path: ref.path, constraints }; }
 export const where = (field, op, value) => ({ type: 'where', field, op, value });
@@ -61,9 +77,13 @@ export async function setDoc(ref, data, options) {
   if (denied(ref.path)) throw deniedError();
   check(data); globalThis.__db.writes++;
   const prev = globalThis.__db.docs.get(ref.path);
-  globalThis.__db.docs.set(ref.path, options?.merge && prev ? deepMerge(prev, data) : { ...data });
+  const next = options?.merge && prev ? deepMerge(prev, data) : { ...data };
+  if (breaksRules(ref.path, next)) throw deniedError();
+  globalThis.__db.docs.set(ref.path, next);
   notify(ref.path);
 }
+// Comme le vrai Firestore : increment(n) ajoute n à la valeur enregistrée (0 si le champ manque).
+export const increment = (n) => ({ __increment: n });
 // Comme le vrai Firestore : « translations.en » modifie un champ à l'intérieur d'une map.
 function applyUpdate(prev, data) {
   const next = { ...prev };
@@ -71,7 +91,8 @@ function applyUpdate(prev, data) {
     const parts = key.split('.');
     let target = next;
     parts.slice(0, -1).forEach((part) => { target[part] = { ...(target[part] ?? {}) }; target = target[part]; });
-    target[parts.at(-1)] = value;
+    const field = parts.at(-1);
+    target[field] = value?.__increment !== undefined ? (Number(target[field]) || 0) + value.__increment : value;
   }
   return next;
 }
@@ -79,7 +100,9 @@ export async function updateDoc(ref, data) {
   check(data);
   const prev = globalThis.__db.docs.get(ref.path);
   if (!prev) throw notFound();
-  globalThis.__db.docs.set(ref.path, applyUpdate(prev, data));
+  const next = applyUpdate(prev, data);
+  if (breaksRules(ref.path, next)) throw deniedError();
+  globalThis.__db.docs.set(ref.path, next);
   notify(ref.path);
 }
 export async function deleteDoc(ref) {
@@ -103,10 +126,14 @@ export function onSnapshot(ref, ...args) {
 export function writeBatch() {
   const ops = [];
   return {
-    set(ref, data) { check(data); ops.push(() => globalThis.__db.docs.set(ref.path, { ...data })); },
+    set(ref, data) { check(data); ops.push(() => {
+      if (breaksRules(ref.path, data)) throw deniedError();
+      globalThis.__db.docs.set(ref.path, { ...data }); }); },
     update(ref, data) { check(data); ops.push(() => {
       const prev = globalThis.__db.docs.get(ref.path); if (!prev) throw notFound();
-      globalThis.__db.docs.set(ref.path, applyUpdate(prev, data)); }); },
+      const next = applyUpdate(prev, data);
+      if (breaksRules(ref.path, next)) throw deniedError();
+      globalThis.__db.docs.set(ref.path, next); }); },
     delete(ref) { ops.push(() => globalThis.__db.docs.delete(ref.path)); },
     async commit() { ops.forEach((o) => o()); globalThis.__db.writes++;
       for (const l of globalThis.__db.listeners) fire(l); }

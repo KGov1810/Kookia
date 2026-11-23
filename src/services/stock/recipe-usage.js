@@ -2,6 +2,7 @@
 
 import { parseAmount } from '../quantities/portions.js';
 import { parseWeight } from '../quantities/weights.js';
+import { simplify } from '../text/text.js';
 
 // Cuillères et unités, aussi en anglais, espagnol et portugais (recettes écrites dans la langue de l'iPhone).
 const SPOONS = [
@@ -26,8 +27,8 @@ export function recipeUnits(ingredient, product, factor = 1) {
   const unit = parsed.unit.trim();
   if (!unit) return need; // « 3 » œufs : des pièces
   // « ½ citron », « 2 oignons » : l'unité est le produit lui-même.
-  const word = unit.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/s$/, '');
-  if (word.length >= 3 && product.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').includes(word)) return need;
+  const word = simplify(unit).replace(/s$/, '');
+  if (word.length >= 3 && simplify(product.name).includes(word)) return need;
   const size = parseWeight(product.quantity); // poids ou volume d'une unité du produit
   if (!size) return null;
   const spoon = SPOONS.find(([pattern]) => pattern.test(unit));

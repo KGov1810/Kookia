@@ -4,7 +4,7 @@
 import { setDoc } from 'firebase/firestore';
 import { CATEGORY_IDS } from '../reference/categories.js';
 import { LOCATIONS } from '../reference/locations.js';
-import { reportStatsDenied } from './movements.js';
+import { reportMemoryError } from './errors.js';
 import { priceKeys } from './prices.js';
 import { state } from './state.js';
 import { canWrite, ref } from './writes.js';
@@ -33,5 +33,5 @@ export function rememberPlacement(product, { category, location } = {}) {
   }
   if (!Object.keys(entries).length) return;
   state.placements = { ...state.placements, ...entries };
-  setDoc(ref('prix', 'categories'), { entries }, { merge: true }).catch(reportStatsDenied);
+  setDoc(ref('prix', 'categories'), { entries }, { merge: true }).catch(reportMemoryError);
 }

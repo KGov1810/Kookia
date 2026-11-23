@@ -2,22 +2,36 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // Nom d'un produit, d'un article ou d'un mouvement : du texte, de taille raisonnable.
+    function validName(name) {
+      return name is string && name.size() <= 300;
+    }
+
     // Un foyer n'est lisible que si l'on connaît son code (pas de listing possible).
     match /foyers/{code} {
       allow get, create: if request.auth != null;
       allow list, update, delete: if false;
 
       // Stock, liste de courses, recettes et mémoire des prix du foyer.
+      // Produits et articles de courses enregistrés : avec un nom (texte de 300 caractères au plus).
       match /{collection}/{docId} {
-        allow read, write: if request.auth != null
+        allow read, delete: if request.auth != null
           && collection in ['produits', 'courses', 'recettes', 'prix']
           && exists(/databases/$(database)/documents/foyers/$(code));
+        allow create, update: if request.auth != null
+          && collection in ['produits', 'courses', 'recettes', 'prix']
+          && exists(/databases/$(database)/documents/foyers/$(code))
+          && (collection in ['recettes', 'prix'] || validName(request.resource.data.name));
       }
 
       // Mouvements (statistiques) : lecture, ajout et suppression (« Annuler ») ; jamais de modification.
       match /mouvements/{movementId} {
-        allow read, create, delete: if request.auth != null
+        allow read, delete: if request.auth != null
           && exists(/databases/$(database)/documents/foyers/$(code));
+        allow create: if request.auth != null
+          && exists(/databases/$(database)/documents/foyers/$(code))
+          && request.resource.data.type in ['achat', 'consomme', 'jete']
+          && validName(request.resource.data.name);
       }
 
       // Historique : lecture, ajout et nettoyage des entrées anciennes ; jamais de modification.

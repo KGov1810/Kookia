@@ -1,6 +1,7 @@
 // Kookia — Fiche produit : affichage.
 
 import { html, raw } from '../../components/html.js';
+import { stepper } from '../../components/stepper.js';
 import { I } from '../../components/icons.js';
 import { categoryOptions, thumb } from '../../components/product-visuals.js';
 import * as R from '../../data/reference/index.js';
@@ -64,11 +65,7 @@ export function renderEditor(ctx) {
         </label>
         ${dateSection(ctx)}
         <div class="field"><span>${t('editor.count')}</span>
-          <div class="stepper">
-            <button data-action="count-minus" aria-label="${t('editor.oneLess')}" ${(p.count ?? 1) <= 1 ? raw('disabled') : ''}>−</button>
-            <output aria-live="polite">${p.count ?? 1}</output>
-            <button data-action="count-plus" aria-label="${t('editor.oneMore')}">+</button>
-          </div>
+          ${stepper({ actions: ['count-minus', 'count-plus'], value: p.count ?? 1, labels: [t('editor.oneLess'), t('editor.oneMore')], canLess: (p.count ?? 1) > 1, live: true })}
         </div>
         ${quantityField(ctx)}
         ${(p.count ?? 1) > 1 && p.quantity.trim() ? html`<p class="hint inset">${t('editor.inStock', { qty: S.quantityLabel(p) })}</p>` : ''}

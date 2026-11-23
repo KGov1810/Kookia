@@ -18,7 +18,7 @@ export function translateIfNeeded(id, onChange) {
   if (!recipe || !hasClaudeKey() || !S.lacksLanguage(recipe, lang) || attempts.has(key)) return;
   attempts.set(key, 'busy');
   onChange();
-  S.translateRecipe({ key: state.settings.claudeKey, model: state.settings.model, recipe, lang })
+  S.translateRecipe({ ...store.claudeAccess(), recipe, lang })
     .then((translation) => {
       store.saveRecipeTranslation(id, lang, translation);
       attempts.set(key, 'done');

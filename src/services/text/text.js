@@ -41,11 +41,7 @@ export function nameKey(name) {
 }
 
 function computeTokens(name) {
-  const text = name
-    .replace(/\([^)]*\)/g, ' ')
-    .replace(/œ/gi, 'oe').replace(/æ/gi, 'ae')
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
+  const text = simplify(name.replace(/\([^)]*\)/g, ' ').replace(/œ/gi, 'oe').replace(/æ/gi, 'ae'))
     // Mots composés gardés entiers : « demi-écrémé », « pâte à tartiner ».
     .replace(/([a-z])\s*-\s*([a-z])/g, '$1-$2')
     .replace(/([a-z]{3,})\s+a\s+([a-z]{3,})/g, '$1-a-$2');
@@ -76,4 +72,5 @@ export function normalizeBarcode(code) {
   return String(code ?? '').replace(/\D/g, '').replace(/^0+/, '');
 }
 
+/** Sans accents, en minuscules : « Crème Brûlée » → « creme brulee ». */
 export const simplify = (text) => String(text ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();

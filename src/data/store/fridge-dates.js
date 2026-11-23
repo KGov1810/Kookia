@@ -7,7 +7,7 @@ import { fridgeEstimable } from '../../services/stock/fridge-days.js';
 import { remainingOf } from '../../services/stock/opened.js';
 import { dateKindOf, estimateFreshDays, freezerLimit, isDateEstimated, keptCold } from '../../services/stock/stock-dates.js';
 import { db } from './connection.js';
-import { reportStatsDenied } from './movements.js';
+import { reportMemoryError } from './errors.js';
 import { priceKeys } from './prices.js';
 import { state } from './state.js';
 import { canWrite, ref, write } from './writes.js';
@@ -62,7 +62,7 @@ export function rememberShelfLife(product) {
   }
   if (!Object.keys(entries).length) return;
   state.shelfDays = { ...state.shelfDays, ...entries };
-  setDoc(ref('prix', 'dates'), { entries }, { merge: true }).catch(reportStatsDenied);
+  setDoc(ref('prix', 'dates'), { entries }, { merge: true }).catch(reportMemoryError);
 }
 
 const estimated = new Set(); // produits déjà traités pendant cette session

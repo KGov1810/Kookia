@@ -46,8 +46,7 @@ export async function analyze(ctx) {
   ctx.sheet.update();
   try {
     const items = await S.analyzeReceipt({
-      key: state.settings.claudeKey,
-      model: state.settings.model,
+      ...store.claudeAccess(),
       images: view.photos.map((p) => p.base64),
       shopping: state.shopping.map((s) => ({ id: s.id, name: s.name }))
     });

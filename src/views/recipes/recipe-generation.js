@@ -18,8 +18,7 @@ export async function startRecipeGeneration() {
     const others = all.filter((p) => !ui.priority.has(p.id) && store.productStatus(p) !== 'expired');
     const filters = currentFilters();
     const recipes = await S.generateRecipes({
-      key: state.settings.claudeKey,
-      model: state.settings.model,
+      ...store.claudeAccess(),
       priority,
       others,
       shopping: state.shopping,

@@ -10,6 +10,9 @@ import * as S from '../../services/index.js';
 import { openEditor } from '../product-editor/product-editor.js';
 import { proposal } from './put-away-sheet.js';
 
+/** Changements qui touchent les Courses : la liste, le stock (« il en reste »), « À racheter », la synchronisation. */
+const REDRAW = ['shopping', 'products', 'purchases', 'sync', 'settings', 'time'];
+
 export const shoppingView = {
   render() {
     return html`
@@ -26,7 +29,8 @@ export const shoppingView = {
   mounted() {
     this.update();
   },
-  update() {
+  update(what) {
+    if (what && !REDRAW.includes(what)) return; // recettes, planning, statistiques : rien à changer ici
     store.watchPurchases(); // achats des 3 derniers mois, pour « À racheter » (une seule écoute par session)
     const toBuy = state.shopping.filter((i) => !i.checked).sort((a, b) => a.createdAt - b.createdAt);
     const inCart = state.shopping.filter((i) => i.checked).sort((a, b) => a.name.localeCompare(b.name, S.localeTag()));

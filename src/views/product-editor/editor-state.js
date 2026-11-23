@@ -29,7 +29,9 @@ export function createEditorContext({ product = null, draft = null, mode = 'manu
     const place = draft?.location ? null : memo.location ?? (category ? S.defaultLocationFor(category, p.name, p.location) : null);
     if (place) p.location = place;
   }
-  const ctx = { p, view, isNew, shoppingItemId, draft, mode, filePromise, barcode, sheet: null };
+  // base : le produit tel qu'il était à l'ouverture. Seul ce qui a changé depuis est enregistré : ce que l'autre iPhone
+  // modifie pendant que la fiche est ouverte (une unité consommée…) est gardé.
+  const ctx = { p, base: product ? { ...product } : null, view, isNew, shoppingItemId, draft, mode, filePromise, barcode, sheet: null };
   applyKnownPrice(ctx); // nom déjà connu (article de courses rangé) : dernier prix payé
   if (!p.dateKind) setKind(ctx, isNew ? defaultKind(p) : R.KINDS_BY_LOCATION[p.location][0]);
   return ctx;

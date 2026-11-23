@@ -2,6 +2,7 @@
 // Code inconnu ou sans réseau : la ligne attend un nom, et se coche toute seule quand on le tape.
 
 import { html, raw } from '../../components/html.js';
+import { stepper } from '../../components/stepper.js';
 import { I } from '../../components/icons.js';
 import { lineActions } from '../../components/line-actions.js';
 import { openSheet } from '../../components/sheet.js';
@@ -27,11 +28,7 @@ function line(entry, index) {
         <input data-field="name" data-index="${index}" value="${entry.name}" placeholder="${t('multi.typeName')}" aria-label="${t('editor.productName')}" autocomplete="off">
         ${note ? html`<small>${note}</small>` : ''}
         <div class="receipt-place">
-          <div class="stepper small">
-            <button data-action="line-minus" data-index="${index}" aria-label="${t('editor.oneLess')}" ${entry.count <= 1 ? raw('disabled') : ''}>−</button>
-            <output>${entry.count}</output>
-            <button data-action="line-plus" data-index="${index}" aria-label="${t('editor.oneMore')}">+</button>
-          </div>
+          ${stepper({ actions: ['line-minus', 'line-plus'], value: entry.count, labels: [t('editor.oneLess'), t('editor.oneMore')], canLess: entry.count > 1, data: { index }, small: true })}
           <select class="receipt-location" data-field="location" data-index="${index}" aria-label="${t('stock.place')}">
             ${R.LOCATIONS.map((loc) => html`<option value="${loc.id}" ${entry.location === loc.id ? raw('selected') : ''}>${S.placeName(loc.id)}</option>`)}
           </select>

@@ -1,8 +1,5 @@
 // Kookia — Gabarits HTML échappés.
 
-// Kookia — outils d'interface : gabarits HTML échappés, icônes,
-// fiches modales, messages éphémères, sélection de photo.
-
 export class Html {
   constructor(value) {
     this.value = value;
@@ -31,6 +28,11 @@ export function html(strings, ...values) {
     if (i < values.length) out += fmt(values[i]);
   });
   return raw(out);
+}
+
+/** Attributs data-* (échappés) : ` data-index="2"`, pour retrouver la ligne concernée. */
+export function dataAttrs(dataset) {
+  return raw(Object.entries(dataset).map(([key, value]) => ` data-${key}="${fmt(value)}"`).join(''));
 }
 
 export function setHTML(selector, value, root = document) {

@@ -1,7 +1,6 @@
 // Kookia — Filtres des recettes et consignes correspondantes pour Claude.
 
 import { originOf } from '../../data/reference/origins.js';
-import { daysUntil, hasDate } from '../dates/dates.js';
 import { t } from '../i18n/i18n.js';
 import { nameTokens } from '../text/text.js';
 
@@ -103,13 +102,4 @@ export function filterLines(filters) {
     ? 'Toutes les recettes doivent convenir au batch cooking : préparées en plusieurs portions et se conservant au moins 3 jours au réfrigérateur (batch_cooking = true, conservation_jours ≥ 3).'
     : 'Inclue au moins une recette adaptée au batch cooking (se conserve plusieurs jours).');
   return lines;
-}
-
-function promptExpiry(iso) {
-  if (!hasDate(iso)) return 'date de péremption non renseignée';
-  const days = daysUntil(iso);
-  if (days < 0) return `date dépassée depuis ${-days} j`;
-  if (days === 0) return "expire aujourd'hui";
-  if (days === 1) return 'expire demain';
-  return `expire dans ${days} j`;
 }

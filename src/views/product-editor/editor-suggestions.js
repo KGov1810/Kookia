@@ -3,7 +3,6 @@
 import { fmt } from '../../components/html.js';
 import { thumb } from '../../components/product-visuals.js';
 import * as store from '../../data/store/index.js';
-import { state } from '../../data/store/state.js';
 import * as S from '../../services/index.js';
 import { dateSection } from './editor-date-section.js';
 import { suggestPrice } from './editor-price.js';
@@ -59,7 +58,7 @@ function askClaude(ctx) {
   if (!name || !store.hasClaudeKey()) return;
   const id = name.toLowerCase();
   if (!asked.has(id)) {
-    asked.set(id, S.categorizeProduct({ key: state.settings.claudeKey, name }).catch(() => ({ category: null, location: null })));
+    asked.set(id, S.categorizeProduct({ key: store.claudeAccess().key, name }).catch(() => ({ category: null, location: null })));
   }
   asked.get(id).then(({ category, location }) => {
     // Fiche fermée, nom changé ou catégorie choisie entre-temps : on ne touche à rien.

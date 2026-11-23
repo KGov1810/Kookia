@@ -48,7 +48,7 @@ export function consumeAmounts(uses, { reason = '' } = {}) {
 /**
  * Congèle « units » unités. Tout le produit : il change de lieu. Une partie : les unités congelées
  * deviennent une ligne à part au congélateur (pas un achat), le reste ne bouge pas.
- * product : la fiche en cours (modifications comprises). Renvoie de quoi annuler.
+ * product : la fiche en cours (modifications comprises, déjà enregistrées). Renvoie de quoi annuler.
  */
 export function freezeUnits(product, units) {
   if (!canWrite()) return null;
@@ -60,12 +60,12 @@ export function freezeUnits(product, units) {
   const frozen = { location: 'congelateur', dateKind: 'congele', frozenAt, expiry: freezerLimit(product.category, frozenAt) };
   const before = { ...stored };
   if (taken >= total) {
-    saveProduct({ ...product, ...frozen, count: total });
+    saveProduct({ ...stored, ...frozen }); // seuls le lieu et les dates changent (la fiche est déjà enregistrée)
     return { before, frozenId: '', product: { ...product, ...frozen } };
   }
   const frozenId = crypto.randomUUID();
   logChange({ scope: 'stock', action: 'congelation', name: product.name, itemId: product.id, details: [{ k: 'units.ofTotal', p: { n: taken, total } }, { k: 'rest.whole', p: { n: total - taken } }] });
-  saveProduct({ ...product, count: total - taken }, { log: false });
+  saveProduct({ ...stored, count: total - taken }, { log: false });
   saveProduct({ ...product, ...frozen, id: frozenId, count: taken, createdAt: Date.now() }, { log: false, purchase: false });
   return { before, frozenId, product: { ...product, ...frozen } };
 }
@@ -83,6 +83,7 @@ export function addUnits(product, units, unitPrice) {
   if (!canWrite()) return;
   const price = cleanPrice(unitPrice) ?? cleanPrice(product.unitPrice);
   const added = Math.max(1, Math.round(Number(units) || 1));
-  saveProduct({ ...product, count: (product.count ?? 1) + added, unitPrice: price });
+  const stored = state.products.find((p) => p.id === product.id) ?? product; // le stock actuel, pas une copie ancienne
+  saveProduct({ ...stored, count: (stored.count ?? 1) + added, unitPrice: price });
   recordMovement('achat', { ...product, unitPrice: price }, added);
 }

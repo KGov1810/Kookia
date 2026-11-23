@@ -67,6 +67,11 @@ export function hasClaudeKey() {
   return Boolean(state.settings.claudeKey);
 }
 
+/** Clé et modèle Claude choisis sur cet iPhone, pour chaque appel à Claude. */
+export function claudeAccess() {
+  return { key: state.settings.claudeKey, model: state.settings.model };
+}
+
 /**
  * Prénom de l'autre personne du foyer, d'après ce qu'elle a ajouté (stock et courses) ; '' si inconnu.
  * Le plus fréquent l'emporte, à égalité le plus récent.

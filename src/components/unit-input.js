@@ -1,12 +1,7 @@
 // Kookia — Champ « chiffre + unité » : le chiffre au clavier numérique, l'unité d'un toucher (g | kg | cl | L).
 
 import { t } from '../services/i18n/i18n.js';
-import { fmt, html, raw } from './html.js';
-
-/** Attributs data-* (échappés), communs au champ et aux boutons pour retrouver la ligne concernée. */
-function dataAttrs(dataset) {
-  return raw(Object.entries(dataset).map(([key, value]) => ` data-${key}="${fmt(value)}"`).join(''));
-}
+import { dataAttrs, fmt, html, raw } from './html.js';
 
 /**
  * amount : chiffre tapé ; unit : unité en surbrillance (null : aucune, pour un ancien texte libre) ;

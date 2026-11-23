@@ -5,7 +5,7 @@ import * as WI from '../../data/reference/category-words-intl.js';
 import * as W from '../../data/reference/category-words.js';
 import { FOODS } from '../../data/reference/i18n/foods.js';
 import { PRODUCE } from '../../data/reference/produce.js';
-import { nameMatchScore } from '../text/text.js';
+import { nameMatchScore, simplify } from '../text/text.js';
 
 /** Noms d'un fruit ou légume du catalogue : français, puis anglais, espagnol et portugais. */
 const produceNames = (item) => [...new Set([item.name, ...(FOODS[`fv.${item.name}`] ?? []).slice(1)])];
@@ -34,7 +34,7 @@ function normalizeWord(raw) {
   const lower = raw.toLowerCase();
   if (/^p[aâ]tés?$/.test(lower)) return 'pateviande';
   if (/^th?és?$/.test(lower)) return 'thebev'; // « thé », « té » (≠ « the » anglais)
-  const plain = lower.replace(/œ/g, 'oe').replace(/æ/g, 'ae').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const plain = simplify(lower.replace(/œ/g, 'oe').replace(/æ/g, 'ae'));
   const single = plain.length >= 4 ? plain.replace(/[sx]$/, '') : plain;
   return single.length > 4 && single.endsWith('ee') ? single.slice(0, -1) : single; // surgelée → surgele
 }

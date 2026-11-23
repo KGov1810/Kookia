@@ -9,6 +9,7 @@ export const CATEGORY_VERSION = 2;
 
 export function toProduct(id, d) {
   if (!d.name) return null; // document incomplet (une date vide = « date à compléter »)
+  if (isEmptied(d)) return null; // plus aucune unité : supprimé dès réception (removeEmptied)
   return {
     id,
     name: d.name ?? '',
@@ -28,8 +29,15 @@ export function toProduct(id, d) {
     createdAt: d.createdAt ?? 0,
     image: d.image ?? '',
     imageUrl: d.imageUrl ?? '',
-    unitPrice: cleanPrice(d.unitPrice) // prix d'une unité, en euros (null = inconnu)
+    unitPrice: cleanPrice(d.unitPrice), // prix d'une unité, en euros (null = inconnu)
+    // Ancien format (catégories larges, champ manquant) : réécrit en entier à la prochaine modification.
+    legacy: (d.categoryVersion ?? 1) < CATEGORY_VERSION || !(Number(d.count) >= 1) || !d.location || !d.dateKind
   };
+}
+
+/** Nombre d'unités tombé à 0 : les deux iPhone ont retiré la dernière unité en même temps. */
+export function isEmptied(d) {
+  return Number.isFinite(d.count) && d.count <= 0;
 }
 
 const MOVEMENT_TYPES = ['achat', 'consomme', 'jete'];

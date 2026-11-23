@@ -9,7 +9,7 @@ import * as S from '../../services/index.js';
 import { applyKnownPrice } from './editor-price.js';
 import { applyReadDate, followCategoryDate, setLocation } from './editor-state.js';
 
-const claude = () => ({ key: state.settings.claudeKey, model: state.settings.model });
+const claude = () => store.claudeAccess();
 
 export async function run(ctx, message, task) {
   const { view } = ctx;

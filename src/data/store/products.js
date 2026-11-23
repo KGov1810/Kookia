@@ -1,63 +1,60 @@
 // Kookia — Produits du stock : enregistrer, consommer, retirer.
 
-import { setDoc, writeBatch } from 'firebase/firestore';
-import { toISODate } from '../../services/dates/dates.js';
+import { setDoc, updateDoc, writeBatch } from 'firebase/firestore';
 import { quantityLabel } from '../../services/quantities/quantities.js';
 import { cleanPrice } from '../../services/stats/money.js';
-import { remainingOf, stockAmount } from '../../services/stock/opened.js';
-import { dateKindOf } from '../../services/stock/stock-dates.js';
+import { stockAmount } from '../../services/stock/opened.js';
 import { locationOf } from '../reference/locations.js';
 import { db } from './connection.js';
 import { initialDates } from './fridge-dates.js';
 import { countName, logChange, productDiff, productSummary } from './history.js';
-import { CATEGORY_VERSION } from './mappers.js';
+import { isEmptied } from './mappers.js';
 import { cancelLastMovements, recordMovement } from './movements.js';
+import { productFields, productPatch } from './product-fields.js';
 import { rememberPrices } from './prices.js';
 import { rememberRecipeLinks } from './recipes.js';
 import { state } from './state.js';
 import { canWrite, ref, write } from './writes.js';
 
-/** Part restante (une ligne entamée n'a qu'un exemplaire) et date d'ouverture. */
-function openedFields(product, count) {
-  const remaining = count > 1 ? 1 : remainingOf(product);
-  return { remaining, openedAt: remaining < 1 ? product.openedAt || toISODate(new Date()) : '' };
-}
-
-/** Enregistre un produit. Un produit nouveau est noté comme un achat (sauf « Annuler », sans log). */
-export function saveProduct(product, { log = true, purchase = log } = {}) {
-  if (!canWrite()) return;
-  const before = state.products.find((p) => p.id === product.id);
-  const count = Math.max(1, Math.round(Number(product.count) || 1));
+/**
+ * Enregistre un produit. Un produit nouveau est noté comme un achat (sauf « Annuler », sans log).
+ * base : la version d'où part la modification (fiche ouverte plus tôt) ; par défaut, le produit tel qu'il est en stock.
+ * Seul ce qui change par rapport à base est envoyé. Renvoie 'gone' si le produit a été retiré entre-temps par l'autre
+ * iPhone (il n'est pas recréé).
+ */
+export function saveProduct(product, { log = true, purchase = log, base } = {}) {
+  if (!canWrite()) return '';
+  const current = state.products.find((p) => p.id === product.id);
+  if (base && !current) return 'gone';
+  const from = base ?? current;
+  const fields = productFields(product);
   if (log) {
-    if (!before) {
-      logChange({ scope: 'stock', action: 'ajout', name: product.name.trim(), itemId: product.id, details: [productSummary(product)] });
+    if (!from) {
+      logChange({ scope: 'stock', action: 'ajout', name: fields.name, itemId: product.id, details: [productSummary(product)] });
     } else {
-      const changes = productDiff(before, { ...product, name: product.name.trim(), count, dateKind: dateKindOf(product), unitPrice: cleanPrice(product.unitPrice) });
-      if (changes.length) logChange({ scope: 'stock', action: 'modification', name: product.name.trim(), itemId: product.id, details: changes });
+      const changes = productDiff(from, { ...product, name: fields.name, count: fields.count, dateKind: fields.dateKind, unitPrice: fields.unitPrice });
+      if (changes.length) logChange({ scope: 'stock', action: 'modification', name: fields.name, itemId: product.id, details: changes });
     }
   }
-  write(setDoc(ref('produits', product.id), {
-    name: (product.name ?? '').trim(),
-    expiry: product.expiry,
-    category: product.category || 'autre',
-    categoryVersion: CATEGORY_VERSION,
-    quantity: (product.quantity ?? '').trim(),
-    count,
-    location: product.location || 'frigo',
-    // Fruits & légumes : rangés au frigo ou non, si on l'a choisi (sinon l'habitude du produit).
-    ...(product.location === 'fruits' && typeof product.cold === 'boolean' ? { cold: product.cold } : {}),
-    dateKind: dateKindOf(product),
-    frozenAt: product.frozenAt || '',
-    barcode: product.barcode || '',
-    addedBy: product.addedBy || state.settings.userName,
-    createdAt: product.createdAt || Date.now(),
-    image: product.image || '',
-    imageUrl: product.imageUrl || '',
-    unitPrice: cleanPrice(product.unitPrice),
-    ...openedFields(product, count)
-  }));
-  if (!before && purchase) recordMovement('achat', product, count);
+  if (!from) {
+    write(setDoc(ref('produits', product.id), fields));
+    if (purchase) recordMovement('achat', product, fields.count);
+  } else {
+    // updateDoc : un produit supprimé par l'autre iPhone (pas encore reçu ici) n'est pas recréé.
+    const patch = productPatch(from, product);
+    if (Object.keys(patch).length) write(updateDoc(ref('produits', product.id), patch));
+  }
   if (log) rememberPrices([product]);
+  return 'saved';
+}
+
+/** Produits tombés à 0 unité (les deux iPhone ont retiré la dernière en même temps) : supprimés. */
+export function removeEmptied(docs) {
+  const emptied = docs.filter((d) => isEmptied(d.data()));
+  if (!emptied.length || !canWrite()) return;
+  const batch = writeBatch(db);
+  emptied.forEach((d) => batch.delete(ref('produits', d.id)));
+  write(batch.commit());
 }
 
 /**
@@ -108,23 +105,21 @@ export function addReceiptProducts(items, shoppingIdsToRemove = [], { source = '
     const id = crypto.randomUUID();
     const count = Math.max(1, Math.round(Number(item.count) || 1));
     added.push({ id, name: item.name.trim(), category: item.category || 'autre', location, unitPrice: cleanPrice(item.unitPrice), count, barcode: item.barcode || '' });
-    batch.set(ref('produits', id), {
-      name: item.name.trim(),
+    batch.set(ref('produits', id), productFields({
+      name: item.name,
       expiry,
       location,
       dateKind,
       frozenAt,
-      category: item.category || 'autre',
-      categoryVersion: CATEGORY_VERSION,
-      quantity: (item.quantity ?? '').trim(),
+      category: item.category,
+      quantity: item.quantity,
       count,
-      barcode: item.barcode || '', // scan en rafale : code-barres et photo d'Open Food Facts
-      addedBy: state.settings.userName,
+      barcode: item.barcode, // scan en rafale : code-barres et photo d'Open Food Facts
       createdAt: now + index,
-      image: item.image || '', // ticket : image découpée sur la capture de commande en ligne
-      imageUrl: item.imageUrl || '',
-      unitPrice: cleanPrice(item.unitPrice)
-    });
+      image: item.image, // ticket : image découpée sur la capture de commande en ligne
+      imageUrl: item.imageUrl,
+      unitPrice: item.unitPrice
+    }));
   });
   shoppingIdsToRemove.forEach((id) => batch.delete(ref('courses', id)));
   write(batch.commit());

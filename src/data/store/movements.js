@@ -2,21 +2,12 @@
 // Écrits à part : si les règles Firestore ne les autorisent pas encore, le stock fonctionne quand même.
 
 import { deleteDoc, serverTimestamp, setDoc } from 'firebase/firestore';
-import { t } from '../../services/i18n/i18n.js';
 import { cleanPrice } from '../../services/stats/money.js';
 import { auth, db } from './connection.js';
-import { errorMessage } from './errors.js';
+import { errorMessage, reportMemoryError, reportStatsDenied } from './errors.js';
 import { readMovements, stopReading } from './movement-feed.js';
 import { emit, state } from './state.js';
 import { canWrite, ref } from './writes.js';
-
-/** Refus des règles Firestore : message clair dans l'onglet Stats. Renvoie vrai si c'était le cas. */
-export function reportStatsDenied(error) {
-  if (error?.code !== 'permission-denied') return false;
-  state.movementsError = t('stats.denied');
-  emit('movements');
-  return true;
-}
 
 // Derniers mouvements de chaque produit, pour « Annuler » (consommé ou jeté).
 const undoable = new Map();
@@ -37,7 +28,7 @@ export function recordMovement(type, product, count = 1) {
     uid: auth?.currentUser?.uid ?? '',
     clientAt: Date.now(),
     at: serverTimestamp()
-  }).catch(reportStatsDenied);
+  }).catch(reportMemoryError);
   if (type !== 'achat' && product.id) {
     const list = undoable.get(product.id) ?? [];
     list.push(id);

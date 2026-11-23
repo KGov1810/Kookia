@@ -1,6 +1,7 @@
 // Kookia — Ticket de caisse : affichage (photos, puis vérification des produits reconnus).
 
 import { html, raw } from '../../components/html.js';
+import { stepper } from '../../components/stepper.js';
 import { I } from '../../components/icons.js';
 import { unitInput } from '../../components/unit-input.js';
 import * as R from '../../data/reference/index.js';
@@ -91,11 +92,7 @@ function receiptLine(item, index) {
           <input data-field="name" data-index="${index}" value="${item.name}" aria-label="${t('editor.productName')}" autocomplete="off">
           <small>${item.receiptText ? `« ${item.receiptText} »` : ''}</small>
           <div class="receipt-qty">
-            <div class="stepper small">
-              <button data-action="line-minus" data-index="${index}" aria-label="${t('editor.oneLess')}" ${item.count <= 1 ? raw('disabled') : ''}>−</button>
-              <output>${item.count}</output>
-              <button data-action="line-plus" data-index="${index}" aria-label="${t('editor.oneMore')}">+</button>
-            </div>
+            ${stepper({ actions: ['line-minus', 'line-plus'], value: item.count, labels: [t('editor.oneLess'), t('editor.oneMore')], canLess: item.count > 1, data: { index }, small: true })}
             ${unitInput({ amount: item.qtyAmount ?? item.quantity, unit: item.qtyLegacy ? null : item.qtyUnit, units: S.unitsFor(item.category),
               dataset: { index }, inputData: { field: 'quantity' }, label: t('qty.fieldNumber'), placeholder: t('ticket.weight') })}
           </div>

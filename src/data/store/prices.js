@@ -5,7 +5,7 @@ import { collection, onSnapshot, setDoc } from 'firebase/firestore';
 import { cleanPrice } from '../../services/stats/money.js';
 import { nameKey } from '../../services/text/text.js';
 import { db } from './connection.js';
-import { reportStatsDenied } from './movements.js';
+import { reportMemoryError } from './errors.js';
 import { emit, state } from './state.js';
 import { expireWeekPlan } from './week-plan.js';
 import { canWrite, ref } from './writes.js';
@@ -45,7 +45,7 @@ export function rememberPrices(products) {
   }
   if (!Object.keys(entries).length) return;
   state.prices = { ...state.prices, ...entries };
-  setDoc(ref('prix', 'memoire'), { prices: entries }, { merge: true }).catch(reportStatsDenied);
+  setDoc(ref('prix', 'memoire'), { prices: entries }, { merge: true }).catch(reportMemoryError);
 }
 
 /**
@@ -71,7 +71,5 @@ export function listenPrices(code, onLoaded = () => {}) {
       expireWeekPlan(); // semaine terminée : effacée
     }
     onLoaded();
-  }, (error) => {
-    reportStatsDenied(error);
-  });
+  }, reportMemoryError);
 }

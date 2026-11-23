@@ -2,6 +2,7 @@
 // remplis par settings-view.js).
 
 import { html, raw } from '../../components/html.js';
+import { stepper } from '../../components/stepper.js';
 import { I } from '../../components/icons.js';
 import * as R from '../../data/reference/index.js';
 import { state } from '../../data/store/state.js';
@@ -26,15 +27,6 @@ function languageField() {
     </label>`;
 }
 
-function stepper(minus, plus, id, value, [lessLabel, moreLabel]) {
-  return html`
-    <div class="stepper">
-      <button data-action="${minus}" aria-label="${lessLabel}">−</button>
-      <output id="${id}">${value}</output>
-      <button data-action="${plus}" aria-label="${moreLabel}">+</button>
-    </div>`;
-}
-
 export function mainPage() {
   const s = state.settings;
   return html`
@@ -50,7 +42,7 @@ export function mainPage() {
 
       <h2 class="section">${t('settings.alerts')}</h2>
       <section class="group">
-        <div class="field"><span>${t('settings.warn')}</span>${stepper('alert-minus', 'alert-plus', 'alert-days', alertText(s.alertDays), [t('settings.dayLess'), t('settings.dayMore')])}</div>
+        <div class="field"><span>${t('settings.warn')}</span>${stepper({ actions: ['alert-minus', 'alert-plus'], id: 'alert-days', value: alertText(s.alertDays), labels: [t('settings.dayLess'), t('settings.dayMore')] })}</div>
         <div id="badge-row"></div>
       </section>
       <p class="hint">${t('settings.remindersHint')}</p>
@@ -59,7 +51,7 @@ export function mainPage() {
       <section class="group">
         <div id="claude-key"></div>
         <div class="field"><span class="label-stack">${t('settings.light.recipe')}<small>${t('settings.light.hint')}</small></span>
-          ${stepper('kcal-minus', 'kcal-plus', 'kcal-max', `${s.lightMaxKcal || 500} kcal`, [t('settings.kcalLess'), t('settings.kcalMore')])}
+          ${stepper({ actions: ['kcal-minus', 'kcal-plus'], id: 'kcal-max', value: `${s.lightMaxKcal || 500} kcal`, labels: [t('settings.kcalLess'), t('settings.kcalMore')] })}
         </div>
       </section>
       <p class="hint">${t('settings.keyHint')}</p>

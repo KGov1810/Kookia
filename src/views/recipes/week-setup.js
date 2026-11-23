@@ -2,6 +2,7 @@
 // Les choix (repas cochés, options) sont repris la fois suivante ; les filtres sont ceux de l'écran Idées.
 
 import { html, raw } from '../../components/html.js';
+import { stepper } from '../../components/stepper.js';
 import { I } from '../../components/icons.js';
 import { servingsLabel } from '../../components/recipe-visuals.js';
 import { openSheet } from '../../components/sheet.js';
@@ -84,11 +85,7 @@ export function openWeekSetup() {
         </section>
         <section class="group">
           <div class="field"><span>${t('setup.for')}</span>
-            <div class="stepper">
-              <button data-action="servings-down" aria-label="${t('filters.lessPerson')}" ${draft.servings <= 1 ? raw('disabled') : ''}>−</button>
-              <output>${servingsLabel(draft.servings)}</output>
-              <button data-action="servings-up" aria-label="${t('filters.morePerson')}" ${draft.servings >= 12 ? raw('disabled') : ''}>+</button>
-            </div>
+            ${stepper({ actions: ['servings-down', 'servings-up'], value: servingsLabel(draft.servings), labels: [t('filters.lessPerson'), t('filters.morePerson')], canLess: draft.servings > 1, canMore: draft.servings < 12 })}
           </div>
           <label class="field">
             <span class="label-stack">${t('setup.leftovers')}<small>${leftoversHint(draft)}</small></span>

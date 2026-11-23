@@ -44,7 +44,11 @@ export function persist(ctx, { force = true } = {}) {
   if (!force && !changed(ctx)) return true;
   const stored = isNew ? null : store.productById(p.id);
   const previous = stored ? { ...stored } : null;
-  store.saveProduct(p);
+  if (store.saveProduct(p, { base: ctx.base ?? undefined }) === 'gone') {
+    toast(t('save.gone', { name: p.name.trim() })); // retiré par l'autre iPhone pendant que la fiche était ouverte
+    return true;
+  }
+  ctx.base = { ...p };
   rememberChoices(ctx);
   // Date de l'emballage saisie : sa durée depuis l'achat sera proposée la prochaine fois (yaourts, beurre…).
   if (isNew ? view.dateTouched : previous && previous.expiry !== p.expiry) store.rememberShelfLife(p);

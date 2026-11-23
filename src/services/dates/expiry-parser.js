@@ -1,5 +1,6 @@
 // Kookia — Lecture de la date de péremption dans un texte OCR.
 
+import { simplify } from '../text/text.js';
 import { addDays, makeDate, startOfDay, toISODate } from './dates.js';
 
 const POSITIVE = ['consommer', 'dlc', 'ddm', 'dluo', 'exp', 'avant', 'jusqu', 'best before',
@@ -22,9 +23,7 @@ const MONTHS = [['janv', 1], ['jan', 1], ['fev', 2], ['feb', 2], ['mar', 3], ['a
   ['sep', 9], ['oct', 10], ['nov', 11], ['dec', 12]];
 
 function normalizeLine(line) {
-  return line
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
+  return simplify(line)
     // Confusions fréquentes de l'OCR au milieu d'une date : O→0, l/i→1.
     .replace(/(?<=[\d.\/\-])[o](?=[\d.\/\-])/g, '0')
     .replace(/(?<=[\d.\/\-])[li](?=[\d.\/\-])/g, '1');

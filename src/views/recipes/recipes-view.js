@@ -88,6 +88,9 @@ function generateBlock() {
     </div>`;
 }
 
+/** Changements sans effet sur les Recettes (achats récents, statistiques, historique) : l'écran n'est pas redessiné. */
+const UNUSED = ['purchases', 'movements', 'history'];
+
 export const recipesView = {
   render() {
     if (ui.recipeMode === 'semaine') return html`${recipesHeader()}${weekView()}`;
@@ -120,7 +123,8 @@ export const recipesView = {
       ${hiddenOld ? html`<p class="hint">${t('recipes.hiddenOld', { n: hiddenOld })}</p>` : ''}
       ${!cards.length && hasFilters() && state.recipes.length ? html`<button class="secondary" data-action="clear-filters">${t('recipes.clearFilters')}</button>` : ''}`;
   },
-  update() {
+  update(what) {
+    if (UNUSED.includes(what)) return;
     rerenderKeepScroll();
   }
 };

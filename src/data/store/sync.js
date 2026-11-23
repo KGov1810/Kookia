@@ -11,6 +11,7 @@ import { toProduct, toRecipe, toShoppingItem } from './mappers.js';
 import { stopMovements } from './movements.js';
 import { publishLanguage } from './languages.js';
 import { listenPrices } from './prices.js';
+import { removeEmptied } from './products.js';
 import { stopPurchases } from './purchases.js';
 import { rememberRecipeLinks } from './recipes.js';
 import { partnerName } from './selectors.js';
@@ -35,7 +36,10 @@ export async function start() {
     collection(db, 'foyers', code, name),
     { includeMetadataChanges: true },
     (snapshot) => {
-      state[key] = snapshot.docs.map((d) => map(d.id, d.data())).filter(Boolean);
+      // Seul l'état de l'envoi a changé (écriture en attente puis confirmée, retour du réseau) : mêmes données,
+      // seule la ligne de synchronisation est à mettre à jour.
+      const changed = !meta[key] || snapshot.docChanges().length > 0;
+      if (changed) state[key] = snapshot.docs.map((d) => map(d.id, d.data())).filter(Boolean);
       meta[key] = { fromCache: snapshot.metadata.fromCache, pending: snapshot.metadata.hasPendingWrites };
       const metas = Object.values(meta);
       state.fromCache = metas.some((m) => m.fromCache);
@@ -44,9 +48,12 @@ export async function start() {
         state.error = null;
         state.lastSync = new Date();
         if (key === 'products' || key === 'recipes') rememberRecipeLinks(state.products);
-        if (key === 'products') state.productsLoaded = true;
+        if (key === 'products') {
+          state.productsLoaded = true;
+          removeEmptied(snapshot.docs);
+        }
       }
-      emit(key);
+      emit(changed ? key : 'sync');
       if (key === 'products') estimateMissingDates(); // produits du frigo restés sans date
     },
     (error) => {
@@ -70,6 +77,7 @@ export async function start() {
 export function stop() {
   unsubscribers.forEach((u) => u());
   unsubscribers = [];
+  Object.keys(meta).forEach((key) => delete meta[key]); // prochaine écoute : sa première réponse est toujours lue
   stopMovements();
   stopPurchases();
   state.connected = false;

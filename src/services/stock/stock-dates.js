@@ -4,6 +4,7 @@ import { BREAD_DAYS, LONG_LIFE_BREAD_WORDS, PACKAGED_BREAD_WORDS } from '../../d
 import { FREEZER_MONTHS } from '../../data/reference/categories.js';
 import { UNKNOWN_PRODUCE_DAYS } from '../../data/reference/produce.js';
 import { DAY, addDays, addMonths, parseISODate, startOfDay, toISODate } from '../dates/dates.js';
+import { simplify } from '../text/text.js';
 import { produceFor } from './categorization.js';
 import { fridgeDays, fridgeEstimable } from './fridge-days.js';
 
@@ -19,7 +20,7 @@ export function freezerLimit(category, frozenAtISO) {
 
 /** Nom sans accents, mots au singulier : « Pains au lait » → « pain au lait ». */
 function breadText(name) {
-  const words = String(name ?? '').replace(/’/g, "'").normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+  const words = simplify(String(name ?? '').replace(/’/g, "'"))
     .split(/[^a-z']+/).filter(Boolean).map((w) => (w.length > 3 ? w.replace(/[sx]$/, '') : w));
   return ` ${words.join(' ')} `;
 }

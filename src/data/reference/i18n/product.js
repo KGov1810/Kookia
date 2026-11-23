@@ -99,5 +99,6 @@ export const PRODUCT = {
   'save.badPrice': ['Indiquez un prix valide, par exemple 2,49 (ou laissez le champ vide).', 'Enter a valid price, for example 2.49 (or leave it empty).', 'Escribe un precio válido, por ejemplo 2.49 (o déjalo vacío).', 'Digite um preço válido, por exemplo 2,49 (ou deixe vazio).'],
   'save.added': ['{name} : ajouté {at}', '{name}: added {at}', '{name}: agregado {at}', '{name}: adicionado {at}'],
   'save.saved': ['Modifications enregistrées', 'Changes saved', 'Cambios guardados', 'Alterações salvas'],
+  'save.gone': ['{name} a été retiré du stock entre-temps', '{name} was removed from the stock in the meantime', '{name} se retiró del stock mientras tanto', '{name} foi retirado do estoque nesse meio-tempo'],
   'save.notSaved': ['Modification non enregistrée : {problem}', 'Change not saved: {problem}', 'Cambio no guardado: {problem}', 'Alteração não salva: {problem}']
 };

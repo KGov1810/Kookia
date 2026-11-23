@@ -15,6 +15,9 @@
   transform: translateY(100%); transition: transform 500ms var(--ease-sheet);
 }
 
+/* La fiche reçoit le focus à l'ouverture (VoiceOver, clavier) : pas de cadre autour de toute la fiche. */
+.sheet:focus { outline: none; }
+
 /* Poignée en haut de la fiche. */
 .sheet::before {
   content: ""; flex: none; align-self: center; width: 38px; height: 5px; margin: 8px 0 2px; border-radius: 3px;

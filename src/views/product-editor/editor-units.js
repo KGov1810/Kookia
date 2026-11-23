@@ -1,7 +1,8 @@
 // Kookia — Fiche produit : « Consommé », « Congeler » et « Jeté ».
 // Un seul exemplaire : le bouton agit tout de suite. Plusieurs : on choisit combien (à partir de 1).
 
-import { html, raw } from '../../components/html.js';
+import { html } from '../../components/html.js';
+import { stepper } from '../../components/stepper.js';
 import { I } from '../../components/icons.js';
 import { toast } from '../../components/toast.js';
 import * as store from '../../data/store/index.js';
@@ -38,11 +39,7 @@ export function unitsBox(ctx) {
   return html`
     <div class="units-box units-${kind}" role="group" aria-label="${question}">
       <div class="field"><span>${question}</span>
-        <div class="stepper">
-          <button data-action="units-minus" aria-label="${t('editor.oneLess')}" ${units <= 1 ? raw('disabled') : ''}>−</button>
-          <output aria-live="polite">${t('units.ofTotal', { n: units, total })}</output>
-          <button data-action="units-plus" aria-label="${t('editor.oneMore')}" ${units >= total ? raw('disabled') : ''}>+</button>
-        </div>
+        ${stepper({ actions: ['units-minus', 'units-plus'], value: t('units.ofTotal', { n: units, total }), labels: [t('editor.oneLess'), t('editor.oneMore')], canLess: units > 1, canMore: units < total, live: true })}
         <button class="chip" data-action="units-all" aria-pressed="${String(units === total)}">${t('units.all', { n: total })}</button>
       </div>
       <div class="row-actions inline">

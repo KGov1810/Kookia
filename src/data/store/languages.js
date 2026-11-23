@@ -5,7 +5,7 @@ import { setDoc } from 'firebase/firestore';
 import { language } from '../../services/i18n/i18n.js';
 import { LANGUAGE_IDS } from '../reference/i18n/languages.js';
 import { auth } from './connection.js';
-import { reportStatsDenied } from './movements.js';
+import { reportMemoryError } from './errors.js';
 import { state } from './state.js';
 import { canWrite, ref } from './writes.js';
 
@@ -20,7 +20,7 @@ export function publishLanguage() {
   if (published === key) return;
   published = key;
   const member = { lang: language(), name: state.settings.userName || '', at: Date.now() };
-  setDoc(ref('prix', 'langues'), { members: { [uid]: member } }, { merge: true }).catch(reportStatsDenied);
+  setDoc(ref('prix', 'langues'), { members: { [uid]: member } }, { merge: true }).catch(reportMemoryError);
 }
 
 /** Langues du foyer : celle de cet iPhone d'abord, puis celles des autres iPhone (récents). */

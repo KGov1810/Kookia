@@ -11,6 +11,9 @@ import * as S from '../../services/index.js';
 import { ui } from '../app/ui-state.js';
 import { fridgeList } from './stock-list.js';
 
+/** Changements qui redessinent la liste (le reste ne touche que la ligne de synchronisation). */
+const LIST_DATA = ['products', 'settings', 'time'];
+
 export const fridgeView = {
   render() {
     return html`
@@ -27,9 +30,10 @@ export const fridgeView = {
   mounted() {
     this.update();
   },
-  update() {
+  update(what) {
     syncLine();
     setHTML('#fridge-error', errorNote());
+    if (what && !LIST_DATA.includes(what)) return; // synchro, courses, statistiques… : la liste ne change pas
     setHTML('#fridge-alert', fridgeAlert());
     setHTML('#location-filter', locationFilter());
     setHTML('#fridge-list', fridgeList());

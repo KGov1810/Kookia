@@ -27,7 +27,7 @@ export async function startWeekGeneration({ start, slots, servings, leftovers, b
   rerenderIf('recettes');
   try {
     const plan = await S.generateWeekPlan({
-      key: state.settings.claudeKey, model: state.settings.model,
+      ...store.claudeAccess(),
       products: stockByUrgency(), shopping: state.shopping, filters: currentFilters(),
       servings, slots, start, leftovers, batchDay, langs: store.householdLanguages()
     });
@@ -63,7 +63,7 @@ export async function replaceSlot(index) {
     const stock = stockByUrgency();
     const withLeftovers = !slot.leftovers && plan.slots.some((s) => s.leftovers && s.recipeId === slot.recipeId);
     const [recipe] = await S.generateRecipes({
-      key: state.settings.claudeKey, model: state.settings.model,
+      ...store.claudeAccess(),
       priority: stock.filter((p) => !taken.has(p.id) && ['soon', 'check'].includes(store.productStatus(p))),
       others: stock.filter((p) => taken.has(p.id) || !['soon', 'check'].includes(store.productStatus(p))),
       shopping: state.shopping, filters: currentFilters(), count: 1, langs: store.householdLanguages(),
