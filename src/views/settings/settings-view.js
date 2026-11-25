@@ -7,19 +7,21 @@ import * as store from '../../data/store/index.js';
 import { state } from '../../data/store/state.js';
 import * as S from '../../services/index.js';
 import { ui } from '../app/ui-state.js';
-import { advancedPage, alertText, mainPage } from './settings-pages.js';
+import { advancedPage, aisleRows, aislesPage, alertText, mainPage } from './settings-pages.js';
 
 const t = S.t;
 
-/** Réglages, ou la sous-page « Avancé » (modèle, synchronisation, à propos). */
+/** Réglages, ou une sous-page : « Ordre des rayons », « Avancé » (modèle, synchronisation, à propos). */
 export const settingsView = {
   render() {
+    if (ui.settingsPage === 'aisles') return aislesPage();
     return ui.settingsPage === 'advanced' ? advancedPage() : mainPage();
   },
   mounted() {
     this.update('settings');
   },
   update(what) {
+    if (what === 'aisles') refreshAisles();
     const s = state.settings;
     const days = document.getElementById('alert-days');
     if (days) days.textContent = alertText(s.alertDays);
@@ -51,6 +53,13 @@ export const settingsView = {
       : html`<p class="plain hint">${t('settings.noHousehold')}</p>`);
   }
 };
+
+/** Ordre des rayons changé (ici ou sur l'autre iPhone) : la liste et « Remettre l'ordre type ». */
+function refreshAisles() {
+  setHTML('#aisle-order', aisleRows());
+  const reset = document.querySelector('[data-action="aisles-reset"]');
+  if (reset) reset.disabled = S.isDefaultAisleOrder(state.aisleOrder);
+}
 
 /** Profil dans le bandeau : l'initiale, le prénom et avec qui le foyer est partagé ; « Modifier » change le prénom. */
 export function renderProfile() {

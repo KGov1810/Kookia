@@ -3,6 +3,7 @@
 import { html, setHTML } from '../../components/html.js';
 import { I } from '../../components/icons.js';
 import { errorNote } from '../../components/status.js';
+import * as R from '../../data/reference/index.js';
 import * as store from '../../data/store/index.js';
 import { state } from '../../data/store/state.js';
 import { t } from '../../services/i18n/i18n.js';
@@ -10,8 +11,11 @@ import * as S from '../../services/index.js';
 import { openEditor } from '../product-editor/product-editor.js';
 import { proposal } from './put-away-sheet.js';
 
-/** Changements qui touchent les Courses : la liste, le stock (« il en reste »), « À racheter », la synchronisation. */
-const REDRAW = ['shopping', 'products', 'purchases', 'sync', 'settings', 'time'];
+/**
+ * Changements qui touchent les Courses : la liste, le stock (« il en reste »), « À racheter », la synchronisation,
+ * les rayons (ordre ou rayon d'un article changé sur l'un des iPhone).
+ */
+const REDRAW = ['shopping', 'products', 'purchases', 'sync', 'settings', 'time', 'aisles'];
 
 export const shoppingView = {
   render() {
@@ -44,7 +48,7 @@ export const shoppingView = {
           <p>${t('shop.emptyText')}</p>
         </div>`,
       restockRow(),
-      toBuy.length ? html`<h2 class="section">${t('shop.toBuy')}<small>${toBuy.length}</small></h2><div class="shop-group">${toBuy.map(shoppingRow)}</div>` : '',
+      toBuy.length ? html`<h2 class="section">${t('shop.toBuy')}<small>${toBuy.length}</small></h2>${aisleGroups(toBuy)}` : '',
       inCart.length ? html`
         <div class="section-row"><h2 class="section">${t('shop.cart')}<small>${inCart.length}</small></h2>
           <button class="link" data-action="clear-checked" id="clear-checked">${t('shop.emptyCart')}</button></div>
@@ -54,6 +58,13 @@ export const shoppingView = {
     ]);
   }
 };
+
+/** « À acheter » rangé par rayon, dans l'ordre du foyer : un petit titre et une carte par rayon. */
+function aisleGroups(items) {
+  return S.groupByAisle(items, store.shoppingAisle, store.aisleOrder()).map(({ aisle, items: list }) => html`
+    <h3 class="aisle-title"><span aria-hidden="true">${R.AISLES.find((a) => a.id === aisle).emoji}</span>${t(`aisle.${aisle}`)}<small>${list.length}</small></h3>
+    <div class="shop-group">${list.map(shoppingRow)}</div>`);
+}
 
 /**
  * Sous le titre : « 3 à acheter, 2 dans le panier ». Hors ligne ou en erreur, l'état de la synchronisation

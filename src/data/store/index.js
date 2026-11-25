@@ -1,5 +1,6 @@
 // Kookia — point d'entrée de la couche data/store.
 
+export * from './aisles.js';
 export * from './connection.js';
 export * from './errors.js';
 export * from './fridge-dates.js';

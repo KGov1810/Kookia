@@ -38,6 +38,21 @@ export const SHOPPING = {
   'item.noCount': ['Aucune', 'None', 'Ninguna', 'Nenhuma'],
   'item.bought': ['Acheté : ranger dans le stock', 'Bought: put it in stock', 'Comprado: guardar en el inventario', 'Comprado: guardar no estoque'],
   'item.remove': ['Supprimer de la liste', 'Remove from the list', 'Quitar de la lista', 'Remover da lista'],
+  'item.aisle': ['Rayon', 'Aisle', 'Pasillo', 'Seção'],
+  'item.aisleHint': ['Le rayon choisi est retenu pour ce produit, sur les deux iPhone.', 'The aisle you choose is remembered for this product, on both iPhones.', 'El pasillo elegido se recuerda para este producto, en los dos iPhone.', 'A seção escolhida fica guardada para este produto, nos dois iPhones.'],
+
+  // Rayons du magasin (la liste « À acheter » est rangée par rayon)
+  'aisle.fruits_legumes': ['Fruits et légumes', 'Produce', 'Frutas y verduras', 'Hortifrúti'],
+  'aisle.boulangerie': ['Boulangerie', 'Bakery', 'Panadería', 'Padaria'],
+  'aisle.boucherie': ['Boucherie et volaille', 'Meat and poultry', 'Carnicería y aves', 'Açougue e aves'],
+  'aisle.poissonnerie': ['Poissonnerie', 'Seafood', 'Pescadería', 'Peixaria'],
+  'aisle.charcuterie': ['Charcuterie et traiteur', 'Deli', 'Salchichonería y platos preparados', 'Frios e pratos prontos'],
+  'aisle.cremerie': ['Crèmerie, œufs et fromages', 'Dairy, eggs and cheese', 'Lácteos, huevos y quesos', 'Laticínios, ovos e queijos'],
+  'aisle.epicerie_salee': ['Épicerie salée', 'Savory pantry', 'Abarrotes salados', 'Mercearia salgada'],
+  'aisle.epicerie_sucree': ['Épicerie sucrée', 'Sweet pantry', 'Abarrotes dulces', 'Mercearia doce'],
+  'aisle.boissons': ['Boissons', 'Drinks', 'Bebidas', 'Bebidas'],
+  'aisle.surgeles': ['Surgelés', 'Frozen', 'Congelados', 'Congelados'],
+  'aisle.autre': ['Autres (maison, hygiène…)', 'Other (household, toiletries…)', 'Otros (hogar, higiene…)', 'Outros (casa, higiene…)'],
 
   // « Tout ranger »
   'away.title': ['Ranger le panier', 'Put the cart away', 'Guardar el carrito', 'Guardar o carrinho'],

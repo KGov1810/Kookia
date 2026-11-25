@@ -58,3 +58,25 @@
 .advanced-row .label-stack { font-weight: 700; }
 
 .advanced-row svg { flex: none; width: 20px; height: 20px; color: var(--muted); }
+
+/* Ordre des rayons : monter (chevron vers le haut) et descendre (vers le bas). */
+.aisles-row { margin-top: 0; }
+
+.aisles-hint { margin: 4px 4px 12px; }
+
+.aisle-row { gap: 8px; }
+
+/* Nom long (« Crèmerie, œufs et fromages ») : il passe à la ligne, les boutons restent visibles. */
+.aisle-row > span:first-child { flex: 1; min-width: 0; }
+
+.aisle-moves { display: flex; gap: 4px; flex: none; }
+
+.aisle-moves button { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 22px; background: var(--bg); color: var(--herb); }
+
+.aisle-moves button svg { width: 20px; height: 20px; stroke-width: 2.4; }
+
+.aisle-moves .aisle-up svg { transform: rotate(-90deg); }
+
+.aisle-moves .aisle-down svg { transform: rotate(90deg); }
+
+.aisle-moves button:disabled { color: var(--muted); opacity: .4; }

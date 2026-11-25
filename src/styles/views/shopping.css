@@ -89,3 +89,8 @@
 .restock-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .restock-chip:active { transform: scale(.97); }
+
+/* « À acheter » rangé par rayon : un petit titre au-dessus de la carte de chaque rayon. */
+.aisle-title { display: flex; align-items: center; gap: 6px; margin: 14px 6px 6px; font-size: 14px; font-weight: 800; color: var(--muted); }
+
+.aisle-title small { margin-left: auto; font-weight: 700; }

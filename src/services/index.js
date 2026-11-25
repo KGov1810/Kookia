@@ -34,6 +34,7 @@ export * from './stats/periods.js';
 export * from './stats/purchases.js';
 export * from './stats/stats.js';
 export * from './stats/stock-value.js';
+export * from './stock/aisles.js';
 export * from './stock/categorization.js';
 export * from './stock/fridge-days.js';
 export * from './stock/matching.js';

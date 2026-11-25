@@ -56,8 +56,13 @@ export function listenPrices(code, onLoaded = () => {}) {
   return onSnapshot(collection(db, 'foyers', code, 'prix'), (snapshot) => {
     const memo = snapshot.docs.find((d) => d.id === 'memoire');
     state.prices = memo?.data().prices ?? {};
-    // Même collection : la mémoire des catégories et rangements corrigés (placements.js).
-    state.placements = snapshot.docs.find((d) => d.id === 'categories')?.data().entries ?? {};
+    // Même collection : la mémoire des catégories, rangements et rayons corrigés (placements.js),
+    // et l'ordre des rayons du foyer (aisles.js) : la liste de courses se range de nouveau s'ils changent.
+    const placements = snapshot.docs.find((d) => d.id === 'categories')?.data().entries ?? {};
+    const aisleOrder = snapshot.docs.find((d) => d.id === 'rayons')?.data().order ?? null;
+    const aislesChanged = JSON.stringify([placements, aisleOrder]) !== JSON.stringify([state.placements, state.aisleOrder]);
+    state.placements = placements;
+    state.aisleOrder = aisleOrder;
     // Et les durées retenues entre l'achat et la date des produits du frigo (fridge-dates.js).
     state.shelfDays = snapshot.docs.find((d) => d.id === 'dates')?.data().entries ?? {};
     state.shelfDaysLoaded = true;
@@ -70,6 +75,7 @@ export function listenPrices(code, onLoaded = () => {}) {
       emit('plan');
       expireWeekPlan(); // semaine terminée : effacée
     }
+    if (aislesChanged) emit('aisles');
     onLoaded();
   }, reportMemoryError);
 }

@@ -65,19 +65,19 @@ test("Stock de toute la maison : lieux, dates, congélation, ticket", async () =
   await click('[data-action="add-menu"]');
   await click(sheet().querySelector('[data-action="produce"]'), 400);
   const pick = (name) => [...sheet().querySelectorAll('.produce-chip')].find((c) => c.dataset.name === name);
-  log(sheet().querySelectorAll('.produce-chip').length === 46, 'Grille : 46 fruits et légumes');
+  log(sheet().querySelectorAll('.produce-chip').length === 72, 'Grille : 72 fruits et légumes');
   await click(pick('Bananes')); await click(pick('Bananes')); await click(pick('Carottes'));
   log(pick('Bananes').querySelector('b').textContent === '2', 'Bananes touchées 2 fois → 2');
-  await type(sheet().querySelector('[name="produce-search"]'), 'topinambour');
-  log(sheet().querySelectorAll('.produce-chip').length === 1 && sheet().querySelector('.produce-chip.custom'), 'Recherche sans résultat : « Ajouter « topinambour » »');
+  await type(sheet().querySelector('[name="produce-search"]'), 'rutabaga');
+  log(sheet().querySelectorAll('.produce-chip').length === 1 && sheet().querySelector('.produce-chip.custom'), 'Recherche sans résultat : « Ajouter « rutabaga » »');
   await click(sheet().querySelector('.produce-chip.custom'));
   await click([...sheet().querySelectorAll('[data-action="minus"]')].find((b) => b.dataset.name === 'Carottes'));
   log(!sheet().textContent.includes('Carottes') || ![...sheet().querySelectorAll('.field')].some((f) => f.textContent.includes('Carottes')), 'Bouton − : carottes retirées de la sélection');
   await click(sheet().querySelector('.sheet-body [data-action="confirm"]'), 350);
   const bananes = docs(P0).find((d) => d.name === 'Bananes');
-  const topi = docs(P0).find((d) => d.name === 'topinambour');
+  const ruta = docs(P0).find((d) => d.name === 'rutabaga');
   log(bananes?.count === 2 && bananes.location === 'fruits' && bananes.dateKind === 'estimee' && bananes.expiry === iso(5), 'Bananes : 2, fruits & légumes, date estimée (5 jours)');
-  log(topi?.location === 'fruits' && topi.expiry === iso(5) && !docs(P0).some((d) => d.name === 'Carottes'), 'Topinambour : 5 jours par défaut (hors du frigo) ; carottes non ajoutées');
+  log(ruta?.location === 'fruits' && ruta.expiry === iso(5) && !docs(P0).some((d) => d.name === 'Carottes'), 'Rutabaga (inconnu) : 5 jours par défaut (hors du frigo) ; carottes non ajoutées');
   log(row('Bananes').querySelector('.days b').textContent === '≈5', 'Compteur estimé : « ≈5 »');
 
   console.log('\n— Saisie : lieu et type de date —');

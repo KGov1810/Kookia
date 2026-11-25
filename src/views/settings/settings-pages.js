@@ -1,10 +1,11 @@
-// Kookia — Réglages : la page principale et la sous-page « Avancé » (structure ; les contenus vivants sont
-// remplis par settings-view.js).
+// Kookia — Réglages : la page principale et les sous-pages « Ordre des rayons » et « Avancé » (structure ; les
+// contenus vivants sont remplis par settings-view.js).
 
 import { html, raw } from '../../components/html.js';
 import { stepper } from '../../components/stepper.js';
 import { I } from '../../components/icons.js';
 import * as R from '../../data/reference/index.js';
+import * as store from '../../data/store/index.js';
 import { state } from '../../data/store/state.js';
 import * as S from '../../services/index.js';
 
@@ -47,6 +48,11 @@ export function mainPage() {
       </section>
       <p class="hint">${t('settings.remindersHint')}</p>
 
+      <h2 class="section">${t('settings.shopping')}</h2>
+      <button class="group advanced-row aisles-row" data-action="open-aisles">
+        <span class="label-stack">${t('settings.aisles')}<small>${t(S.isDefaultAisleOrder(state.aisleOrder) ? 'settings.aislesTypical' : 'settings.aislesCustom')}</small></span>${I.chevron}
+      </button>
+
       <h2 class="section">${t('settings.claude')}</h2>
       <section class="group">
         <div id="claude-key"></div>
@@ -62,6 +68,32 @@ export function mainPage() {
       <button class="group advanced-row" data-action="open-advanced">
         <span class="label-stack">${t('settings.advanced')}<small>${t('settings.advancedHint')}${state.error ? t('settings.advancedError') : ''}</small></span>${I.chevron}
       </button>
+    </div>`;
+}
+
+/** Rayons dans l'ordre du foyer, chacun avec « monter » et « descendre ». */
+export function aisleRows() {
+  const order = store.aisleOrder();
+  return order.map((id, i) => {
+    const name = t(`aisle.${id}`);
+    const aisle = R.AISLES.find((a) => a.id === id);
+    return html`
+      <div class="field aisle-row"><span><span aria-hidden="true">${aisle.emoji}</span> ${name}</span>
+        <span class="aisle-moves">
+          <button class="aisle-up" data-action="aisle-up" data-id="${id}" aria-label="${t('settings.aisleUp', { name })}" ${i === 0 ? raw('disabled') : ''}>${I.chevron}</button>
+          <button class="aisle-down" data-action="aisle-down" data-id="${id}" aria-label="${t('settings.aisleDown', { name })}" ${i === order.length - 1 ? raw('disabled') : ''}>${I.chevron}</button>
+        </span>
+      </div>`;
+  });
+}
+
+export function aislesPage() {
+  return html`
+    <header class="top"><button class="back" data-action="close-advanced">${I.chevron}${t('settings.title')}</button><div class="top-row"><h1>${t('settings.aisles')}</h1></div></header>
+    <div class="settings-page">
+      <p class="hint aisles-hint">${t('settings.aislesHint')}</p>
+      <section class="group" id="aisle-order">${aisleRows()}</section>
+      <section class="group"><button class="row-button" data-action="aisles-reset" ${S.isDefaultAisleOrder(state.aisleOrder) ? raw('disabled') : ''}>${I.refresh}${t('settings.aislesReset')}</button></section>
     </div>`;
 }
 

@@ -1,10 +1,11 @@
-// Kookia — Actions de l'écran Réglages : alertes, clé Claude, foyer, pastille.
+// Kookia — Actions de l'écran Réglages : alertes, clé Claude, foyer, pastille, ordre des rayons.
 
 import { copyText, shareText } from '../../components/platform.js';
 import { toast } from '../../components/toast.js';
 import * as store from '../../data/store/index.js';
 import { state } from '../../data/store/state.js';
 import { t } from '../../services/i18n/i18n.js';
+import { moveAisle } from '../../services/stock/aisles.js';
 import { updateAppBadge } from '../app/chrome.js';
 import { rerenderKeepScroll } from '../app/navigation.js';
 import { ui } from '../app/ui-state.js';
@@ -41,6 +42,14 @@ export const settingsActions = {
     rerenderKeepScroll();
     window.scrollTo(0, 0);
   },
+  'open-aisles': () => {
+    ui.settingsPage = 'aisles';
+    rerenderKeepScroll();
+    window.scrollTo(0, 0);
+  },
+  'aisle-up': (el) => moveAndKeepFocus(el.dataset.id, -1),
+  'aisle-down': (el) => moveAndKeepFocus(el.dataset.id, 1),
+  'aisles-reset': () => store.saveAisleOrder([]),
   'close-advanced': () => {
     ui.settingsPage = '';
     rerenderKeepScroll();
@@ -67,3 +76,11 @@ export const settingsActions = {
     settingsView.update('badge');
   }
 };
+
+/** Monte ou descend un rayon ; le bouton touché garde le focus (VoiceOver), ou l'autre s'il est au bout. */
+function moveAndKeepFocus(id, delta) {
+  store.saveAisleOrder(moveAisle(store.aisleOrder(), id, delta));
+  const [same, other] = delta < 0 ? ['aisle-up', 'aisle-down'] : ['aisle-down', 'aisle-up'];
+  const find = (action) => document.querySelector(`#aisle-order [data-action="${action}"][data-id="${id}"]:not([disabled])`);
+  (find(same) ?? find(other))?.focus();
+}

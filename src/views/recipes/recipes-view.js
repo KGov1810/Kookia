@@ -88,8 +88,8 @@ function generateBlock() {
     </div>`;
 }
 
-/** Changements sans effet sur les Recettes (achats récents, statistiques, historique) : l'écran n'est pas redessiné. */
-const UNUSED = ['purchases', 'movements', 'history'];
+/** Changements sans effet sur les Recettes (achats récents, statistiques, historique, rayons des courses) : l'écran n'est pas redessiné. */
+const UNUSED = ['purchases', 'movements', 'history', 'aisles'];
 
 export const recipesView = {
   render() {

@@ -24,6 +24,7 @@ export const state = {
   productsLoaded: false, // stock reçu du serveur au moins une fois
   languages: {},        // langue de chaque iPhone du foyer (foyers/{code}/prix/langues), par identifiant
   plan: null,           // planning de la semaine (foyers/{code}/prix/semaine), partagé entre les iPhone
+  aisleOrder: null,     // ordre des rayons choisi par le foyer (foyers/{code}/prix/rayons) ; null : ordre type
   endedPlan: null,      // planning terminé, effacé automatiquement pendant cette session ({ start })
   lastSync: null
 };
